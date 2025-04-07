@@ -1,0 +1,703 @@
+basePath: /api
+definitions:
+  entities.Metadata:
+    properties:
+      description:
+        example: the best beatmaker ever
+        type: string
+      id:
+        type: string
+      instagramUrl:
+        example: insta.com/i_love_bunnies
+        type: string
+      subscriptionTypeId:
+        example: 3
+        type: integer
+      telegramUrl:
+        example: tg.com/i_love_bunnies
+        type: string
+      userId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      vkUrl:
+        example: vk.com/i_love_bunnies
+        type: string
+    type: object
+  entities.User:
+    description: User
+    properties:
+      email:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      firstname:
+        example: John
+        type: string
+      followerOf:
+        example: 10
+        type: integer
+      id:
+        example: "1"
+        type: string
+      lastname:
+        example: Doe
+        type: string
+      metadata:
+        $ref: '#/definitions/entities.Metadata'
+      password:
+        description: Never exposed in responses
+        example: securepassword123
+        type: string
+      patronymic:
+        example: Smith
+        type: string
+      roleId:
+        example: 1
+        type: integer
+      subscriptionId:
+        example: 1
+        type: integer
+      username:
+        example: johndoe
+        type: string
+      usersFavourites:
+        example: 5
+        type: integer
+    type: object
+  middleware.LoginInput:
+    description: Login Input
+    properties:
+      email:
+        example: john_molly@example.com
+        type: string
+      password:
+        example: securepassword123
+        type: string
+    type: object
+  middleware.RegisterInput:
+    properties:
+      email:
+        example: eugene@example.com
+        type: string
+      password:
+        example: securepassword123
+        type: string
+    type: object
+  presenters.Data:
+    description: Data Token
+    properties:
+      token:
+        type: string
+    type: object
+  presenters.Metadata:
+    description: Metadata entity containing social links and description
+    properties:
+      description:
+        example: Artist profile description
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      instagramUrl:
+        example: https://instagram.com/username
+        type: string
+      subscriptionTypeId:
+        example: 1
+        type: integer
+      telegramUrl:
+        example: https://t.me/username
+        type: string
+      userId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      vkUrl:
+        example: https://vk.com/username
+        type: string
+    type: object
+  presenters.MetadataErrorResponse:
+    description: Error response for metadata operations
+    properties:
+      data:
+        example: "null"
+        type: string
+      error:
+        example: error message
+        type: string
+      status:
+        example: false
+        type: boolean
+    type: object
+  presenters.MetadataSuccessResponse:
+    description: Standard response for single metadata operation
+    properties:
+      data:
+        $ref: '#/definitions/presenters.Metadata'
+      error:
+        example: "null"
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+  presenters.User:
+    description: User information
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      firstname:
+        example: John
+        type: string
+      followerOf:
+        example: 4
+        type: integer
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      lastname:
+        example: Doe
+        type: string
+      metadata:
+        $ref: '#/definitions/presenters.Metadata'
+      patronymic:
+        example: Smith
+        type: string
+      roleId:
+        example: 1
+        type: integer
+      subscriptionId:
+        example: 1
+        type: integer
+      username:
+        example: johndoe
+        type: string
+      usersFavourites:
+        example: 1
+        type: integer
+    type: object
+  presenters.UserErrorResponse:
+    description: Error response for user operations
+    properties:
+      data:
+        example: "null"
+        type: string
+      error:
+        example: error message
+        type: string
+      status:
+        example: false
+        type: boolean
+    type: object
+  presenters.UserSuccessResponse:
+    description: Success response containing user data
+    properties:
+      data:
+        $ref: '#/definitions/presenters.User'
+      error:
+        example: "null"
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+info:
+  contact:
+    name: API Support
+  description: This is a sample server.
+  termsOfService: http://swagger.io/terms/
+  title: Fiber Swagger Example API
+  version: "1.0"
+paths:
+  /auth/google/getjwt:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user using Google OAuth token and return JWT
+      parameters:
+      - description: Google OAuth token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/presenters.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns JWT token and user info
+          schema:
+            additionalProperties: true
+            type: object
+        "201":
+          description: Returns JWT token and user info (new user)
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request format
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Invalid Google token
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Authenticate with Google
+      tags:
+      - auth
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password
+      parameters:
+      - description: User credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/middleware.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UserSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      summary: User login
+      tags:
+      - auth
+  /metadata:
+    post:
+      consumes:
+      - application/json
+      description: Add new metadata entry to the system. In request "id" should be
+        eliminated.
+      parameters:
+      - description: Metadata to add
+        in: body
+        name: metadata
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Metadata'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Add new metadata
+      tags:
+      - metadata
+  /metadataById/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete metadata entry by its ID. You need to be loged in. You can
+        delete anybody's metadata.
+      parameters:
+      - description: Metadata ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful deletion response
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete metadata
+      tags:
+      - metadata
+    get:
+      consumes:
+      - application/json
+      description: Get metadata entry by its ID
+      parameters:
+      - description: Metadata ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get metadata by ID
+      tags:
+      - metadata
+  /metadatas:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataSuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      tags:
+      - metadata
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password
+      parameters:
+      - description: User credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/middleware.RegisterInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UserSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      summary: User Register
+      tags:
+      - auth
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with default role (1)
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/entities.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UserSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      summary: Create a new user
+      tags:
+      - users
+  /user/me:
+    patch:
+      consumes:
+      - application/json
+      description: Update user details (requires authentication). Updates profile
+        by jwt.
+      parameters:
+      - description: Updated user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/presenters.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UserSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update user WITHOUGHT METADATA.
+      tags:
+      - users
+  /user/me/withmeta:
+    patch:
+      consumes:
+      - application/json
+      description: Update user details (requires authentication). Updates profile
+        by jwt.
+      parameters:
+      - description: Updated user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/presenters.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UserSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update user with metadata. Beatmaker role required. If user has no
+        metadata, new is created with update data.
+      tags:
+      - users
+  /userByEmail/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single user by their email. Requires authorization.
+        Requires admin role.
+      parameters:
+      - description: User Email
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UserSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user by email.
+      tags:
+      - users
+  /userById/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UserSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      summary: Get user by ID
+      tags:
+      - users
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UserSuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      summary: Get all users
+      tags:
+      - users
+  /users/me:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the current user account by jwt.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete user
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Retrieve current user details from JWT token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UserSuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get current user by JWT
+      tags:
+      - users
+  /users/me/upgrade:
+    get:
+      consumes:
+      - application/json
+      description: Change user role to beatmaker (role 2). Requires jwt. Updates the
+        role of the user based on given jwt.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Upgrade user to beatmaker
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
