@@ -65,6 +65,7 @@ func ProtectedRequiresModerator() func(*fiber.Ctx) error {
 
 func Protected() func(*fiber.Ctx) error {
 	LoadENV()
+	
 	return jwtware.New(jwtware.Config{
 		SigningKey:   jwtware.SigningKey{Key: []byte(os.Getenv("SECRET"))},
 		ErrorHandler: jwtError,
