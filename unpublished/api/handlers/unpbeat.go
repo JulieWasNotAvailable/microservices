@@ -310,6 +310,17 @@ func GetAllUnpublishedBeats(service unpbeat.Service) fiber.Handler {
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatListSuccessResponse(beats))
 	}}
 
+// UpdateBeat godoc
+// @Summary Update an unpublished beat
+// @Description Update an existing unpublished beat entry
+// @Tags beats
+// @Accept json
+// @Produce json
+// @Param beat body presenters.UnpublishedBeat true "Beat data to update"
+// @Success 200 {object} object "Successfully updated beat"
+// @Failure 422 {object} object "Unprocessable entity - invalid request body"
+// @Failure 500 {object} object "Internal server error"
+// @Router /unpbeats/updateUnpublishedBeat [patch]
 func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var requestBody presenters.UnpublishedBeat

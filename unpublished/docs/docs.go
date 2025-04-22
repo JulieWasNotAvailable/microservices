@@ -35,6 +35,120 @@ const docTemplate = `{
                 }
             }
         },
+        "/metadata/files": {
+            "get": {
+                "description": "Retrieve all available files metadata",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Get all available files",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved all files metadata",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update existing available files metadata",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Update available files",
+                "parameters": [
+                    {
+                        "description": "Updated files data",
+                        "name": "availableFiles",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entities.AvailableFiles"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated files metadata",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create new available files metadata",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Create available files",
+                "parameters": [
+                    {
+                        "description": "Available files data",
+                        "name": "availableFiles",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entities.AvailableFiles"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created files metadata",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/metadata/genres": {
             "get": {
                 "description": "Retrieve all genres from the system",
@@ -531,6 +645,11 @@ const docTemplate = `{
         },
         "/unpbeats/publish/{id}": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Publish an existing beat (mock implementation)",
                 "produces": [
                     "application/json"
@@ -575,6 +694,11 @@ const docTemplate = `{
         },
         "/unpbeats/saveDraft": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Save an unpublished beat with draft status",
                 "consumes": [
                     "application/json"
@@ -730,9 +854,75 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/unpbeats/updateUnpublishedBeat": {
+            "patch": {
+                "description": "Update an existing unpublished beat entry",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "beats"
+                ],
+                "summary": "Update an unpublished beat",
+                "parameters": [
+                    {
+                        "description": "Beat data to update",
+                        "name": "beat",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/presenters.UnpublishedBeat"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated beat",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity - invalid request body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "entities.AvailableFiles": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "mp3": {
+                    "type": "string"
+                },
+                "unpublishedBeatID": {
+                    "type": "string"
+                },
+                "wav": {
+                    "type": "string"
+                },
+                "zip": {
+                    "type": "string"
+                }
+            }
+        },
         "entities.Genre": {
             "type": "object",
             "properties": {
@@ -770,17 +960,17 @@ const docTemplate = `{
         "entities.Keynote": {
             "type": "object",
             "properties": {
-                "beats": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.UnpublishedBeat"
-                    }
-                },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
+                },
+                "unpublishedbeats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UnpublishedBeat"
+                    }
                 }
             }
         },
@@ -832,27 +1022,43 @@ const docTemplate = `{
         "entities.Timestamp": {
             "type": "object",
             "properties": {
-                "beatID": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
                 },
-                "time": {
+                "timeEnd": {
                     "type": "integer"
+                },
+                "timeStart": {
+                    "type": "integer"
+                },
+                "unpublishedbeatId": {
+                    "type": "string",
+                    "example": "01963e01-e46c-7996-996a-42ad3df115ac"
                 }
             }
         },
         "entities.UnpublishedBeat": {
             "description": "entitites.UnpublishedBeatErrorResponse",
             "type": "object",
+            "required": [
+                "availableFiles",
+                "beatmakerId",
+                "bpm",
+                "genres",
+                "keynoteId",
+                "moods",
+                "name",
+                "price",
+                "tags",
+                "timestamps",
+                "url"
+            ],
             "properties": {
-                "availableFilesId": {
-                    "type": "string",
-                    "example": "5"
+                "availableFiles": {
+                    "$ref": "#/definitions/entities.AvailableFiles"
                 },
                 "beatmakerId": {
                     "type": "string",
@@ -860,6 +1066,8 @@ const docTemplate = `{
                 },
                 "bpm": {
                     "type": "integer",
+                    "maximum": 400,
+                    "minimum": 20,
                     "example": 120
                 },
                 "created_at": {
@@ -867,7 +1075,12 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string",
+                    "maxLength": 500,
+                    "minLength": 2,
                     "example": "Chill summer beat with tropical influences"
+                },
+                "err": {
+                    "type": "string"
                 },
                 "genres": {
                     "description": "many to many",
@@ -888,7 +1101,7 @@ const docTemplate = `{
                     }
                 },
                 "keynoteId": {
-                    "description": "keynote has many beats, but each beat has only one keynote",
+                    "description": "keynote has many beats, but each beat has only one keynote` + "`" + `",
                     "type": "integer",
                     "example": 11
                 },
@@ -901,15 +1114,13 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string",
+                    "maxLength": 60,
+                    "minLength": 2,
                     "example": "Summer Vibes"
                 },
                 "picture": {
                     "type": "string",
                     "example": "https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
-                },
-                "plays": {
-                    "type": "integer",
-                    "example": 150
                 },
                 "price": {
                     "type": "integer",
@@ -945,7 +1156,7 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string",
-                    "example": "https://example.com/beats/summer-vibes"
+                    "example": "https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
                 }
             }
         },
@@ -1000,17 +1211,31 @@ const docTemplate = `{
         "presenters.UnpublishedBeat": {
             "description": "presenters.UnpublishedBeat",
             "type": "object",
+            "required": [
+                "availableFiles",
+                "beatmakerId",
+                "bpm",
+                "genres",
+                "keynoteId",
+                "moods",
+                "name",
+                "price",
+                "tags",
+                "timestamps",
+                "url"
+            ],
             "properties": {
-                "available_files": {
-                    "type": "string",
-                    "example": "019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
+                "availableFiles": {
+                    "$ref": "#/definitions/entities.AvailableFiles"
                 },
-                "beatmaker_id": {
+                "beatmakerId": {
                     "type": "string",
-                    "example": "019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
+                    "example": "019628ef-cd76-7d2d-bf80-48b8011fad40"
                 },
                 "bpm": {
                     "type": "integer",
+                    "maximum": 400,
+                    "minimum": 20,
                     "example": 120
                 },
                 "created_at": {
@@ -1018,7 +1243,12 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string",
+                    "maxLength": 500,
+                    "minLength": 2,
                     "example": "Chill summer beat with tropical influences"
+                },
+                "err": {
+                    "type": "string"
                 },
                 "genres": {
                     "description": "many to many",
@@ -1029,7 +1259,7 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                    "example": "019628ef-cd76-7d2d-bf80-48b8011fad40"
                 },
                 "instruments": {
                     "description": "many to many",
@@ -1039,7 +1269,7 @@ const docTemplate = `{
                     }
                 },
                 "keynoteId": {
-                    "description": "keynote has many beats, but each beat has only one keynote",
+                    "description": "keynote has many beats, but each beat has only one keynote` + "`" + `",
                     "type": "integer",
                     "example": 11
                 },
@@ -1052,15 +1282,13 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string",
-                    "example": "Midnight Dreams"
+                    "maxLength": 60,
+                    "minLength": 2,
+                    "example": "Summer Vibes"
                 },
                 "picture": {
                     "type": "string",
                     "example": "https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
-                },
-                "plays": {
-                    "type": "integer",
-                    "example": 1500
                 },
                 "price": {
                     "type": "integer",
@@ -1072,10 +1300,6 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "example": "draft"
-                },
-                "stream_url": {
-                    "type": "string",
-                    "example": "https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
                 },
                 "tags": {
                     "description": "many to many",
@@ -1093,6 +1317,10 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "integer"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
                 }
             }
         },

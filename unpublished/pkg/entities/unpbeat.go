@@ -70,7 +70,8 @@ type Timestamp struct{
 	ID uint  `json:"id"`
 	BeatID uuid.UUID `json:"unpublishedbeatId" example:"01963e01-e46c-7996-996a-42ad3df115ac"`
 	Name string
-	Time int64
+	TimeStart int64
+	TimeEnd int64
 }
 
 type Tag struct{

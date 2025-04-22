@@ -1,5 +1,18 @@
 basePath: /api
 definitions:
+  entities.AvailableFiles:
+    properties:
+      id:
+        type: string
+      mp3:
+        type: string
+      unpublishedBeatID:
+        type: string
+      wav:
+        type: string
+      zip:
+        type: string
+    type: object
   entities.Genre:
     properties:
       id:
@@ -24,14 +37,14 @@ definitions:
     type: object
   entities.Keynote:
     properties:
-      beats:
-        items:
-          $ref: '#/definitions/entities.UnpublishedBeat'
-        type: array
       id:
         type: integer
       name:
         type: string
+      unpublishedbeats:
+        items:
+          $ref: '#/definitions/entities.UnpublishedBeat'
+        type: array
     type: object
   entities.Mood:
     properties:
@@ -65,31 +78,39 @@ definitions:
     type: object
   entities.Timestamp:
     properties:
-      beatID:
-        type: string
       id:
         type: integer
       name:
         type: string
-      time:
+      timeEnd:
         type: integer
+      timeStart:
+        type: integer
+      unpublishedbeatId:
+        example: 01963e01-e46c-7996-996a-42ad3df115ac
+        type: string
     type: object
   entities.UnpublishedBeat:
     description: entitites.UnpublishedBeatErrorResponse
     properties:
-      availableFilesId:
-        example: "5"
-        type: string
+      availableFiles:
+        $ref: '#/definitions/entities.AvailableFiles'
       beatmakerId:
         example: 019628ef-cd76-7d2d-bf80-48b8011fad40
         type: string
       bpm:
         example: 120
+        maximum: 400
+        minimum: 20
         type: integer
       created_at:
         type: integer
       description:
         example: Chill summer beat with tropical influences
+        maxLength: 500
+        minLength: 2
+        type: string
+      err:
         type: string
       genres:
         description: many to many
@@ -105,7 +126,7 @@ definitions:
           $ref: '#/definitions/entities.Instrument'
         type: array
       keynoteId:
-        description: keynote has many beats, but each beat has only one keynote
+        description: keynote has many beats, but each beat has only one keynote`
         example: 11
         type: integer
       moods:
@@ -115,13 +136,12 @@ definitions:
         type: array
       name:
         example: Summer Vibes
+        maxLength: 60
+        minLength: 2
         type: string
       picture:
         example: https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
         type: string
-      plays:
-        example: 150
-        type: integer
       price:
         example: 2999
         type: integer
@@ -144,8 +164,20 @@ definitions:
       updated_at:
         type: integer
       url:
-        example: https://example.com/beats/summer-vibes
+        example: https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
         type: string
+    required:
+    - availableFiles
+    - beatmakerId
+    - bpm
+    - genres
+    - keynoteId
+    - moods
+    - name
+    - price
+    - tags
+    - timestamps
+    - url
     type: object
   presenters.MetadataErrorResponse:
     description: presenters.MetadataErrorResponse
@@ -185,19 +217,24 @@ definitions:
   presenters.UnpublishedBeat:
     description: presenters.UnpublishedBeat
     properties:
-      available_files:
-        example: 019623bd-3d0b-7dc2-8a1f-f782adeb42b4
-        type: string
-      beatmaker_id:
-        example: 019623bd-3d0b-7dc2-8a1f-f782adeb42b4
+      availableFiles:
+        $ref: '#/definitions/entities.AvailableFiles'
+      beatmakerId:
+        example: 019628ef-cd76-7d2d-bf80-48b8011fad40
         type: string
       bpm:
         example: 120
+        maximum: 400
+        minimum: 20
         type: integer
       created_at:
         type: integer
       description:
         example: Chill summer beat with tropical influences
+        maxLength: 500
+        minLength: 2
+        type: string
+      err:
         type: string
       genres:
         description: many to many
@@ -205,7 +242,7 @@ definitions:
           $ref: '#/definitions/entities.Genre'
         type: array
       id:
-        example: 550e8400-e29b-41d4-a716-446655440000
+        example: 019628ef-cd76-7d2d-bf80-48b8011fad40
         type: string
       instruments:
         description: many to many
@@ -213,7 +250,7 @@ definitions:
           $ref: '#/definitions/entities.Instrument'
         type: array
       keynoteId:
-        description: keynote has many beats, but each beat has only one keynote
+        description: keynote has many beats, but each beat has only one keynote`
         example: 11
         type: integer
       moods:
@@ -222,14 +259,13 @@ definitions:
           $ref: '#/definitions/entities.Mood'
         type: array
       name:
-        example: Midnight Dreams
+        example: Summer Vibes
+        maxLength: 60
+        minLength: 2
         type: string
       picture:
         example: https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
         type: string
-      plays:
-        example: 1500
-        type: integer
       price:
         example: 2999
         type: integer
@@ -237,9 +273,6 @@ definitions:
         type: integer
       status:
         example: draft
-        type: string
-      stream_url:
-        example: https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
         type: string
       tags:
         description: many to many
@@ -253,6 +286,21 @@ definitions:
         type: array
       updated_at:
         type: integer
+      url:
+        example: https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
+        type: string
+    required:
+    - availableFiles
+    - beatmakerId
+    - bpm
+    - genres
+    - keynoteId
+    - moods
+    - name
+    - price
+    - tags
+    - timestamps
+    - url
     type: object
   presenters.UnpublishedBeatErrorResponse:
     description: presenters.UnpublishedBeatErrorResponse
@@ -315,6 +363,81 @@ paths:
       summary: Simple hello endpoint
       tags:
       - utils
+  /metadata/files:
+    get:
+      description: Retrieve all available files metadata
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all files metadata
+          schema:
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: object
+      summary: Get all available files
+      tags:
+      - files
+    post:
+      consumes:
+      - application/json
+      description: Create new available files metadata
+      parameters:
+      - description: Available files data
+        in: body
+        name: availableFiles
+        required: true
+        schema:
+          $ref: '#/definitions/entities.AvailableFiles'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created files metadata
+          schema:
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: object
+      summary: Create available files
+      tags:
+      - files
+    put:
+      consumes:
+      - application/json
+      description: Update existing available files metadata
+      parameters:
+      - description: Updated files data
+        in: body
+        name: availableFiles
+        required: true
+        schema:
+          $ref: '#/definitions/entities.AvailableFiles'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated files metadata
+          schema:
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: object
+      summary: Update available files
+      tags:
+      - files
   /metadata/genres:
     get:
       description: Retrieve all genres from the system
@@ -666,6 +789,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Publish a beat. Deletes it from the current service, and posts to beat
         service.
       tags:
@@ -697,6 +822,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Save a beat draft
       tags:
       - beats
@@ -770,6 +897,36 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get user's unpublished beats
+      tags:
+      - beats
+  /unpbeats/updateUnpublishedBeat:
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing unpublished beat entry
+      parameters:
+      - description: Beat data to update
+        in: body
+        name: beat
+        required: true
+        schema:
+          $ref: '#/definitions/presenters.UnpublishedBeat'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated beat
+          schema:
+            type: object
+        "422":
+          description: Unprocessable entity - invalid request body
+          schema:
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: object
+      summary: Update an unpublished beat
       tags:
       - beats
 securityDefinitions:
