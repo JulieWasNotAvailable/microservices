@@ -36,6 +36,7 @@ func Hello(c *fiber.Ctx) error {
 // @Tags beats
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param beat body entities.UnpublishedBeat true "Beat data to save as draft"
 // @Success 200 {object} presenters.UnpublishedBeatSuccessResponse
 // @Failure 422 {object} presenters.UnpublishedBeatErrorResponse
@@ -63,6 +64,7 @@ func SaveBeatDraft(service unpbeat.Service) fiber.Handler {
 // @Description Publish an existing beat (mock implementation)
 // @Tags beats
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Beat ID to publish"
 // @Success 200 {object} map[string]string
 // @Failure 422 {object} presenters.UnpublishedBeatErrorResponse
@@ -82,13 +84,13 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
-		// beatmakerid, err := getIdFromJWT(c)
-		// if err != nil {
-		// 	return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
-		// }
-		// if beat.BeatmakerID != beatmakerid {
-		// 	return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("the beat you tried to publish does not belong to you")))
-		// }
+		beatmakerid, err := getIdFromJWT(c)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
+		}
+		if beat.BeatmakerID != beatmakerid {
+			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("the beat you tried to publish does not belong to you")))
+		}
 
 		url := beat.AvailableFiles.MP3
 		if url == "" {
@@ -107,7 +109,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		}
 
 		mfcc := <- mfcc_channel
-		
+
 		if mfcc.Err != "" {
 			errMessage := presenters.UnpublishedBeat{
 				ID : beatuuid,
