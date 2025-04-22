@@ -1,0 +1,780 @@
+basePath: /api
+definitions:
+  entities.Genre:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      unpublishedBeat:
+        items:
+          $ref: '#/definitions/entities.UnpublishedBeat'
+        type: array
+    type: object
+  entities.Instrument:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      unpublishedBeat:
+        items:
+          $ref: '#/definitions/entities.UnpublishedBeat'
+        type: array
+    type: object
+  entities.Keynote:
+    properties:
+      beats:
+        items:
+          $ref: '#/definitions/entities.UnpublishedBeat'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  entities.Mood:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      unpublishedBeat:
+        items:
+          $ref: '#/definitions/entities.UnpublishedBeat'
+        type: array
+    type: object
+  entities.Status:
+    enum:
+    - in_moderation
+    - draft
+    type: string
+    x-enum-varnames:
+    - StatusInModeration
+    - StatusDraft
+  entities.Tag:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      unpublishedBeat:
+        items:
+          $ref: '#/definitions/entities.UnpublishedBeat'
+        type: array
+    type: object
+  entities.Timestamp:
+    properties:
+      beatID:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      time:
+        type: integer
+    type: object
+  entities.UnpublishedBeat:
+    description: entitites.UnpublishedBeatErrorResponse
+    properties:
+      availableFilesId:
+        example: "5"
+        type: string
+      beatmakerId:
+        example: 019628ef-cd76-7d2d-bf80-48b8011fad40
+        type: string
+      bpm:
+        example: 120
+        type: integer
+      created_at:
+        type: integer
+      description:
+        example: Chill summer beat with tropical influences
+        type: string
+      genres:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Genre'
+        type: array
+      id:
+        example: 019628ef-cd76-7d2d-bf80-48b8011fad40
+        type: string
+      instruments:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Instrument'
+        type: array
+      keynoteId:
+        description: keynote has many beats, but each beat has only one keynote
+        example: 11
+        type: integer
+      moods:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Mood'
+        type: array
+      name:
+        example: Summer Vibes
+        type: string
+      picture:
+        example: https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
+        type: string
+      plays:
+        example: 150
+        type: integer
+      price:
+        example: 2999
+        type: integer
+      sent_to_moderation_at:
+        type: integer
+      status:
+        allOf:
+        - $ref: '#/definitions/entities.Status'
+        example: draft
+      tags:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Tag'
+        type: array
+      timestamps:
+        description: a beat has many timestamps, but each timestamp has only one beat
+        items:
+          $ref: '#/definitions/entities.Timestamp'
+        type: array
+      updated_at:
+        type: integer
+      url:
+        example: https://example.com/beats/summer-vibes
+        type: string
+    type: object
+  presenters.MetadataErrorResponse:
+    description: presenters.MetadataErrorResponse
+    properties:
+      data:
+        example: ""
+        type: string
+      error:
+        example: error message
+        type: string
+      status:
+        example: false
+        type: boolean
+    type: object
+  presenters.MetadataListResponse:
+    description: presenters.MetadataListResponse
+    properties:
+      data: {}
+      error:
+        example: ""
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+  presenters.MetadataSuccessResponse:
+    description: presenters.MetadataSuccessResponse
+    properties:
+      data: {}
+      error:
+        example: ""
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+  presenters.UnpublishedBeat:
+    description: presenters.UnpublishedBeat
+    properties:
+      available_files:
+        example: 019623bd-3d0b-7dc2-8a1f-f782adeb42b4
+        type: string
+      beatmaker_id:
+        example: 019623bd-3d0b-7dc2-8a1f-f782adeb42b4
+        type: string
+      bpm:
+        example: 120
+        type: integer
+      created_at:
+        type: integer
+      description:
+        example: Chill summer beat with tropical influences
+        type: string
+      genres:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Genre'
+        type: array
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      instruments:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Instrument'
+        type: array
+      keynoteId:
+        description: keynote has many beats, but each beat has only one keynote
+        example: 11
+        type: integer
+      moods:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Mood'
+        type: array
+      name:
+        example: Midnight Dreams
+        type: string
+      picture:
+        example: https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
+        type: string
+      plays:
+        example: 1500
+        type: integer
+      price:
+        example: 2999
+        type: integer
+      sent_to_moderation_at:
+        type: integer
+      status:
+        example: draft
+        type: string
+      stream_url:
+        example: https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
+        type: string
+      tags:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Tag'
+        type: array
+      timestamps:
+        description: a beat has many timestamps, but each timestamp has only one beat
+        items:
+          $ref: '#/definitions/entities.Timestamp'
+        type: array
+      updated_at:
+        type: integer
+    type: object
+  presenters.UnpublishedBeatErrorResponse:
+    description: presenters.UnpublishedBeatErrorResponse
+    properties:
+      data:
+        type: string
+      error:
+        example: "null"
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+  presenters.UnpublishedBeatListResponse:
+    description: presenters.UnpublishedBeatListResponse
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/presenters.UnpublishedBeat'
+        type: array
+      error:
+        example: "null"
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+  presenters.UnpublishedBeatSuccessResponse:
+    description: presenters.UnpublishedBeatSuccessResponse
+    properties:
+      data:
+        $ref: '#/definitions/presenters.UnpublishedBeat'
+      error:
+        example: "null"
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+info:
+  contact: {}
+  description: Deals with unpublished beats and moderation. Has its own duplicates
+    of Tags, Genre, and other metadata, except MFCC characteristics. When user publishes
+    a beat, sends a kafka message to get MFCC characteristics from the track. If the
+    user publishes a new tag, tag is updated in unpublished service and then in beats
+    service.
+  title: Fiber Unpublished Beats Service
+  version: "1.0"
+paths:
+  /:
+    get:
+      description: Returns a hello message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: hello!
+          schema:
+            type: string
+      summary: Simple hello endpoint
+      tags:
+      - utils
+  /metadata/genres:
+    get:
+      description: Retrieve all genres from the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all genres
+      tags:
+      - genres
+    post:
+      consumes:
+      - application/json
+      description: Add a new genre to the system
+      parameters:
+      - description: Genre to create
+        in: body
+        name: genre
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Genre'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presenters.MetadataSuccessResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Create a new genre
+      tags:
+      - genres
+  /metadata/instruments:
+    get:
+      description: Retrieve all instruments from the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all instruments
+      tags:
+      - instruments
+    post:
+      consumes:
+      - application/json
+      description: Add a new instrument to the system
+      parameters:
+      - description: Instrument to create
+        in: body
+        name: instrument
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Instrument'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presenters.MetadataSuccessResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Create a new instrument
+      tags:
+      - instruments
+  /metadata/keynotes:
+    get:
+      description: Retrieve all keynotes from the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all keynotes
+      tags:
+      - keynotes
+    post:
+      consumes:
+      - application/json
+      description: Add a new keynote to the system
+      parameters:
+      - description: Keynote to create
+        in: body
+        name: keynote
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Keynote'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presenters.MetadataSuccessResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Create a new keynote
+      tags:
+      - keynotes
+  /metadata/moods:
+    get:
+      description: Retrieve all moods from the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all moods
+      tags:
+      - moods
+    post:
+      consumes:
+      - application/json
+      description: Add a new mood to the system
+      parameters:
+      - description: Mood to create
+        in: body
+        name: mood
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Mood'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presenters.MetadataSuccessResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Create a new mood
+      tags:
+      - moods
+  /metadata/tags:
+    get:
+      description: Retrieve all tags from the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all tags
+      tags:
+      - tags
+    post:
+      consumes:
+      - application/json
+      description: Add a new tag to the system
+      parameters:
+      - description: Tag to create
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Tag'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presenters.MetadataSuccessResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Create a new tag
+      tags:
+      - tags
+  /metadata/timestamps:
+    get:
+      description: Retrieve all timestamps from the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all timestamps
+      tags:
+      - timestamps
+    post:
+      consumes:
+      - application/json
+      description: Add a new timestamp to the system
+      parameters:
+      - description: Timestamp to create
+        in: body
+        name: timestamp
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Timestamp'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presenters.MetadataSuccessResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Create a new timestamp
+      tags:
+      - timestamps
+  /unpbeats/allUnpublishedBeats:
+    get:
+      description: Get all unpublished beats in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+      summary: Get all unpublished beats
+      tags:
+      - beats
+  /unpbeats/beatsForModerationByDate/{from}/{to}:
+    get:
+      description: Get beats in moderation status within specified date range
+      parameters:
+      - description: Start timestamp
+        in: path
+        name: from
+        required: true
+        type: integer
+      - description: End timestamp
+        in: path
+        name: to
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+      summary: 'Get beats in moderation by date range. Warning: uses unix data.'
+      tags:
+      - moderation
+  /unpbeats/publish/{id}:
+    post:
+      description: Publish an existing beat (mock implementation)
+      parameters:
+      - description: Beat ID to publish
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+      summary: Publish a beat. Deletes it from the current service, and posts to beat
+        service.
+      tags:
+      - beats
+  /unpbeats/saveDraft:
+    post:
+      consumes:
+      - application/json
+      description: Save an unpublished beat with draft status
+      parameters:
+      - description: Beat data to save as draft
+        in: body
+        name: beat
+        required: true
+        schema:
+          $ref: '#/definitions/entities.UnpublishedBeat'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatSuccessResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+      summary: Save a beat draft
+      tags:
+      - beats
+  /unpbeats/sendToModeration/{id}:
+    get:
+      description: Update beat status to 'in_moderation' and set moderation timestamp
+      parameters:
+      - description: Beat ID to send to moderation
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+      summary: Send beat to moderation
+      tags:
+      - beats
+  /unpbeats/sortByStatus/{status}:
+    get:
+      description: Get unpublished beats filtered by status for the authenticated
+        beatmaker
+      parameters:
+      - description: Status to filter by
+        in: path
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get beats by status for current user
+      tags:
+      - beats
+  /unpbeats/unpublishedBeatsByBeatmakerJWT:
+    get:
+      description: Get all unpublished beats for the authenticated beatmaker
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user's unpublished beats
+      tags:
+      - beats
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
