@@ -45,7 +45,7 @@ func HandleGoogleAuth(service user.Service) fiber.Handler {
 	}
 
 	// Verify Google token
-	payload, err := idtoken.Validate(context.Background(), json.Token, os.Getenv("Client"))
+	payload, err := idtoken.Validate(context.Background(), json.Token, os.Getenv("Google_Client"))
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid Google token"})
 	}
@@ -78,7 +78,7 @@ func HandleGoogleAuth(service user.Service) fiber.Handler {
 			"exp": time.Now().Add(time.Hour * 72).Unix(),
 		})
 		
-		tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
+		tokenString, err := token.SignedString([]byte(os.Getenv("Google_Secret")))
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to generate token"})
 		}

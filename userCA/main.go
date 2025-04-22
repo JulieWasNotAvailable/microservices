@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/JulieWasNotAvailable/microservices/user/api/routes"
+	// "github.com/JulieWasNotAvailable/microservices/user/internal/consumer"
+	_ "github.com/JulieWasNotAvailable/microservices/user/docs"
 	"github.com/JulieWasNotAvailable/microservices/user/pkg/bmmetadata"
 	"github.com/JulieWasNotAvailable/microservices/user/pkg/dbconnection"
 	"github.com/JulieWasNotAvailable/microservices/user/pkg/entities"
@@ -11,15 +13,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
-	_ "github.com/JulieWasNotAvailable/microservices/user/docs"
 )
 
 // @BasePath /api
-// @title Fiber Swagger Example API
+// @title Fiber User Service
 // @version 1.0
-// @description This is a sample server.
-// @termsOfService http://swagger.io/terms/
-// @contact.name API Support
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
@@ -68,6 +66,8 @@ func main () {
 	routes.MetadataRoutes(api, metadataService, userService)
 	routes.GoogleRoutes(api, userService)
 	routes.WelcomeRouter(api)
+
+	// go consumer.StartConsumer(userService)
 	
 	app.Listen(":7773")
 }

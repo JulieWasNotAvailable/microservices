@@ -16,6 +16,7 @@ type User struct {
 	Lastname        string `json:"lastname,omitempty" example:"Doe"`
 	Patronymic      string `json:"patronymic,omitempty" example:"Smith"`
 	Username        string `json:"username,omitempty" example:"johndoe"`
+	ProfilePictureUrl string `json:"profilepicture,omitempty" example:"https://storage.yandexcloud.net/imagesall/01961f2b-61b4-74ee-8e5b-26044ec630ea"`
 	RoleID          uint    `json:"roleId" example:"1"`
 	SubscriptionID  int    `json:"subscriptionId,omitempty" example:"1"`
 	UsersFavourites int    `json:"usersFavourites,omitempty" example:"5"`

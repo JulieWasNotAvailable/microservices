@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	// "log"
 	"net/http"
 
 	"github.com/JulieWasNotAvailable/microservices/user/api/presenters"
@@ -10,8 +9,6 @@ import (
 	"github.com/JulieWasNotAvailable/microservices/user/pkg/entities"
 	"github.com/JulieWasNotAvailable/microservices/user/pkg/user"
 	"github.com/google/uuid"
-
-	// "gorm.io/gorm"
 
 	"github.com/gofiber/fiber/v2"
 )

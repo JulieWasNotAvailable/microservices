@@ -1,0 +1,247 @@
+basePath: /api
+definitions:
+  handler.Request:
+    properties:
+      bucketName:
+        type: string
+      entity:
+        type: string
+      entityType:
+        type: string
+      objectKey:
+        type: string
+    type: object
+  handler.request:
+    properties:
+      objectKey:
+        example: 019623bd-3d0b-7dc2-8a1f-f782adeb42b4
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Deals with presigned requests. Pushes updates to Beats and User microservice,
+    when files are uploaded.
+  title: Fiber Presigner Service
+  version: "1.0"
+paths:
+  /ObjectsFromBucket/{bucket}:
+    get:
+      description: Get a list of objects from the specified S3 bucket
+      parameters:
+      - description: Bucket name
+        in: path
+        name: bucket
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns list of objects
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List objects in a bucket
+      tags:
+      - Storage
+  /buckets:
+    get:
+      description: Get a list of all available S3 buckets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns list of buckets
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Access denied
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all S3 buckets
+      tags:
+      - Storage
+  /checkFileUpdateUrl:
+    post:
+      consumes:
+      - application/json
+      description: Verify if a file exists in S3 and publish to Kafka
+      parameters:
+      - description: File details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully processed
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Validates the file, pushes to User or Beat Service.
+      tags:
+      - Storage
+  /getObjectsFromBucket/{bucket}:
+    get:
+      description: Get a list of objects from the specified S3 bucket
+      parameters:
+      - description: Bucket name
+        in: path
+        name: bucket
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns list of objects
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List objects in a bucket
+      tags:
+      - Storage
+  /presigned/getPresignedDeleteRequest/{bucket}:
+    post:
+      consumes:
+      - application/json
+      description: Create a presigned URL to delete an object
+      parameters:
+      - description: Bucket name
+        in: path
+        name: bucket
+        required: true
+        type: string
+      - description: Object details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Presigned URL generated
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Generate presigned DELETE URL
+      tags:
+      - Presigned
+  /presigned/getPresignedGetRequest/{bucket}:
+    post:
+      consumes:
+      - application/json
+      description: Create a presigned URL to download an object
+      parameters:
+      - description: Bucket name
+        in: path
+        name: bucket
+        required: true
+        type: string
+      - description: Object details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Presigned URL generated
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Generate presigned GET URL
+      tags:
+      - Presigned
+  /presigned/getPresignedPostRequest/{bucket}:
+    post:
+      consumes:
+      - application/json
+      description: Create a presigned URL to upload an object
+      parameters:
+      - description: Bucket name
+        in: path
+        name: bucket
+        required: true
+        type: string
+      - description: Object details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Presigned URL generated
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Generate presigned PUT URL
+      tags:
+      - Presigned
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

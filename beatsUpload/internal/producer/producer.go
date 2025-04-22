@@ -24,7 +24,7 @@ func createProducer (brokersUrl []string) (sarama.AsyncProducer, error) {
 }
 
 //pushes Update Message to queue
-func pushMessageToQueue (topic string, key *int, message []byte) error {
+func pushMessageToQueue (topic string, key []byte, message []byte) error {
 
 	brokerUrl := []string{"localhost:9092"}
 
@@ -34,10 +34,10 @@ func pushMessageToQueue (topic string, key *int, message []byte) error {
 	}
 
 	defer producer.Close()
-
+	
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
-		Key: sarama.ByteEncoder{byte(*key)},
+		Key: sarama.StringEncoder(key),
 		Value: sarama.StringEncoder(message),
 	}
 	
@@ -58,17 +58,22 @@ func pushMessageToQueue (topic string, key *int, message []byte) error {
 	return nil
 }
 
-func CreateMessage(url *string, beatId *int) error {
+func CreateMessage(url string, key string, topic string) error {
 
-	urlInBytes, err := json.Marshal(*url)
+	urlInBytes, err := json.Marshal(url)
 	if err != nil {
 		log.Fatal(urlInBytes)
 		}
 
-	pushMessageToQueue("beat_url_updates", beatId, urlInBytes)
+	keyInBytes, err := json.Marshal(key)
+	if err != nil {
+		log.Fatal(keyInBytes)
+		}
 
+	err = pushMessageToQueue(topic, keyInBytes, urlInBytes)
 	if err != nil {
 		log.Println("created message successfully")
 		}
+
 	return nil
 	}
