@@ -9,6 +9,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// PostFile godoc
+// @Summary Create available files
+// @Description Create new available files metadata
+// @Tags files
+// @Accept json
+// @Produce json
+// @Param availableFiles body entities.AvailableFiles true "Available files data"
+// @Success 201 {object} object "Successfully created files metadata"
+// @Failure 400 {object} object "Invalid request body"
+// @Failure 500 {object} object "Internal server error"
+// @Router /metadata/files [post]
 func PostFile(service beatmetadata.MetadataService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var availableFiles entities.AvailableFiles
@@ -25,6 +36,14 @@ func PostFile(service beatmetadata.MetadataService) fiber.Handler {
 	}
 }
 
+// GetAllFiles godoc
+// @Summary Get all available files
+// @Description Retrieve all available files metadata
+// @Tags files
+// @Produce json
+// @Success 200 {object} object "Successfully retrieved all files metadata"
+// @Failure 500 {object} object "Internal server error"
+// @Router /metadata/files [get]
 func GetAllFiles(service beatmetadata.MetadataService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		availableFiles, err := service.ReadAllAvailableFiles()
@@ -36,6 +55,17 @@ func GetAllFiles(service beatmetadata.MetadataService) fiber.Handler {
 	}
 }
 
+// UpdateFiles godoc
+// @Summary Update available files
+// @Description Update existing available files metadata
+// @Tags files
+// @Accept json
+// @Produce json
+// @Param availableFiles body entities.AvailableFiles true "Updated files data"
+// @Success 200 {object} object "Successfully updated files metadata"
+// @Failure 400 {object} object "Invalid request body"
+// @Failure 500 {object} object "Internal server error"
+// @Router /metadata/files [put]
 func UpdateFiles(service beatmetadata.MetadataService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var availableFiles entities.AvailableFiles
