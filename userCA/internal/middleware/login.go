@@ -46,12 +46,12 @@ func Login(service user.Service) fiber.Handler {
 	user, err := service.FetchUserByEmail(login)
 
 	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "User not found"})
 	}
-	
+
 	//to-do: use bcrypt
 	if user.Password != pass {
-		return c.SendStatus(fiber.StatusUnauthorized)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid password"})
 	}
 
 	//creates an empty token having the signing method hs256
@@ -77,6 +77,6 @@ func Login(service user.Service) fiber.Handler {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "message": "Success login", "data": t})
+	return c.JSON(fiber.Map{"message": "Success login", "token": t})
 	}
 }

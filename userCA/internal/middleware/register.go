@@ -17,9 +17,10 @@ import (
 )
 
 type RegisterInput struct {
-	Email string `json:"email" example:"eugene@example.com"`
+	Email    string `json:"email" example:"eugene@example.com"`
 	Password string `json:"password" example:"securepassword123"`
 }
+
 // Register godoc
 // @Summary User Register
 // @Description Authenticate user with email and password
@@ -34,8 +35,8 @@ type RegisterInput struct {
 // @Router /register [post]
 func Register(service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		input := RegisterInput{}		
-		
+		input := RegisterInput{}
+
 		err := c.BodyParser(&input)
 		if err != nil {
 			c.Status(http.StatusUnprocessableEntity)
@@ -50,14 +51,13 @@ func Register(service user.Service) fiber.Handler {
 		}
 
 		if result != nil {
-			c.Status(http.StatusConflict)
-			return c.JSON(errors.New("user already exists"))
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"message": "User already exists"})
 		}
-		
+
 		user := entities.User{
-			Email: input.Email,
+			Email:    input.Email,
 			Password: input.Password,
-			RoleID: 1,
+			RoleID:   1,
 		}
 		_, err = service.InsertUser(&user)
 
@@ -71,7 +71,7 @@ func Register(service user.Service) fiber.Handler {
 		claims["id"] = input.Email
 		claims["role"] = 1
 		claims["iat"] = time.Now().Unix()
-		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()		
+		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
 		err = godotenv.Load(".env")
 		if err != nil {
@@ -83,6 +83,6 @@ func Register(service user.Service) fiber.Handler {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 
-		return c.JSON(fiber.Map{"status": "success", "message": "Successfully registered", "data": t})
+		return c.JSON(fiber.Map{"message": "Successfully registered", "token": t})
 	}
 }

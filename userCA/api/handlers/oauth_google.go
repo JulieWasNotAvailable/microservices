@@ -32,17 +32,17 @@ import (
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router api/auth/google/getjwt [post]
 func HandleGoogleAuth(service user.Service) fiber.Handler {
-	return func (c *fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
 
-	var json presenters.Data
-	if err := c.BodyParser(&json); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
-	}
+		var json presenters.Data
+		if err := c.BodyParser(&json); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
+		}
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal(err)
-	}
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Fatal(err)
+		}
 
 	// Verify Google token
 	payload, err := idtoken.Validate(context.Background(), json.Token, os.Getenv("Google_Client"))
@@ -50,39 +50,62 @@ func HandleGoogleAuth(service user.Service) fiber.Handler {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid Google token"})
 	}
 
-	// Extract user data
-	email, _ := payload.Claims["email"].(string)
-	name, _ := payload.Claims["name"].(string)
-	userId, _ := payload.Claims["sub"].(string)
+		// Extract user data
+		email, _ := payload.Claims["email"].(string)
+		name, _ := payload.Claims["name"].(string)
+		userId, _ := payload.Claims["sub"].(string)
 
-	user, err := service.FetchUserByEmail(email)
+		user, err := service.FetchUserByEmail(email)
 
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return c.JSON(presenters.CreateUserErrorResponse(err))
-	}
-
-	if user == nil {
-		newUser := entities.User{
-			Email : email,
-			RoleID : 1,
-		}
-		result, err := service.InsertUser(&newUser)
-		if err != nil{
-			c.Status(http.StatusInternalServerError)
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return c.JSON(presenters.CreateUserErrorResponse(err))
 		}
+
+		if user == nil {
+			newUser := entities.User{
+				Email:  email,
+				RoleID: 1,
+			}
+			result, err := service.InsertUser(&newUser)
+			if err != nil {
+				c.Status(http.StatusInternalServerError)
+				return c.JSON(presenters.CreateUserErrorResponse(err))
+			}
+			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+				"id":   result.ID,
+				"role": result.RoleID,
+				"iat":  time.Now().Unix(),
+				"exp":  time.Now().Add(time.Hour * 72).Unix(),
+			})
+
+			tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to generate token"})
+			}
+
+			return c.JSON(fiber.Map{
+				"token":    tokenString,
+				"new_user": true,
+				"user": fiber.Map{
+					"id":    userId,
+					"email": email,
+					"name":  name,
+				},
+			})
+		}
+
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"id": result.ID,
-			"role": result.RoleID,
-			"iat": time.Now().Unix(),
-			"exp": time.Now().Add(time.Hour * 72).Unix(),
+			"id":   user.ID,
+			"role": user.RoleID,
+			"iat":  time.Now().Unix(),
+			"exp":  time.Now().Add(time.Hour * 72).Unix(),
 		})
-		
-		tokenString, err := token.SignedString([]byte(os.Getenv("Google_Secret")))
+
+		tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to generate token"})
 		}
-	
+
 		return c.JSON(fiber.Map{
 			"token": tokenString,
 			"user": fiber.Map{
@@ -92,26 +115,4 @@ func HandleGoogleAuth(service user.Service) fiber.Handler {
 			},
 		})
 	}
-	
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id": user.ID,
-		"role": user.RoleID,
-		"iat": time.Now().Unix(),
-		"exp": time.Now().Add(time.Hour * 72).Unix(),
-	})
-	
-	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to generate token"})
-	}
-
-	return c.JSON(fiber.Map{
-		"token": tokenString,
-		"user": fiber.Map{
-			"id":    userId,
-			"email": email,
-			"name":  name,
-		},
-	})
-}
 }
