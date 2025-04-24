@@ -10,6 +10,7 @@ type MetadataService interface {
 	ReadAllAvailableFiles() (*[]entities.AvailableFiles, error)
 	ReadAvailableFilesByBeatId(uuid uuid.UUID) (*entities.AvailableFiles, error)
 	UpdateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error)
+	UpdateAvailableFilesByBeatId(beatId uuid.UUID, updateData *entities.AvailableFiles) (*entities.AvailableFiles, error)
 	DeleteFileById(id uuid.UUID, fileType string) error
 
 	CreateInstrument(instrument *entities.Instrument) (*entities.Instrument, error)
@@ -38,11 +39,6 @@ type metadataService struct {
 	repo MetadataRepository
 }
 
-// DeleteFileById implements MetadataService.
-func (s *metadataService) DeleteFileById(id uuid.UUID, fileType string) error {
-	return s.repo.DeleteFileById(id, fileType)
-}
-
 func NewMetadataService(repo MetadataRepository) MetadataService {
 	return &metadataService{repo: repo}
 }
@@ -63,6 +59,16 @@ func (s *metadataService) ReadAvailableFilesByBeatId(uuid uuid.UUID) (*entities.
 // UpdateAvailableFiles implements MetadataService.
 func (s *metadataService) UpdateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error) {
 	return s.repo.UpdateAvailableFiles(availableFiles)
+}
+
+// UpdateAvailableFilesByBeatId implements MetadataService.
+func (s *metadataService) UpdateAvailableFilesByBeatId(beatId uuid.UUID, updateData *entities.AvailableFiles) (*entities.AvailableFiles, error) {
+	return s.repo.UpdateAvailableFilesByBeatId(beatId, updateData)
+}
+
+// DeleteFileById implements MetadataService.
+func (s *metadataService) DeleteFileById(id uuid.UUID, fileType string) error {
+	return s.repo.DeleteFileById(id, fileType)
 }
 
 func (s *metadataService) CreateInstrument(instrument *entities.Instrument) (*entities.Instrument, error) {

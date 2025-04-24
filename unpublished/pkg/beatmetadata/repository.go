@@ -2,7 +2,6 @@ package beatmetadata
 
 import (
 	"errors"
-	"log"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/entities"
 	"github.com/google/uuid"
@@ -14,6 +13,7 @@ type MetadataRepository interface {
 	ReadAllAvailableFiles() (*[]entities.AvailableFiles, error)
 	ReadAvailableFilesByBeatId(uuid uuid.UUID) (*entities.AvailableFiles, error)
 	UpdateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error)
+	UpdateAvailableFilesByBeatId(beatId uuid.UUID, updateData *entities.AvailableFiles) (*entities.AvailableFiles, error)
 	DeleteFileById(id uuid.UUID, fileType string) error 
 	
 
@@ -89,13 +89,32 @@ func (r *repository) ReadAvailableFilesByBeatId(uuid uuid.UUID) (*entities.Avail
 }
 
 func (r *repository) UpdateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error) {
-	log.Println(availableFiles)
 	err := r.DB.Where("id = ?", availableFiles.ID).Updates(&availableFiles).Error
 	if err != nil {
 		return entities.AvailableFiles{}, err
 	}
 
 	return *availableFiles, nil
+}
+
+func (r *repository) UpdateAvailableFilesByBeatId(beatId uuid.UUID, updateData *entities.AvailableFiles) (*entities.AvailableFiles, error) {
+	result := r.DB.Where("unpublished_beat_id = ?", beatId).
+	Updates(updateData)
+
+    if result.Error != nil {
+        return nil, result.Error
+    }
+    
+    if result.RowsAffected == 0 {
+        return nil, gorm.ErrRecordNotFound
+    }
+    
+    var updatedFiles entities.AvailableFiles
+    if err := r.DB.Where("unpublished_beat_id = ?", beatId).First(&updatedFiles).Error; err != nil {
+        return nil, err
+    }
+    
+    return &updatedFiles, nil
 }
 
 func (r *repository) DeleteFileById(id uuid.UUID, fileType string) error {

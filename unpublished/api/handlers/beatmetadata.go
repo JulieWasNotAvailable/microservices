@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -115,6 +116,60 @@ func UpdateFiles(service beatmetadata.MetadataService) fiber.Handler {
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateMetadataListResponse(updatedFiles))
 	}}
+
+// UpdateAvailableFilesByBeatId godoc
+// @Summary Update available files for a beat
+// @Description Updates the available files (MP3, WAV, ZIP) for a specific beat
+// @Tags files
+// @Accept json
+// @Produce json
+// @Param beatId path string true "Beat ID in UUID format"
+// @Param request body entities.AvailableFiles true "File URLs to update"
+// @Success 200 {object} entities.AvailableFiles "Updated available files"
+// @Failure 400 {object} presenters.MetadataErrorResponse "Invalid UUID format or request body"
+// @Failure 404 {object} presenters.MetadataErrorResponse "Beat not found"
+// @Failure 500 {object} presenters.MetadataErrorResponse "Internal server error"
+// @Router /metadata/filesByBeatId/{beatId} [patch] 
+func UpdateAvailableFilesByBeatId(service beatmetadata.MetadataService) fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        beatIdStr := c.Params("beatId")
+        beatId, err := uuid.Parse(beatIdStr)
+        if err != nil {
+            return c.Status(fiber.StatusBadRequest).JSON(
+                presenters.CreateMetadataErrorResponse(
+                    errors.New("invalid beat ID format"),
+                ),
+            )
+        }
+
+        var updateData entities.AvailableFiles
+        if err := c.BodyParser(&updateData); err != nil {
+            return c.Status(fiber.StatusBadRequest).JSON(
+                presenters.CreateMetadataErrorResponse(
+                    errors.New("invalid request body"),
+                ),
+            )
+        }
+
+        updatedFiles, err := service.UpdateAvailableFilesByBeatId(beatId, &updateData)
+        if err != nil {
+            if errors.Is(err, gorm.ErrRecordNotFound) {
+                return c.Status(fiber.StatusNotFound).JSON(
+                    presenters.CreateMetadataErrorResponse(
+                        errors.New("beat not found"),
+                    ),
+                )
+            }
+            return c.Status(fiber.StatusInternalServerError).JSON(
+                presenters.CreateMetadataErrorResponse(
+                    fmt.Errorf("failed to update files: %w", err),
+                ),
+            )
+        }
+        
+        return c.Status(fiber.StatusOK).JSON(updatedFiles)
+    }
+}
 
 // DeleteFileById godoc
 // @Summary Delete a specific file by ID

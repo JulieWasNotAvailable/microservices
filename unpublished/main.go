@@ -44,6 +44,7 @@ func main () {
 	api := app.Group("/api")
 	mfcc_channel := make(chan consumer.KafkaMessage)
 	delete_approve_channel := make(chan consumer.KafkaMessage)
+	
 
 	routes.SetupUnpublishedBeatRoutes(api, unpBeatService, metadataBeatService, mfcc_channel, delete_approve_channel)
 	routes.SetupMetadataBeatRoutes(api, metadataBeatService)
@@ -52,9 +53,9 @@ func main () {
 		return c.JSON("Welcome to unpublished beats service")
 	} )
 	
-	// go consumer.StartConsumer("beat_mfcc2", mfcc_channel)
-	// go consumer.StartConsumer("delete_approve", delete_approve_channel)
-	// go consumer.StartConsumer("beat_files_updates")
+	go consumer.StartConsumer("beat_mfcc2", mfcc_channel)
+	go consumer.StartConsumer("delete_approve", delete_approve_channel)
+	go consumer.StartConsumerFileUpdate("beat_files_updates", unpBeatService, metadataBeatService)
 
 	app.Listen(":7772")
 }

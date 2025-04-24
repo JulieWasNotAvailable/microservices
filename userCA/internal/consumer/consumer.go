@@ -1,11 +1,11 @@
 package consumer
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"github.com/IBM/sarama"
@@ -13,6 +13,11 @@ import (
 	"github.com/JulieWasNotAvailable/microservices/user/pkg/user"
 	"github.com/google/uuid"
 )
+
+type KafkaMessageURLUpdate struct {
+	FileType string
+	URL string
+}
 
 func StartConsumer(topic string, uservice user.Service){
 	worker, err := connectConsumer([]string{"localhost:9092"})
@@ -26,14 +31,6 @@ func StartConsumer(topic string, uservice user.Service){
 	}
 
 	fmt.Println(("consumer started"))
-	//chan - chanel, used for goroutines to exchange messages
-	/*
-	make(chan os.Signal, 1)  creates a new channel of type os.Signal
-	ctrl+c interruptions or terminal signals
-	this channel can only hold 1 signal
-	if the second signal is send, the goroutine that sends messages to this channel will be blocked
-	*/
-
 	sigchan := make(chan os.Signal, 1) 
 
 	// Ctrl + C is SIGINT
@@ -58,23 +55,23 @@ func StartConsumer(topic string, uservice user.Service){
 				//if err, service, that sent, should be notified?
 				key, err := uuid.Parse(string(msg.Key))
 				if err != nil{
-					log.Panic(err)
+					log.Println(err)
 				}
-				log.Println(key)
-				valuebytes := msg.Value
-				value := string(valuebytes)
-
-				url := "storage.yandexcloud.net/"
-				resulturl := url + strings.Trim(value, "\"")
-				
-				user := presenters.User{
-					ID : key,
-					ProfilePictureUrl : resulturl,
+				message := KafkaMessageURLUpdate{}
+				err = json.Unmarshal(msg.Value, &message)
+				if err != nil{
+					log.Println(err)
 				}
-				
-				_, err = uservice.UpdateUser(&user)
-				if err != nil {
-					log.Panic(err)
+				userUpdate := presenters.User{}
+				if message.FileType == "pfp"{
+					userUpdate.ID = key
+					userUpdate.ProfilePictureUrl = message.URL
+					_, err = uservice.UpdateUser(&userUpdate)
+					if err != nil {
+						log.Println(err)
+					}
+				} else {
+					log.Println("wrong request")
 				}
 
 			case <- sigchan:

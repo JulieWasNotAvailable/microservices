@@ -54,9 +54,9 @@ func (beat *UnpublishedBeat) BeforeSave(tx *gorm.DB) error {
 
 type AvailableFiles struct{
 	ID uuid.UUID
-	MP3 string
-	WAV string
-	ZIP string
+	MP3Url string
+	WAVUrl string
+	ZIPUrl string
 	UnpublishedBeatID uuid.UUID 
 }
 

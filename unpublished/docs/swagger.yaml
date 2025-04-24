@@ -4,13 +4,13 @@ definitions:
     properties:
       id:
         type: string
-      mp3:
+      mp3Url:
         type: string
       unpublishedBeatID:
         type: string
-      wav:
+      wavurl:
         type: string
-      zip:
+      zipurl:
         type: string
     type: object
   entities.Genre:
@@ -297,6 +297,44 @@ paths:
           schema:
             $ref: '#/definitions/presenters.MetadataErrorResponse'
       summary: Get available files by beat ID
+      tags:
+      - files
+    patch:
+      consumes:
+      - application/json
+      description: Updates the available files (MP3, WAV, ZIP) for a specific beat
+      parameters:
+      - description: Beat ID in UUID format
+        in: path
+        name: beatId
+        required: true
+        type: string
+      - description: File URLs to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entities.AvailableFiles'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated available files
+          schema:
+            $ref: '#/definitions/entities.AvailableFiles'
+        "400":
+          description: Invalid UUID format or request body
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "404":
+          description: Beat not found
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Update available files for a beat
       tags:
       - files
   /metadata/genres:

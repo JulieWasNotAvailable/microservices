@@ -14,7 +14,7 @@ type UpdateBeatURLRequest struct {
 }
 
 // @BasePath /api
-// @title Presigner Service
+// @title Beats Upload Service
 // @version 1.0
 // @description Deals with presigned requests. Pushes updates to Beats and User microservice, when files are uploaded.
 // @securityDefinitions.apikey ApiKeyAuth

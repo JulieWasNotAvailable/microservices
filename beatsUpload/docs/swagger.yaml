@@ -19,7 +19,7 @@ info:
   contact: {}
   description: Deals with presigned requests. Pushes updates to Beats and User microservice,
     when files are uploaded.
-  title: Presigner Service
+  title: Beats Upload Service
   version: "1.0"
 paths:
   /ObjectsFromBucket/{bucket}:
@@ -205,12 +205,12 @@ paths:
       - application/json
       description: Verify if a file exists, file type in S3 and publish to Kafka
       parameters:
-      - description: File ID in UUID format
+      - description: User or Beat
         in: path
         name: entity
         required: true
         type: string
-      - description: fileType (mp3, wav, zip, or cover)
+      - description: fileType (mp3, wav, zip, cover or pfp)
         in: path
         name: filetype
         type: string

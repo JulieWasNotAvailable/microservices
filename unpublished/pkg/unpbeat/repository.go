@@ -2,7 +2,6 @@ package unpbeat
 
 import (
 	"errors"
-	"log"
 	"time"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/api/presenters"
@@ -127,7 +126,6 @@ func (r *repository) ReadUnpublishedInModeration(from int64, to int64) (*[]prese
 func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
 	//Where("id = ?", unpublished.ID)
 	// unpublishedModel := entities.UnpublishedBeat{}
-	log.Println(unpublished)
 	result := r.DB.Updates(unpublished)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {

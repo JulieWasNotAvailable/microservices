@@ -83,7 +83,6 @@ func (r *repository) ReadUserByEmail (email string) (*presenters.User, error) {
 }
 
 func (r *repository) UpdateUser(user *presenters.User) (*presenters.User, error) {
-
 	err := r.DB.Updates(&user).Error
 	if err != nil {
 		return nil, err

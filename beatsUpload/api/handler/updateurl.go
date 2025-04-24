@@ -24,6 +24,13 @@ func checkContentType(contentType string, bucketName string, objectKey string, c
 
 	re := regexp.MustCompile(`audio/mpeg|audio/wav|application/zip|image/jpeg|image/jpg|image/png`)
 	if !re.MatchString(contentType) {
+		_, err := client.S3Client.DeleteObject(ctx.Context(), &s3.DeleteObjectInput{
+			Bucket : aws.String(bucketName),
+			Key : aws.String(objectKey),
+		})
+		if err != nil{
+			return err
+		}
 		return errors.New("content type is not available")
 	}
 
@@ -35,25 +42,20 @@ func checkContentType(contentType string, bucketName string, objectKey string, c
 				Key : aws.String(objectKey),
 			})
 			if err != nil{
-				return ctx.Status(http.StatusInternalServerError).JSON(
-					&fiber.Map{
-						"message": "couldn't delete the object with the wrong content-type. please, try again",
-						"error":err.Error()})
+				return err
 			}
 			return errors.New("wrong bucket. audio/mpeg should be in mp3beats. i'm deleting that")
 		}
 		
 	case "audio/wav":
+		log.Println(bucketName)
 		if bucketName != "wavbeats"{
 			_, err := client.S3Client.DeleteObject(ctx.Context(), &s3.DeleteObjectInput{
 				Bucket : aws.String(bucketName),
 				Key : aws.String(objectKey),
 			})
 			if err != nil{
-				return ctx.Status(http.StatusInternalServerError).JSON(
-					&fiber.Map{
-						"message": "couldn't delete the object with the wrong content-type. please, try again",
-						"error":err.Error()})
+				return err
 			}
 			return errors.New("wrong bucket. audio/wav should be in wavbeats. i'm deleting that")
 		}
@@ -64,10 +66,7 @@ func checkContentType(contentType string, bucketName string, objectKey string, c
 				Key : aws.String(objectKey),
 			})
 			if err != nil{
-				return ctx.Status(http.StatusInternalServerError).JSON(
-					&fiber.Map{
-						"message": "couldn't delete the object with the wrong content-type. please, try again",
-						"error":err.Error()})
+				return err
 			}
 			return errors.New("wrong bucket. application/zip should be in zipbeats. i'm deleting that")
 		}
@@ -78,10 +77,7 @@ func checkContentType(contentType string, bucketName string, objectKey string, c
 				Key : aws.String(objectKey),
 			})
 			if err != nil{
-				return ctx.Status(http.StatusInternalServerError).JSON(
-					&fiber.Map{
-						"message": "couldn't delete the object with the wrong content-type. please, try again",
-						"error":err.Error()})
+				return err
 			}
 			return errors.New("wrong bucket. images should be in imagesall. i'm deleting that")
 		}
@@ -97,8 +93,8 @@ func checkContentType(contentType string, bucketName string, objectKey string, c
 // @Tags Update
 // @Accept json
 // @Produce json
-// @Param entity path string true "File ID in UUID format"
-// @Param filetype path string false "fileType (mp3, wav, zip, or cover)"
+// @Param entity path string true "User or Beat"
+// @Param filetype path string false "fileType (mp3, wav, zip, cover or pfp)"
 // @Param UpdateRequest body UpdateRequest true "UpdateRequest"
 // @Success 200 {object} map[string]interface{} "Successfully processed"
 // @Failure 400 {object} map[string]interface{} "Bad request"
@@ -149,7 +145,7 @@ func UpdateFile(ctx *fiber.Ctx) error {
 		log.Printf("Failed attempt to wait for object %s to exist.\n", req.ObjectKey)
 		return ctx.Status(http.StatusInternalServerError).JSON(
 			&fiber.Map{
-				"message": "the file was not uploaded to s3 storage/not available yet",
+				"message": "cannot find this file in this bucket/not available yet",
 				"error":err.Error()})
 	}
 
@@ -179,15 +175,20 @@ func UpdateFile(ctx *fiber.Ctx) error {
 	
 	allowedContentypes := [5]string{"audio/mpeg", "audio/wav", "application/zip", "image/jpeg", "image/png"}
 	err = checkContentType(*objectMetaData.ContentType, bucketName, req.ObjectKey, ctx)		
-	if err != nil {return ctx.Status(http.StatusInternalServerError).JSON(
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(
 		&fiber.Map{
 			"message": "object had an incorrect type, so it was deleted",
 			"err": err.Error(),
 			"allowed content types" : allowedContentypes})	}
 	
-
-	address := bucketName + "/" + req.ObjectKey	
-	err = producer.CreateMessage(address, req.Id, topic)
+	url := "storage.yandexcloud.net/"
+	address := url + bucketName + "/" + req.ObjectKey	
+	message := producer.KafkaMessage{
+		FileType: producer.FileType(filetype),
+		URL : address,
+	}
+	err = producer.CreateMessage(message, req.Id, topic)
 	if err != nil{
 		return ctx.Status(http.StatusInternalServerError).JSON(
 			&fiber.Map{

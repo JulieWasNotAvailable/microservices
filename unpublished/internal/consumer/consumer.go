@@ -20,7 +20,7 @@ type KafkaMessage struct{
 }
 
 type MessageData struct{	
-	Value json.RawMessage
+	Value json.RawMessage //
 	Err string `json:"error"`
 }
 

@@ -8,6 +8,20 @@ import (
 	"github.com/IBM/sarama"
 )
 
+type FileType string
+
+const (
+	mp3 FileType = "mp3"
+	wav FileType = "wav"
+	zip FileType = "zip"
+	cover FileType = "cover"
+	pfp FileType = "pfp" //profile picture
+)
+
+type KafkaMessage struct {
+	FileType FileType
+	URL string
+}
 
 func createProducer (brokersUrl []string) (sarama.AsyncProducer, error) {
 	config := sarama.NewConfig()
@@ -58,11 +72,11 @@ func pushMessageToQueue (topic string, key []byte, message []byte) error {
 	return nil
 }
 
-func CreateMessage(url string, key string, topic string) error {
+func CreateMessage(message KafkaMessage, key string, topic string) error {
 
-	urlInBytes, err := json.Marshal(url)
+	messageInBytes, err := json.Marshal(message)
 	if err != nil {
-		log.Fatal(urlInBytes)
+		log.Fatal(messageInBytes)
 		}
 
 	keyInBytes, err := json.Marshal(key)
@@ -70,7 +84,7 @@ func CreateMessage(url string, key string, topic string) error {
 		log.Fatal(keyInBytes)
 		}
 
-	err = pushMessageToQueue(topic, keyInBytes, urlInBytes)
+	err = pushMessageToQueue(topic, keyInBytes, messageInBytes)
 	if err != nil {
 		log.Println("created message successfully")
 		}

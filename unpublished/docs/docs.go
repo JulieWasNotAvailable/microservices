@@ -106,6 +106,63 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "Updates the available files (MP3, WAV, ZIP) for a specific beat",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Update available files for a beat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Beat ID in UUID format",
+                        "name": "beatId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "File URLs to update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entities.AvailableFiles"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated available files",
+                        "schema": {
+                            "$ref": "#/definitions/entities.AvailableFiles"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid UUID format or request body",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.MetadataErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Beat not found",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.MetadataErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.MetadataErrorResponse"
+                        }
+                    }
+                }
             }
         },
         "/metadata/genres": {
@@ -857,16 +914,16 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "mp3": {
+                "mp3Url": {
                     "type": "string"
                 },
                 "unpublishedBeatID": {
                     "type": "string"
                 },
-                "wav": {
+                "wavurl": {
                     "type": "string"
                 },
-                "zip": {
+                "zipurl": {
                     "type": "string"
                 }
             }

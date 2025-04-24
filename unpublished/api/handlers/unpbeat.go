@@ -135,7 +135,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("the beat you tried to publish does not belong to you")))
 		}
 
-		url := beat.AvailableFiles.MP3
+		url := beat.AvailableFiles.MP3Url
 		if url == "" {
 			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("mp3 file path is required to publish the beat")))
 		}

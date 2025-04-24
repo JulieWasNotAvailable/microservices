@@ -293,14 +293,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "File ID in UUID format",
+                        "description": "User or Beat",
                         "name": "entity",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "fileType (mp3, wav, zip, or cover)",
+                        "description": "fileType (mp3, wav, zip, cover or pfp)",
                         "name": "filetype",
                         "in": "path"
                     },
@@ -386,7 +386,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "Presigner Service",
+	Title:            "Beats Upload Service",
 	Description:      "Deals with presigned requests. Pushes updates to Beats and User microservice, when files are uploaded.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

@@ -12,6 +12,7 @@ func SetupMetadataBeatRoutes(app fiber.Router, service beatmetadata.MetadataServ
     // meta.Post("/files", handlers.PostFile(service))
     meta.Get("/files", handlers.GetAllFiles(service))
     meta.Get("/filesByBeatId/:beatId", handlers.GetAvailableFilesByBeatId(service))
+    meta.Patch("/filesByBeatId/:beatId", handlers.UpdateAvailableFilesByBeatId(service))
     // meta.Patch("/files", handlers.UpdateFiles(service))
     // meta.Delete("/singleFile/:fileId/:fileType", handlers.DeleteFileById(service))
 

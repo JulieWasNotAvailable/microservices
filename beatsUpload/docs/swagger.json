@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "Deals with presigned requests. Pushes updates to Beats and User microservice, when files are uploaded.",
-        "title": "Presigner Service",
+        "title": "Beats Upload Service",
         "contact": {},
         "version": "1.0"
     },
@@ -286,14 +286,14 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "File ID in UUID format",
+                        "description": "User or Beat",
                         "name": "entity",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "fileType (mp3, wav, zip, or cover)",
+                        "description": "fileType (mp3, wav, zip, cover or pfp)",
                         "name": "filetype",
                         "in": "path"
                     },
