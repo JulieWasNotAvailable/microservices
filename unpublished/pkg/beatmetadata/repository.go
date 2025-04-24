@@ -12,7 +12,10 @@ import (
 type MetadataRepository interface {
 	CreateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error)
 	ReadAllAvailableFiles() (*[]entities.AvailableFiles, error)
+	ReadAvailableFilesByBeatId(uuid uuid.UUID) (*entities.AvailableFiles, error)
 	UpdateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error)
+	DeleteFileById(id uuid.UUID, fileType string) error 
+	
 
 	CreateInstrument(instrument *entities.Instrument) (*entities.Instrument, error)
 	ReadAllInstruments() (*[]entities.Instrument, error)
@@ -47,6 +50,14 @@ func NewRepo(db *gorm.DB) MetadataRepository {
 }
 
 func (r *repository) CreateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error) {
+	var availFiles entities.AvailableFiles
+	err := r.DB.Where("unpublished_beat_id = ?", availableFiles.UnpublishedBeatID).First(availFiles).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return entities.AvailableFiles{}, err
+	} else if err == nil{
+		return availFiles, errors.New("unpublished entity for this beat aldready exists")
+	}
+	
 	uuid, err := uuid.NewV7()
 	if err != nil {
 		return entities.AvailableFiles{}, err
@@ -68,6 +79,15 @@ func (r *repository) ReadAllAvailableFiles() (*[]entities.AvailableFiles, error)
 	return &availFiles, nil
 }
 
+func (r *repository) ReadAvailableFilesByBeatId(uuid uuid.UUID) (*entities.AvailableFiles, error){
+	var availFiles entities.AvailableFiles
+	err := r.DB.Where("unpublished_beat_id = ?", uuid).First(&availFiles).Error
+	if err != nil {
+		return nil, err
+	}
+	return &availFiles, nil
+}
+
 func (r *repository) UpdateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error) {
 	log.Println(availableFiles)
 	err := r.DB.Where("id = ?", availableFiles.ID).Updates(&availableFiles).Error
@@ -76,6 +96,39 @@ func (r *repository) UpdateAvailableFiles(availableFiles *entities.AvailableFile
 	}
 
 	return *availableFiles, nil
+}
+
+func (r *repository) DeleteFileById(id uuid.UUID, fileType string) error {
+
+    var columnName string
+    switch fileType {
+    case "mp3":
+        columnName = "mp3"
+    case "wav":
+        columnName = "wav"
+    case "zip":
+        columnName = "z_ip" // Note the mapping to your actual column name
+    default:
+        return errors.New("invalid file type")
+    }
+
+    updateData := map[string]interface{}{
+        columnName: "",
+    }
+
+    result := r.DB.Model(&entities.AvailableFiles{}).
+        Where("id = ?", id).
+        Updates(updateData)
+
+    if result.Error != nil {
+        return result.Error
+    }
+
+    if result.RowsAffected == 0 {
+        return errors.New("available files record not found")
+    }
+
+    return nil
 }
 
 func (r *repository) CreateInstrument(instrument *entities.Instrument) (*entities.Instrument, error) {

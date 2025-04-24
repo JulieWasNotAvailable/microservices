@@ -14,11 +14,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type Request struct {
-	BucketName string
-	ObjectKey string
-	EntityType string
-	Entity string
+type UpdateRequest struct {
+	Id string `json:"id" example:"019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
+	ObjectKey string `json:"objectKey" example:"019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
 }
 
 func checkContentType(contentType string, bucketName string, objectKey string, ctx *fiber.Ctx) error {
@@ -95,56 +93,83 @@ func checkContentType(contentType string, bucketName string, objectKey string, c
 }
 
 // @Summary Validates the file, pushes to User or Beat Service.
-// @Description Verify if a file exists in S3 and publish to Kafka
-// @Tags Storage
+// @Description Verify if a file exists, file type in S3 and publish to Kafka
+// @Tags Update
 // @Accept json
 // @Produce json
-// @Param request body Request true "File details"
+// @Param entity path string true "File ID in UUID format"
+// @Param filetype path string false "fileType (mp3, wav, zip, or cover)"
+// @Param UpdateRequest body UpdateRequest true "UpdateRequest"
 // @Success 200 {object} map[string]interface{} "Successfully processed"
 // @Failure 400 {object} map[string]interface{} "Bad request"
 // @Failure 422 {object} map[string]interface{} "Unprocessable entity"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /checkFileUpdateUrl [post]
-func CheckFileAvailability(ctx *fiber.Ctx) error {
-    client := dbconnection.S3Connect()
+// @Router /updateURL/{entity}/{filetype} [post]
+func UpdateFile(ctx *fiber.Ctx) error {
+	client := dbconnection.S3Connect()
+	
+	entity := ctx.Params("entity") //user or beat
+	filetype := ctx.Params("filetype") //mp3 wav or zip
 
-	req := Request{}
+	var bucketName string
+	switch {
+	case entity == "user":
+		bucketName = "imagesall"
+	case entity == "beat":
+		if filetype == "mp3"{
+			bucketName = "mp3beats"
+		}
+		if filetype == "wav"{
+			bucketName = "wavbeats"
+		}
+		if filetype == "zip"{
+			bucketName = "zipbeats"
+		}
+		if filetype == "cover"{
+			bucketName = "imagesall"
+		}
+	default:
+		return ctx.Status(http.StatusNotFound).JSON(
+			&fiber.Map{"message": "request should be in the followng form: /api/user or /api/beat/mp3"})
+	}
 
+	req := UpdateRequest{}
+	
 	err := ctx.BodyParser(&req)
 	if err != nil {
 		return ctx.Status(http.StatusUnprocessableEntity).JSON(
-			&fiber.Map{"message": "request failed"})
+			&fiber.Map{"message": "unprocessable entity"})
 	}
 
 	err = s3.NewObjectExistsWaiter(client.S3Client).Wait(
 		ctx.Context(), &s3.HeadObjectInput{
-			Bucket: aws.String(req.BucketName),
+			Bucket: aws.String(bucketName),
 			Key:    aws.String(req.ObjectKey)}, time.Second*10)
 	if err != nil {
 		log.Printf("Failed attempt to wait for object %s to exist.\n", req.ObjectKey)
 		return ctx.Status(http.StatusInternalServerError).JSON(
 			&fiber.Map{
-				"message": "couldn't wait for the object from s3. please, try again",
+				"message": "the file was not uploaded to s3 storage/not available yet",
 				"error":err.Error()})
 	}
 
 	objectMetaData, err := client.S3Client.HeadObject(ctx.Context(), &s3.HeadObjectInput{
-		Bucket: aws.String(req.BucketName),
+		Bucket: aws.String(bucketName),
 		Key:    aws.String(req.ObjectKey)})
 	
 	if err != nil {
-		log.Printf("Failed attempt to wait for object %s to exist.\n", req.ObjectKey)
+		// log.Printf("Failed attempt to wait for object %s to exist.\n", req.ObjectKey)
 		return ctx.Status(http.StatusInternalServerError).JSON(
 			&fiber.Map{
-				"message": "couldn't get the objects metadata. please, try again",
+				"message": "the object does not exist. please, try again",
 				"error":err})
 			}
 
 	var topic string
-	if req.EntityType == "User" {
+	if entity == "user" {
 		topic = "profilepic_url_updates"
-	} else if req.EntityType == "Beat"{
-			topic = "beat_url_updates"
+	} else if entity == "beat"{
+			topic = "beat_files_updates"
 		} else {
 		return ctx.Status(http.StatusBadRequest).JSON(
 			&fiber.Map{
@@ -153,7 +178,7 @@ func CheckFileAvailability(ctx *fiber.Ctx) error {
 	}
 	
 	allowedContentypes := [5]string{"audio/mpeg", "audio/wav", "application/zip", "image/jpeg", "image/png"}
-	err = checkContentType(*objectMetaData.ContentType, req.BucketName, req.ObjectKey, ctx)		
+	err = checkContentType(*objectMetaData.ContentType, bucketName, req.ObjectKey, ctx)		
 	if err != nil {return ctx.Status(http.StatusInternalServerError).JSON(
 		&fiber.Map{
 			"message": "object had an incorrect type, so it was deleted",
@@ -161,8 +186,8 @@ func CheckFileAvailability(ctx *fiber.Ctx) error {
 			"allowed content types" : allowedContentypes})	}
 	
 
-	address := req.BucketName + "/" + req.ObjectKey	
-	err = producer.CreateMessage(address, req.Entity, topic)
+	address := bucketName + "/" + req.ObjectKey	
+	err = producer.CreateMessage(address, req.Id, topic)
 	if err != nil{
 		return ctx.Status(http.StatusInternalServerError).JSON(
 			&fiber.Map{
@@ -172,6 +197,7 @@ func CheckFileAvailability(ctx *fiber.Ctx) error {
 
 	return ctx.Status(http.StatusOK).JSON(
 		&fiber.Map{
-			"message": "successfully pushed to kafka",
+			"status" : true,
+			"message": "file checked, update request successfully pushed to kafka",
 		})
 }

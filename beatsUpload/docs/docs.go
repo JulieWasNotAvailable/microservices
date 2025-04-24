@@ -86,62 +86,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/checkFileUpdateUrl": {
-            "post": {
-                "description": "Verify if a file exists in S3 and publish to Kafka",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Storage"
-                ],
-                "summary": "Validates the file, pushes to User or Beat Service.",
-                "parameters": [
-                    {
-                        "description": "File details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.Request"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully processed",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable entity",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/getObjectsFromBucket/{bucket}": {
             "get": {
                 "description": "Get a list of objects from the specified S3 bucket",
@@ -332,23 +276,88 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/updateURL/{entity}/{filetype}": {
+            "post": {
+                "description": "Verify if a file exists, file type in S3 and publish to Kafka",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Update"
+                ],
+                "summary": "Validates the file, pushes to User or Beat Service.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File ID in UUID format",
+                        "name": "entity",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "fileType (mp3, wav, zip, or cover)",
+                        "name": "filetype",
+                        "in": "path"
+                    },
+                    {
+                        "description": "UpdateRequest",
+                        "name": "UpdateRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.UpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully processed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "handler.Request": {
+        "handler.UpdateRequest": {
             "type": "object",
             "properties": {
-                "bucketName": {
-                    "type": "string"
-                },
-                "entity": {
-                    "type": "string"
-                },
-                "entityType": {
-                    "type": "string"
+                "id": {
+                    "type": "string",
+                    "example": "019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
                 },
                 "objectKey": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
                 }
             }
         },
@@ -377,7 +386,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "Fiber Presigner Service",
+	Title:            "Presigner Service",
 	Description:      "Deals with presigned requests. Pushes updates to Beats and User microservice, when files are uploaded.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

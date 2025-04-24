@@ -2,6 +2,7 @@ package unpbeat
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/api/presenters"
@@ -124,8 +125,10 @@ func (r *repository) ReadUnpublishedInModeration(from int64, to int64) (*[]prese
 }
 
 func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
-	
-	result := r.DB.Where("id = ?", unpublished.ID).Updates(unpublished)
+	//Where("id = ?", unpublished.ID)
+	// unpublishedModel := entities.UnpublishedBeat{}
+	log.Println(unpublished)
+	result := r.DB.Updates(unpublished)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, errors.New("unpublished beat not found or not owned by user")
@@ -136,7 +139,7 @@ func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBe
 	var updated presenters.UnpublishedBeat
 	if err := r.DB.Where("id = ?", unpublished.ID).First(&updated).Preload("AvailableFiles").Preload("Tags").Preload("Genres").
 	Preload("Moods").Preload("Timestamps").Preload("Instruments").Error; err != nil {
-		return nil, err
+		return nil, err 
 	}
 
 	return &updated, nil

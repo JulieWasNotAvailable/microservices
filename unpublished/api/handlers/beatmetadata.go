@@ -1,12 +1,16 @@
 package handlers
 
 import (
+	"errors"
+	"log"
 	"net/http"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/api/presenters"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/beatmetadata"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/entities"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // PostFile godoc
@@ -19,7 +23,6 @@ import (
 // @Success 201 {object} object "Successfully created files metadata"
 // @Failure 400 {object} object "Invalid request body"
 // @Failure 500 {object} object "Internal server error"
-// @Router /metadata/files [post]
 func PostFile(service beatmetadata.MetadataService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var availableFiles entities.AvailableFiles
@@ -55,6 +58,39 @@ func GetAllFiles(service beatmetadata.MetadataService) fiber.Handler {
 	}
 }
 
+// GetAvailableFilesByBeatId godoc
+// @Summary Get available files by beat ID
+// @Description Retrieve all available files for a specific beat by its ID
+// @Tags files
+// @Produce json
+// @Param beatId path string true "Beat ID in UUID format"
+// @Success 200 {object} entities.AvailableFiles
+// @Failure 400 {object} presenters.MetadataErrorResponse "Invalid beat ID format"
+// @Failure 404 {object} presenters.MetadataErrorResponse "Beat not found"
+// @Failure 500 {object} presenters.MetadataErrorResponse "Internal server error"
+// @Router /metadata/filesByBeatId/{beatId} [get]
+func GetAvailableFilesByBeatId(service beatmetadata.MetadataService) fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        beatIdStr := c.Params("beatId")
+        beatId, err := uuid.Parse(beatIdStr)
+        if err != nil {
+            return c.Status(http.StatusOK).JSON(presenters.CreateMetadataErrorResponse(errors.New("invalid beat ID format")))
+        }
+        
+        availableFiles, err := service.ReadAvailableFilesByBeatId(beatId)
+		log.Println(availableFiles)
+        if err != nil {
+            if errors.Is(err, gorm.ErrRecordNotFound) {
+                return c.Status(http.StatusNotFound).JSON(presenters.CreateMetadataErrorResponse(errors.New("beat not found")))
+            }
+            return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err),
+            )
+        }
+        
+        return c.Status(http.StatusOK).JSON(presenters.CreateMetadataSuccessResponse(availableFiles))
+    }
+}
+
 // UpdateFiles godoc
 // @Summary Update available files
 // @Description Update existing available files metadata
@@ -65,7 +101,6 @@ func GetAllFiles(service beatmetadata.MetadataService) fiber.Handler {
 // @Success 200 {object} object "Successfully updated files metadata"
 // @Failure 400 {object} object "Invalid request body"
 // @Failure 500 {object} object "Internal server error"
-// @Router /metadata/files [put]
 func UpdateFiles(service beatmetadata.MetadataService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var availableFiles entities.AvailableFiles
@@ -80,6 +115,53 @@ func UpdateFiles(service beatmetadata.MetadataService) fiber.Handler {
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateMetadataListResponse(updatedFiles))
 	}}
+
+// DeleteFileById godoc
+// @Summary Delete a specific file by ID
+// @Description Removes a specific file reference from available files by file ID
+// @Tags files
+// @Accept json
+// @Produce json
+// @Param fileId path string true "File ID in UUID format"
+// @Param fileType path string true "fileType (mp3, wav, or zip)"
+// @Success 200 {object} presenters.MetadataSuccessResponse "File successfully deleted"
+// @Failure 400 {object} presenters.MetadataErrorResponse "Invalid UUID format"
+// @Failure 404 {object} presenters.MetadataErrorResponse "File not found"
+// @Failure 500 {object} presenters.MetadataErrorResponse "Internal server error"
+func DeleteFileById(service beatmetadata.MetadataService) fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        fileIdStr := c.Params("fileId")
+		fileTypeStr := c.Params("fileType")
+        
+        fileId, err := uuid.Parse(fileIdStr)
+        if err != nil {
+            return c.Status(fiber.StatusBadRequest).JSON(
+                presenters.CreateMetadataErrorResponse(
+                    errors.New("invalid file ID format"),
+                ),
+            )
+        }
+
+        err = service.DeleteFileById(fileId, fileTypeStr)
+        if err != nil {
+            if errors.Is(err, errors.New("available files record not found")) {
+                return c.Status(fiber.StatusNotFound).JSON(
+                    presenters.CreateMetadataErrorResponse(
+                        errors.New("file not found"),
+                    ),
+                )
+            }
+            return c.Status(fiber.StatusInternalServerError).JSON(
+                presenters.CreateMetadataErrorResponse(err))
+        }
+        
+        return c.Status(fiber.StatusOK).JSON(
+            presenters.CreateMetadataSuccessResponse(
+                "file deleted successfully",
+            ),
+        )
+    }
+}
 	
 // PostInstrument godoc
 // @Summary Create a new instrument

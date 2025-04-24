@@ -37,26 +37,70 @@ func Hello(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param beat body entities.UnpublishedBeat true "Beat data to save as draft"
 // @Success 200 {object} presenters.UnpublishedBeatSuccessResponse
 // @Failure 422 {object} presenters.UnpublishedBeatErrorResponse
 // @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
-// @Router /unpbeats/saveDraft [post]
-func SaveBeatDraft(service unpbeat.Service) fiber.Handler {
+// @Router /unpbeats/makeEmptyBeat [post]
+func SaveBeatDraft(service unpbeat.Service, metaservice beatmetadata.MetadataService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var requestBody entities.UnpublishedBeat
-		err := c.BodyParser(&requestBody)
-		if err != nil {
-			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(err))
-		}
-		requestBody.Status = entities.StatusDraft
-		createdBeat, err := service.CreateUnpublishedBeat(requestBody)
+		var emptyBeat entities.UnpublishedBeat
+		beatmakeruuid, err := getIdFromJWT(c)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
-		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse(&createdBeat))
+		emptyBeat.Status = entities.StatusDraft
+		emptyBeat.BeatmakerID = beatmakeruuid
+
+		createdBeat, err := service.CreateUnpublishedBeat(emptyBeat)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
+		}
+
+		var emptyAvailablefiles entities.AvailableFiles
+		emptyAvailablefiles.UnpublishedBeatID = createdBeat.ID
+		createdAvailbableFiles, err := metaservice.CreateAvailableFiles(&emptyAvailablefiles)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
+		}
+
+		beatReponse := presenters.UnpublishedBeat{
+			ID: createdBeat.ID,
+			Status: string(createdBeat.Status),
+			BeatmakerID: beatmakeruuid,
+			AvailableFiles: createdAvailbableFiles,
+		}
+
+		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse2(beatReponse))
 	}
+}
+
+// UpdateBeat godoc
+// @Summary Update an unpublished beat
+// @Description Update an existing unpublished beat entry
+// @Tags beats
+// @Accept json
+// @Produce json
+// @Param beat body presenters.UnpublishedBeat true "Beat data to update"
+// @Success 200 {object} object "Successfully updated beat"
+// @Failure 422 {object} object "Unprocessable entity - invalid request body"
+// @Failure 500 {object} object "Internal server error"
+// @Router /unpbeats/saveDraft [patch]
+func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var requestBody presenters.UnpublishedBeat
+		err := c.BodyParser(&requestBody)
+		if err != nil {
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(err))
+		}
+
+		beat, err := service.UpdateUnpublishedBeat(&requestBody)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+		}
+
+		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse2(*beat))
+}
 }
 
 // PostPublishBeat godoc
@@ -69,7 +113,7 @@ func SaveBeatDraft(service unpbeat.Service) fiber.Handler {
 // @Success 200 {object} map[string]string
 // @Failure 422 {object} presenters.UnpublishedBeatErrorResponse
 // @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
-// @Router /unpbeats/publish/{id} [post]
+// @Router /unpbeats/publishBeat/{id} [get]
 func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.KafkaMessage, delete_approve_channel <-chan consumer.KafkaMessage) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		beatId := c.Params("id")
@@ -78,7 +122,6 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(errors.New("wrong id format")))
 		}
 		
-		//check files
 		beat, err := service.GetUnpublishedBeatByID(beatuuid)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
@@ -95,6 +138,14 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		url := beat.AvailableFiles.MP3
 		if url == "" {
 			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("mp3 file path is required to publish the beat")))
+		}
+
+		beatModel := presenters.UnpublishedBeat{
+			Status: string(entities.StatusInModeration),
+		}
+		_, err = service.UpdateUnpublishedBeat(&beatModel)
+		if err != nil{
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 		
 		//send to kafka to Dmitry topic track_for_mfcc
@@ -155,23 +206,23 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(errors.New("wrong id format")))
 		}
 		log.Println("deleting beat with this id: ", delapproveuuid)
-		// err = service.DeleteUnpublishedBeat(delapproveuuid)
-		// if err != nil{
-		// 	message := consumer.MessageData{
-		// 		Value: []byte{},
-		// 		Err : "unsuccessful delete operation",
-		// 	}
-		// 	messageBytes, err := json.Marshal(message)
-		// 	if err != nil{
-		// 		log.Println(err)
-		// 	}
-		// 	//нужен таймаут на сохранение бита в beat service
-		// 	producer.CreateMessage(messageBytes, beatId, "publish_beat_main")
-		// 	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-		// 		"key": delapproveuuid,
-		// 		"status": false,
-		// 		"error": err})  
-		// 		}
+		err = service.DeleteUnpublishedBeat(delapproveuuid)
+		if err != nil{
+			message := consumer.MessageData{
+				Value: []byte{},
+				Err : "unsuccessful delete operation",
+			}
+			messageBytes, err := json.Marshal(message)
+			if err != nil{
+				log.Println(err)
+			}
+			//нужен таймаут на сохранение бита в beat service
+			producer.CreateMessage(messageBytes, beatId, "publish_beat_main")
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"key": delapproveuuid,
+				"status": false,
+				"error": err})  
+				}
 				
 		return c.Status(http.StatusOK).JSON(fiber.Map{"message":"updated successfully"})
 		}
@@ -180,7 +231,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 // SendToModeration godoc
 // @Summary Send beat to moderation
 // @Description Update beat status to 'in_moderation' and set moderation timestamp
-// @Tags beats
+// @Tags admin
 // @Produce json
 // @Param id path string true "Beat ID to send to moderation"
 // @Success 200 {object} presenters.UnpublishedBeatSuccessResponse
@@ -264,7 +315,7 @@ func GetBeatsSortByStatusAndJWT(service unpbeat.Service) fiber.Handler {
 // GetBeatsInModeration godoc
 // @Summary Get beats in moderation by date range. Warning: uses unix data.
 // @Description Get beats in moderation status within specified date range
-// @Tags moderation
+// @Tags admin
 // @Produce json
 // @Param from path int true "Start timestamp"
 // @Param to path int true "End timestamp"
@@ -294,7 +345,7 @@ func GetBeatsInModeration(service unpbeat.Service) fiber.Handler {
 // GetAllUnpublishedBeats godoc
 // @Summary Get all unpublished beats
 // @Description Get all unpublished beats in the system
-// @Tags beats
+// @Tags admin
 // @Produce json
 // @Success 200 {object} presenters.UnpublishedBeatListResponse
 // @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
@@ -310,40 +361,12 @@ func GetAllUnpublishedBeats(service unpbeat.Service) fiber.Handler {
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatListSuccessResponse(beats))
 	}}
 
-// UpdateBeat godoc
-// @Summary Update an unpublished beat
-// @Description Update an existing unpublished beat entry
-// @Tags beats
-// @Accept json
-// @Produce json
-// @Param beat body presenters.UnpublishedBeat true "Beat data to update"
-// @Success 200 {object} object "Successfully updated beat"
-// @Failure 422 {object} object "Unprocessable entity - invalid request body"
-// @Failure 500 {object} object "Internal server error"
-// @Router /unpbeats/updateUnpublishedBeat [patch]
-func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		var requestBody presenters.UnpublishedBeat
-		err := c.BodyParser(&requestBody)
-		if err != nil {
-			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(err))
-		}
-		
-		if err != nil {
-			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(err))
-		}
-
-		beat, err := service.UpdateUnpublishedBeat(&requestBody)
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
-		}
-
-		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse2(*beat))
-}}
-
 func getIdFromJWT(c *fiber.Ctx) (uuid.UUID, error){
 	auth := c.GetReqHeaders()
-	authHeader := auth["Authorization"]
+	authHeader, ok := auth["Authorization"]
+	if !ok {
+		return uuid.Nil, errors.New("auth header is absent")
+	}
 	splitToken := strings.Split(authHeader[0], "Bearer ")
 	tokenStr := splitToken[1]
 

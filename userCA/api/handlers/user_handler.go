@@ -47,22 +47,19 @@ func AddUser(service user.Service) fiber.Handler {
 		requestBody.RoleID = 1
 
 		if requestBody.Email == "" || requestBody.Password == "" {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(errors.New(
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(errors.New(
 				"email and password should not be null",
 				)))
 		}
 
 		if err != nil {
-			c.Status(http.StatusUnprocessableEntity)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateUserErrorResponse(err))
 		}
 		
 		result, err := service.InsertUser(&requestBody)
 		
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 		return c.JSON(presenters.CreateUserSuccessResponse(result))
 	}
@@ -82,8 +79,7 @@ func GetUsers(service user.Service) fiber.Handler {
 		result, err := service.FetchUsers()
 
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		return c.JSON(presenters.CreateUsersSuccessResponse(result))
@@ -107,14 +103,13 @@ func GetUserById(service user.Service) fiber.Handler {
 		uuid, err := uuid.Parse(id)
 
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		result, err := service.FetchUserById(uuid)
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		return c.JSON(presenters.CreateUserSuccessResponse2(result))
@@ -138,8 +133,7 @@ func GetUserByEmail(service user.Service) fiber.Handler {
 		email := c.Query("email")
 		
 		if email == "" {
-			c.Status(http.StatusBadRequest)
-			return c.JSON(presenters.CreateUserErrorResponse(errors.New(
+			return c.Status(http.StatusBadRequest).JSON(presenters.CreateUserErrorResponse(errors.New(
 				"please, specify email",
 				)))
 		}
@@ -147,8 +141,8 @@ func GetUserByEmail(service user.Service) fiber.Handler {
 		result, err := service.FetchUserByEmail(email)
 
 		if err != nil{
-			c.JSON(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		return c.JSON(presenters.CreateUserSuccessResponse2(result))
@@ -175,25 +169,23 @@ func GetUserByJWT(service user.Service) fiber.Handler {
 
 		token, _, err := jwt.NewParser().ParseUnverified(tokenStr, jwt.MapClaims{})
 		if err != nil {
-			return err
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			return errors.New("couldn't parse")
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(errors.New("couldn't parse")))
 		}
 
 		id := claims["id"].(string)
 		uuid, err := uuid.Parse(id)
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		user, err := service.FetchUserById(uuid)
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		return c.JSON(presenters.CreateUserSuccessResponse2(user))
@@ -218,8 +210,8 @@ func UpdateBeatmaker(uservice user.Service, bmservice bmmetadata.Service) fiber.
 		var requestBody presenters.User
 		err := c.BodyParser(&requestBody)
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		token := c.Locals("user").(*jwt.Token)
@@ -227,14 +219,12 @@ func UpdateBeatmaker(uservice user.Service, bmservice bmmetadata.Service) fiber.
 		id := claims["id"].(string)
 		uuid, err := uuid.Parse(id)
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		user, err := uservice.FetchUserById(uuid)
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 		requestBody.RoleID = user.RoleID
 
@@ -261,8 +251,8 @@ func UpdateBeatmaker(uservice user.Service, bmservice bmmetadata.Service) fiber.
 
 		result, err := uservice.UpdateBeatmaker(uuid, &requestBody, &metadataBody)
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 	
 		return c.JSON(presenters.CreateUserSuccessResponse2(result))
@@ -294,14 +284,14 @@ func UserIsBeatmaker (service user.Service) fiber.Handler {
 		}
 
 		data := presenters.User{
+			ID : uuid,
 			RoleID: 2,
 		}
 
-		_, err = service.UpdateUser(uuid, &data)
+		_, err = service.UpdateUser(&data)
 
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		return c.JSON(&fiber.Map{
@@ -331,19 +321,21 @@ func UpdateUser(service user.Service) fiber.Handler {
 		err := c.BodyParser(&requestBody)
 
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		token := c.Locals("user").(*jwt.Token)
 		claims := token.Claims.(jwt.MapClaims)
 		id := claims["id"].(string)
 		uuid, err := uuid.Parse(id)
+		if err !=nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
+		}
 
-		result, err := service.UpdateUser(uuid, &requestBody)
+		requestBody.ID = uuid
+		result, err := service.UpdateUser(&requestBody)
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateUserSuccessResponse2(result))
@@ -370,15 +362,13 @@ func RemoveUser(service user.Service) fiber.Handler {
 		uuid, err := uuid.Parse(id)
 		
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		err = service.RemoveUser(uuid)
 
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenters.CreateUserErrorResponse(err))
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateUserErrorResponse(err))
 		}
 
 		return c.JSON(&fiber.Map{

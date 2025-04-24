@@ -14,8 +14,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func StartConsumer(uservice user.Service){
-	topic := "profilepic_url_updates"
+func StartConsumer(topic string, uservice user.Service){
 	worker, err := connectConsumer([]string{"localhost:9092"})
 	if err != nil {
 		panic (err)
@@ -56,28 +55,24 @@ func StartConsumer(uservice user.Service){
 				msgCount++
 				fmt.Printf("Received message Count %d: | Topic(%s) | Message(%s) \n", msgCount, string(msg.Topic), string(msg.Value))
 				
+				//if err, service, that sent, should be notified?
 				key, err := uuid.Parse(string(msg.Key))
-				log.Println(msg.Key)
 				if err != nil{
 					log.Panic(err)
 				}
 				log.Println(key)
 				valuebytes := msg.Value
 				value := string(valuebytes)
-				log.Println(value)
 
 				url := "storage.yandexcloud.net/"
-				log.Println(value)
 				resulturl := url + strings.Trim(value, "\"")
-				log.Println(resulturl)
-
-				// final := strings.Join(url, value)
 				
 				user := presenters.User{
+					ID : key,
 					ProfilePictureUrl : resulturl,
 				}
-
-				_, err = uservice.UpdateUser(key, &user)
+				
+				_, err = uservice.UpdateUser(&user)
 				if err != nil {
 					log.Panic(err)
 				}

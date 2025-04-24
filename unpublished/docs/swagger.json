@@ -52,91 +52,50 @@
                         }
                     }
                 }
-            },
-            "put": {
-                "description": "Update existing available files metadata",
-                "consumes": [
-                    "application/json"
-                ],
+            }
+        },
+        "/metadata/filesByBeatId/{beatId}": {
+            "get": {
+                "description": "Retrieve all available files for a specific beat by its ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "files"
                 ],
-                "summary": "Update available files",
+                "summary": "Get available files by beat ID",
                 "parameters": [
                     {
-                        "description": "Updated files data",
-                        "name": "availableFiles",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entities.AvailableFiles"
-                        }
+                        "type": "string",
+                        "description": "Beat ID in UUID format",
+                        "name": "beatId",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully updated files metadata",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request body",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create new available files metadata",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "files"
-                ],
-                "summary": "Create available files",
-                "parameters": [
-                    {
-                        "description": "Available files data",
-                        "name": "availableFiles",
-                        "in": "body",
-                        "required": true,
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.AvailableFiles"
                         }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Successfully created files metadata",
-                        "schema": {
-                            "type": "object"
-                        }
                     },
                     "400": {
-                        "description": "Invalid request body",
+                        "description": "Invalid beat ID format",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/presenters.MetadataErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Beat not found",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.MetadataErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/presenters.MetadataErrorResponse"
                         }
                     }
                 }
@@ -569,7 +528,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "beats"
+                    "admin"
                 ],
                 "summary": "Get all unpublished beats",
                 "responses": {
@@ -595,7 +554,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "moderation"
+                    "admin"
                 ],
                 "summary": "Get beats in moderation by date range. Warning: uses unix data.",
                 "parameters": [
@@ -636,8 +595,48 @@
                 }
             }
         },
-        "/unpbeats/publish/{id}": {
+        "/unpbeats/makeEmptyBeat": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Save an unpublished beat with draft status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "beats"
+                ],
+                "summary": "Save a beat draft",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.UnpublishedBeatSuccessResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.UnpublishedBeatErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.UnpublishedBeatErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/unpbeats/publishBeat/{id}": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -686,13 +685,8 @@
             }
         },
         "/unpbeats/saveDraft": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Save an unpublished beat with draft status",
+            "patch": {
+                "description": "Update an existing unpublished beat entry",
                 "consumes": [
                     "application/json"
                 ],
@@ -702,35 +696,35 @@
                 "tags": [
                     "beats"
                 ],
-                "summary": "Save a beat draft",
+                "summary": "Update an unpublished beat",
                 "parameters": [
                     {
-                        "description": "Beat data to save as draft",
+                        "description": "Beat data to update",
                         "name": "beat",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entities.UnpublishedBeat"
+                            "$ref": "#/definitions/presenters.UnpublishedBeat"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Successfully updated beat",
                         "schema": {
-                            "$ref": "#/definitions/presenters.UnpublishedBeatSuccessResponse"
+                            "type": "object"
                         }
                     },
                     "422": {
-                        "description": "Unprocessable Entity",
+                        "description": "Unprocessable entity - invalid request body",
                         "schema": {
-                            "$ref": "#/definitions/presenters.UnpublishedBeatErrorResponse"
+                            "type": "object"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/presenters.UnpublishedBeatErrorResponse"
+                            "type": "object"
                         }
                     }
                 }
@@ -743,7 +737,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "beats"
+                    "admin"
                 ],
                 "summary": "Send beat to moderation",
                 "parameters": [
@@ -847,52 +841,6 @@
                     }
                 }
             }
-        },
-        "/unpbeats/updateUnpublishedBeat": {
-            "patch": {
-                "description": "Update an existing unpublished beat entry",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "beats"
-                ],
-                "summary": "Update an unpublished beat",
-                "parameters": [
-                    {
-                        "description": "Beat data to update",
-                        "name": "beat",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/presenters.UnpublishedBeat"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully updated beat",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable entity - invalid request body",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -917,19 +865,12 @@
             }
         },
         "entities.Genre": {
+            "description": "entities.Genre",
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
-                    "type": "string"
-                },
-                "unpublishedBeat": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.UnpublishedBeat"
-                    }
+                    "type": "string",
+                    "example": "Jerk"
                 }
             }
         },
@@ -941,12 +882,6 @@
                 },
                 "name": {
                     "type": "string"
-                },
-                "unpublishedBeat": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.UnpublishedBeat"
-                    }
                 }
             }
         },
@@ -958,12 +893,6 @@
                 },
                 "name": {
                     "type": "string"
-                },
-                "unpublishedbeats": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.UnpublishedBeat"
-                    }
                 }
             }
         },
@@ -975,25 +904,8 @@
                 },
                 "name": {
                     "type": "string"
-                },
-                "unpublishedBeat": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.UnpublishedBeat"
-                    }
                 }
             }
-        },
-        "entities.Status": {
-            "type": "string",
-            "enum": [
-                "in_moderation",
-                "draft"
-            ],
-            "x-enum-varnames": [
-                "StatusInModeration",
-                "StatusDraft"
-            ]
         },
         "entities.Tag": {
             "type": "object",
@@ -1003,153 +915,32 @@
                 },
                 "name": {
                     "type": "string"
-                },
-                "unpublishedBeat": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.UnpublishedBeat"
-                    }
                 }
             }
         },
         "entities.Timestamp": {
             "type": "object",
+            "required": [
+                "timeEnd",
+                "timeStart"
+            ],
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
                 },
                 "timeEnd": {
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 300,
+                    "minimum": 2
                 },
                 "timeStart": {
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 299,
+                    "minimum": 1
                 },
                 "unpublishedbeatId": {
                     "type": "string",
                     "example": "01963e01-e46c-7996-996a-42ad3df115ac"
-                }
-            }
-        },
-        "entities.UnpublishedBeat": {
-            "description": "entitites.UnpublishedBeatErrorResponse",
-            "type": "object",
-            "required": [
-                "availableFiles",
-                "beatmakerId",
-                "bpm",
-                "genres",
-                "keynoteId",
-                "moods",
-                "name",
-                "price",
-                "tags",
-                "timestamps",
-                "url"
-            ],
-            "properties": {
-                "availableFiles": {
-                    "$ref": "#/definitions/entities.AvailableFiles"
-                },
-                "beatmakerId": {
-                    "type": "string",
-                    "example": "019628ef-cd76-7d2d-bf80-48b8011fad40"
-                },
-                "bpm": {
-                    "type": "integer",
-                    "maximum": 400,
-                    "minimum": 20,
-                    "example": 120
-                },
-                "created_at": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "minLength": 2,
-                    "example": "Chill summer beat with tropical influences"
-                },
-                "err": {
-                    "type": "string"
-                },
-                "genres": {
-                    "description": "many to many",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Genre"
-                    }
-                },
-                "id": {
-                    "type": "string",
-                    "example": "019628ef-cd76-7d2d-bf80-48b8011fad40"
-                },
-                "instruments": {
-                    "description": "many to many",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Instrument"
-                    }
-                },
-                "keynoteId": {
-                    "description": "keynote has many beats, but each beat has only one keynote`",
-                    "type": "integer",
-                    "example": 11
-                },
-                "moods": {
-                    "description": "many to many",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Mood"
-                    }
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 60,
-                    "minLength": 2,
-                    "example": "Summer Vibes"
-                },
-                "picture": {
-                    "type": "string",
-                    "example": "https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
-                },
-                "price": {
-                    "type": "integer",
-                    "example": 2999
-                },
-                "sent_to_moderation_at": {
-                    "type": "integer"
-                },
-                "status": {
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/entities.Status"
-                        }
-                    ],
-                    "example": "draft"
-                },
-                "tags": {
-                    "description": "many to many",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Tag"
-                    }
-                },
-                "timestamps": {
-                    "description": "a beat has many timestamps, but each timestamp has only one beat",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Timestamp"
-                    }
-                },
-                "updated_at": {
-                    "type": "integer"
-                },
-                "url": {
-                    "type": "string",
-                    "example": "https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
                 }
             }
         },

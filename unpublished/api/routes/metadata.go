@@ -9,9 +9,11 @@ import (
 func SetupMetadataBeatRoutes(app fiber.Router, service beatmetadata.MetadataService) {
     meta := app.Group("/metadata")
 
-    meta.Post("/files", handlers.PostFile(service))
+    // meta.Post("/files", handlers.PostFile(service))
     meta.Get("/files", handlers.GetAllFiles(service))
-    meta.Patch("/files", handlers.UpdateFiles(service))
+    meta.Get("/filesByBeatId/:beatId", handlers.GetAvailableFilesByBeatId(service))
+    // meta.Patch("/files", handlers.UpdateFiles(service))
+    // meta.Delete("/singleFile/:fileId/:fileType", handlers.DeleteFileById(service))
 
     meta.Post("/instruments", handlers.PostInstrument(service))
     meta.Get("/instruments", handlers.GetInstruments(service))

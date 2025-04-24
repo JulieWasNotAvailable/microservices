@@ -69,7 +69,7 @@ func CreateBeatSuccessResponse(data *entities.UnpublishedBeat) *UnpublishedBeatS
         Description:    data.Description,
         Genres:         data.Genres,
         Moods:          data.Moods,
-        KeynoteID:      data.KeynoteID,
+        KeynoteID:      *data.KeynoteID,
         Instruments:    data.Instruments,
         Status:         string(data.Status),
 		Err: 			data.Err,

@@ -1,11 +1,6 @@
 package user
 
 import (
-	// "errors"
-
-	// "log"
-	// "reflect"
-
 	"github.com/JulieWasNotAvailable/microservices/user/api/presenters"
 	"github.com/JulieWasNotAvailable/microservices/user/pkg/entities"
 	"github.com/google/uuid"
@@ -17,7 +12,7 @@ type Repository interface {
 	ReadUsers() (*[]presenters.User, error)
 	ReadUserById(id uuid.UUID) (*presenters.User, error)
 	ReadUserByEmail(email string) (*presenters.User, error)
-	UpdateUser(userID uuid.UUID, user *presenters.User) (*presenters.User, error)
+	UpdateUser(user *presenters.User) (*presenters.User, error)
 	UpdateBeatmaker(userID uuid.UUID, userData *presenters.User, metadata *presenters.Metadata) (*presenters.User, error)
 	DeleteUser(id uuid.UUID) error
 }
@@ -87,9 +82,9 @@ func (r *repository) ReadUserByEmail (email string) (*presenters.User, error) {
 	return user, nil
 }
 
-func (r *repository) UpdateUser(userID uuid.UUID, user *presenters.User) (*presenters.User, error) {
+func (r *repository) UpdateUser(user *presenters.User) (*presenters.User, error) {
 
-	err := r.DB.Where("id = ?", userID).Updates(&user).Error
+	err := r.DB.Updates(&user).Error
 	if err != nil {
 		return nil, err
 	}

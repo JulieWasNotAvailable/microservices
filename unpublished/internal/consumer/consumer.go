@@ -71,8 +71,6 @@ func StartConsumer(topic string, channel chan<- KafkaMessage){
 					channel <- kafkaMessage
 				}
 
-				
-
 			case <- sigchan:
 				fmt.Println("Interrupt is detected")
 				

@@ -1,14 +1,12 @@
 basePath: /api
 definitions:
-  handler.Request:
+  handler.UpdateRequest:
     properties:
-      bucketName:
-        type: string
-      entity:
-        type: string
-      entityType:
+      id:
+        example: 019623bd-3d0b-7dc2-8a1f-f782adeb42b4
         type: string
       objectKey:
+        example: 019623bd-3d0b-7dc2-8a1f-f782adeb42b4
         type: string
     type: object
   handler.request:
@@ -21,7 +19,7 @@ info:
   contact: {}
   description: Deals with presigned requests. Pushes updates to Beats and User microservice,
     when files are uploaded.
-  title: Fiber Presigner Service
+  title: Presigner Service
   version: "1.0"
 paths:
   /ObjectsFromBucket/{bucket}:
@@ -70,44 +68,6 @@ paths:
             additionalProperties: true
             type: object
       summary: List all S3 buckets
-      tags:
-      - Storage
-  /checkFileUpdateUrl:
-    post:
-      consumes:
-      - application/json
-      description: Verify if a file exists in S3 and publish to Kafka
-      parameters:
-      - description: File details
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handler.Request'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully processed
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad request
-          schema:
-            additionalProperties: true
-            type: object
-        "422":
-          description: Unprocessable entity
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Validates the file, pushes to User or Beat Service.
       tags:
       - Storage
   /getObjectsFromBucket/{bucket}:
@@ -239,6 +199,53 @@ paths:
       summary: Generate presigned PUT URL
       tags:
       - Presigned
+  /updateURL/{entity}/{filetype}:
+    post:
+      consumes:
+      - application/json
+      description: Verify if a file exists, file type in S3 and publish to Kafka
+      parameters:
+      - description: File ID in UUID format
+        in: path
+        name: entity
+        required: true
+        type: string
+      - description: fileType (mp3, wav, zip, or cover)
+        in: path
+        name: filetype
+        type: string
+      - description: UpdateRequest
+        in: body
+        name: UpdateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully processed
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Validates the file, pushes to User or Beat Service.
+      tags:
+      - Update
 securityDefinitions:
   ApiKeyAuth:
     in: header

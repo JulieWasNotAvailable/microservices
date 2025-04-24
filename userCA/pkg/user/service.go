@@ -11,7 +11,7 @@ type Service interface {
 	FetchUsers() (*[]presenters.User, error)
 	FetchUserById(id uuid.UUID) (*presenters.User, error)
 	FetchUserByEmail(email string) (*presenters.User, error)
-	UpdateUser(userID uuid.UUID, user *presenters.User) (*presenters.User, error)
+	UpdateUser(user *presenters.User) (*presenters.User, error)
 	UpdateBeatmaker(userID uuid.UUID, userData *presenters.User, metadata *presenters.Metadata) (*presenters.User, error)
 	RemoveUser(id uuid.UUID) error
 }
@@ -46,8 +46,8 @@ func (s *service) FetchUserByEmail(email string) (*presenters.User, error) {
 	return s.repository.ReadUserByEmail(email)
 }
 
-func (s *service) UpdateUser(userID uuid.UUID, user *presenters.User) (*presenters.User, error){
-	return s.repository.UpdateUser(userID, user)
+func (s *service) UpdateUser(user *presenters.User) (*presenters.User, error){
+	return s.repository.UpdateUser(user)
 }
 
 //UpdateUser implements Service.

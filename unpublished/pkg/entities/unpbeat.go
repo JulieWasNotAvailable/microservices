@@ -11,7 +11,7 @@ import (
 type Status string
 
 const (
-	StatusInModeration Status = "in_moderation"
+	StatusInModeration Status = "processing"
 	StatusDraft       Status = "draft"
 )
 
@@ -29,7 +29,7 @@ type UnpublishedBeat struct {
 	Description     string    			`json:"description" validate:"min=2,max=500" example:"Chill summer beat with tropical influences"`
 	Genres         	[]Genre      		`json:"genres" validate:"required" gorm:"many2many:genre_beats;"`       //many to many
 	Moods          	[]Mood      		`json:"moods" validate:"required" gorm:"many2many:mood_beats;"`       //many to many
-	KeynoteID       uint       			`json:"keynoteId" validate:"required" example:"11"`    //keynote has many beats, but each beat has only one keynote`
+	KeynoteID       *uint       			`json:"keynoteId" validate:"required" example:"11"`    //keynote has many beats, but each beat has only one keynote`
 	Timestamps    	[]Timestamp         `json:"timestamps" validate:"required" gorm:"foreignKey:BeatID"` //a beat has many timestamps, but each timestamp has only one beat
 	Instruments   	[]Instrument        `json:"instruments" gorm:"many2many:instrument_beats"` //many to many
 	Status          Status    			`json:"status" example:"draft"`
@@ -60,49 +60,50 @@ type AvailableFiles struct{
 	UnpublishedBeatID uuid.UUID 
 }
 
+//@Description entities.Genre
 type Genre struct{
-	ID uint
-	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:genre_beats;"`
-	Name string
+	ID uint `json:"id" swaggerignore:"true"`
+	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:genre_beats;" swaggerignore:"true"`
+	Name string `json:"name" example:"Jerk"`
 }
 
 type Timestamp struct{
-	ID uint  `json:"id"`
+	ID uint  `json:"id" swaggerignore:"true"`
 	BeatID uuid.UUID `json:"unpublishedbeatId" example:"01963e01-e46c-7996-996a-42ad3df115ac"`
 	Name string
-	TimeStart int64
-	TimeEnd int64
+	TimeStart int64 `validate:"required,gte=1,lte=299"`
+	TimeEnd int64 `validate:"required,gte=2,lte=300"`
 }
 
 type Tag struct{
 	ID uint
-	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:tag_beats;"`
+	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:tag_beats;" swaggerignore:"true"`
 	Name string 
 }
 
 type Mood struct{
 	ID uint
-	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:mood_beats;"`
+	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:mood_beats;" swaggerignore:"true"`
 	Name string
 }
 
 type Keynote struct{
 	ID uint
-	Beats []UnpublishedBeat `json:"unpublishedbeats" gorm:"foreignKey:KeynoteID"`
+	Beats []UnpublishedBeat `json:"unpublishedbeats" gorm:"foreignKey:KeynoteID" swaggerignore:"true"`
 	Name string
 }
 
 type Instrument struct{
 	ID uint
-	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:instrument_beats;"`
+	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:instrument_beats;" swaggerignore:"true"`
 	Name string
 }
 
 func MigrateAll(db *gorm.DB) error {
 	err := db.AutoMigrate(
-		&AvailableFiles{},
-		&Keynote{},
 		&Instrument{},
+		&Keynote{},
+		&AvailableFiles{},
 		&Genre{},
 		&Timestamp{},
 		&Mood{},

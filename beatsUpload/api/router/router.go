@@ -8,7 +8,8 @@ import (
 
 func SetupRoutes(app *fiber.App) {
 	api := app.Group("/api")
-	api.Post("/checkFileUpdateUrl", handler.CheckFileAvailability)
+	api.Post("/updateURL/:entity/:filetype", handler.UpdateFile)
+	api.Post("/checkFileUpdateUrl", handler.UpdateFile)
 	api.Get("/buckets", handler.GetBuckets)
 	api.Get("/objectsFromBucket/:bucket", handler.GetObjectsFromBucket)
 	api.Get("/headObject/:bucket/:key", handler.GetHeadObject)

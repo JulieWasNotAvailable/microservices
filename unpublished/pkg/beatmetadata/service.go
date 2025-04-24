@@ -1,11 +1,16 @@
 package beatmetadata
 
-import "github.com/JulieWasNotAvailable/microservices/unpublished/pkg/entities"
+import (
+	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/entities"
+	"github.com/google/uuid"
+)
 
 type MetadataService interface {
 	CreateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error)
 	ReadAllAvailableFiles() (*[]entities.AvailableFiles, error)
+	ReadAvailableFilesByBeatId(uuid uuid.UUID) (*entities.AvailableFiles, error)
 	UpdateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error)
+	DeleteFileById(id uuid.UUID, fileType string) error
 
 	CreateInstrument(instrument *entities.Instrument) (*entities.Instrument, error)
 	GetAllInstruments() (*[]entities.Instrument, error)
@@ -33,6 +38,11 @@ type metadataService struct {
 	repo MetadataRepository
 }
 
+// DeleteFileById implements MetadataService.
+func (s *metadataService) DeleteFileById(id uuid.UUID, fileType string) error {
+	return s.repo.DeleteFileById(id, fileType)
+}
+
 func NewMetadataService(repo MetadataRepository) MetadataService {
 	return &metadataService{repo: repo}
 }
@@ -44,6 +54,10 @@ func (s *metadataService) CreateAvailableFiles(availableFiles *entities.Availabl
 // ReadAllAvailableFiles implements MetadataService.
 func (s *metadataService) ReadAllAvailableFiles() (*[]entities.AvailableFiles, error) {
 	return s.repo.ReadAllAvailableFiles()
+}
+
+func (s *metadataService) ReadAvailableFilesByBeatId(uuid uuid.UUID) (*entities.AvailableFiles, error) {
+	return s.repo.ReadAvailableFilesByBeatId(uuid)
 }
 
 // UpdateAvailableFiles implements MetadataService.
