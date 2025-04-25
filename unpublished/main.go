@@ -23,9 +23,9 @@ import (
 // @in header
 // @name Authorization
 // @host localhost:7772
-func main () {
+func main() {
 	pgconfig := dbconnection.GetConfigs()
-	db, err := dbconnection.NewConnection(pgconfig) 
+	db, err := dbconnection.NewConnection(pgconfig)
 	if err != nil {
 		log.Fatal("Database Connection Error $s", err)
 	}
@@ -50,8 +50,8 @@ func main () {
 	api.Get("/swagger/*", swagger.New(swagger.Config{}))
 	api.Get("", func(c *fiber.Ctx) error {
 		return c.JSON("Welcome to unpublished beats service")
-	} )
-	
+	})
+
 	go consumer.StartConsumer("beat_mfcc2", mfcc_channel)
 	go consumer.StartConsumer("delete_approve", delete_approve_channel)
 	go consumer.StartConsumerFileUpdate("beat_files_updates", unpBeatService, metadataBeatService)

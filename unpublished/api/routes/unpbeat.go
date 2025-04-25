@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupUnpublishedBeatRoutes(app fiber.Router, service unpbeat.Service, mservice beatmetadata.MetadataService, mfcc_channel <-chan consumer.KafkaMessage, delete_approve_channel <-chan consumer.KafkaMessage){
+func SetupUnpublishedBeatRoutes(app fiber.Router, service unpbeat.Service, mservice beatmetadata.MetadataService, mfcc_channel <-chan consumer.KafkaMessage, delete_approve_channel <-chan consumer.KafkaMessage) {
 	unp := app.Group("/unpbeats")
 	unp.Post("/makeEmptyBeat", internal.ProtectedRequiresBeatmaker(), handlers.SaveBeatDraft(service, mservice))
 	unp.Get("/sortByStatus/:status", internal.ProtectedRequiresBeatmaker(), handlers.GetBeatsSortByStatusAndJWT(service))

@@ -66,11 +66,11 @@ services:
       - DB_PASSWORD=i_love_tuesdays123
       - DB_NAME=tmp02
 
-  unpublished:
+  unpbeats:
     build:
       context: ./unpublished
       dockerfile: Dockerfile
-    container_name: unpublished
+    container_name: unpbeats
     ports:
       - "7772:7772"
     restart: unless-stopped
@@ -112,7 +112,7 @@ services:
       depends_on:
         - beatsupload
         - userca
-        - unpublished
+        - unpbeats
 
 volumes:
   postgres_data:
