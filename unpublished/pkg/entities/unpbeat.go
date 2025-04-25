@@ -22,8 +22,9 @@ type UnpublishedBeat struct {
 	Picture         string    			`json:"picture" example:"https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
 	BeatmakerID     uuid.UUID       	`json:"beatmakerId" validate:"required" example:"019628ef-cd76-7d2d-bf80-48b8011fad40"`
 	AvailableFiles 	AvailableFiles      `gorm:"foreignKey:UnpublishedBeatID;constraint:OnDelete:CASCADE;" validate:"required" `
-	URL             string    			`json:"url" validate:"required" example:"https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
-	Price           int       			`json:"price" validate:"required" example:"2999"`
+	//url is added after publication
+	// URL             string    			`json:"url" validate:"required" example:"https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
+	Price           int       			`json:"price" validate:"required, gte=1" example:"2999"`
 	Tags            []Tag      			`json:"tags" validate:"required" gorm:"many2many:tag_beats;"` //many to many
 	BPM             int       			`json:"bpm" validate:"required,gte=20,lte=400" example:"120"`
 	Description     string    			`json:"description" validate:"min=2,max=500" example:"Chill summer beat with tropical influences"`

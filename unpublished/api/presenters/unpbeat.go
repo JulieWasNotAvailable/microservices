@@ -62,7 +62,6 @@ func CreateBeatSuccessResponse(data *entities.UnpublishedBeat) *UnpublishedBeatS
         Picture:        data.Picture,
         BeatmakerID:    data.BeatmakerID,
         AvailableFiles: data.AvailableFiles,
-        URL:      		data.URL,
         Price:          data.Price,
         Tags:           data.Tags,
         BPM:            data.BPM,

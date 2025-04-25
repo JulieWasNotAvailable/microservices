@@ -13,6 +13,7 @@ func SetupRoutes(app *fiber.App) {
 	api.Get("/buckets", handler.GetBuckets)
 	api.Get("/objectsFromBucket/:bucket", handler.GetObjectsFromBucket)
 	api.Get("/headObject/:bucket/:key", handler.GetHeadObject)
+	
 	api = app.Group("api/presigned")
 	api.Post("/presignedGetRequest/:bucket", handler.GetObject)
 	api.Post("/presignedPostRequest/:bucket", handler.PutObject)
