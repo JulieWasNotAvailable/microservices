@@ -44,7 +44,6 @@ func main () {
 	api := app.Group("/api")
 	mfcc_channel := make(chan consumer.KafkaMessage)
 	delete_approve_channel := make(chan consumer.KafkaMessage)
-	
 
 	routes.SetupUnpublishedBeatRoutes(api, unpBeatService, metadataBeatService, mfcc_channel, delete_approve_channel)
 	routes.SetupMetadataBeatRoutes(api, metadataBeatService)

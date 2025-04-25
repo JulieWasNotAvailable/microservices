@@ -13,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/smithy-go"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 // Presigner encapsulates the Amazon Simple Storage Service (Amazon S3) presign actions
@@ -26,7 +25,8 @@ type Presigner struct {
 
 //attributes need to start from capital so that they would be parsed
 type request struct {
-	ObjectKey string `json:"objectKey" example:"019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
+	UuidFileName string `json:"uuidFileName" example:"019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
+	File string `json:"file" example:"019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
 }
 
 var lifetimeSecs int64 = 300
@@ -174,21 +174,21 @@ func GetObject (ctx *fiber.Ctx) error {
 	
 	_, err := storage.S3Client.HeadObject(ctx.Context(), &s3.HeadObjectInput{
 		Bucket: aws.String(bucket),
-		Key: aws.String(req.ObjectKey),
+		Key: aws.String(req.UuidFileName),
 	})
 
 	if err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(
 			&fiber.Map{
 				"bucket": bucket,
-				"file": req.ObjectKey,
+				"file": req.UuidFileName,
 				"error": err.Error(),
 				"message":"Couldn't get the file"})
 	}
 	
 	presignedRequest, err := presigner.PresignClient.PresignGetObject(ctx.Context(), &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
-		Key:    aws.String(req.ObjectKey),
+		Key:    aws.String(req.UuidFileName),
 	}, func(opts *s3.PresignOptions) {
 		opts.Expires = time.Duration(lifetimeSecs * int64(time.Second))
 	})
@@ -199,7 +199,7 @@ func GetObject (ctx *fiber.Ctx) error {
 				"message":"Couldn't generate a presigned get request",
 				"error": err,
 				"bucket": bucket,
-				"key": req.ObjectKey})
+				"key": req.UuidFileName})
 			return err
 		}
 
@@ -238,7 +238,7 @@ func PutObject(ctx *fiber.Ctx) error {
 					"error": err.Error()})
 		}
 	log.Println("getting type")
-	contentType, err := typeOf(req.ObjectKey)
+	contentType, err := typeOf(req.File)
 	if err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(
 			&fiber.Map{
@@ -254,18 +254,11 @@ func PutObject(ctx *fiber.Ctx) error {
 				"recognised content Type": contentType})
 	}
 
-	generatedObjectKey, err := uuid.NewV7()
-	if err != nil {
-		return ctx.Status(http.StatusInternalServerError).JSON(
-			&fiber.Map{
-				"message":"Couldn't generate uuid. Here's why: ",
-				"error": err,
-				"accepted_data": req})
-	}
+	objectKeyStr := req.UuidFileName
 
 	presignedRequest, err := presigner.PresignClient.PresignPutObject(ctx.Context(), &s3.PutObjectInput{
 		Bucket: aws.String(bucket),
-		Key:    aws.String(generatedObjectKey.String()),
+		Key:    aws.String(objectKeyStr),
 	}, func(opts *s3.PresignOptions) {
 		opts.Expires = 15 * time.Minute
 		// Добавляем условия подписи
@@ -281,7 +274,7 @@ func PutObject(ctx *fiber.Ctx) error {
 
 	ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message":"generated presigned put request successfully",
-		"generatedObjectKey" : generatedObjectKey,
+		"generatedObjectKey" : objectKeyStr,
 		"data": presignedRequest})
 
 	return nil
@@ -330,7 +323,7 @@ func DeleteObject(ctx *fiber.Ctx) error {
 
 	presignedRequest, err := presigner.PresignClient.PresignDeleteObject(ctx.Context(), &s3.DeleteObjectInput{
 		Bucket: aws.String(bucket),
-		Key:    aws.String(req.ObjectKey),
+		Key:    aws.String(req.UuidFileName),
 	})
 	
 	if err != nil {
