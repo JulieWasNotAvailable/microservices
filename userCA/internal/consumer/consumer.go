@@ -16,13 +16,14 @@ import (
 
 type KafkaMessageURLUpdate struct {
 	FileType string
-	URL string
+	URL      string
 }
 
-func StartConsumer(topic string, uservice user.Service){
-	worker, err := connectConsumer([]string{"localhost:9092"})
+func StartConsumer(topic string, uservice user.Service) {
+	worker, err := connectConsumer([]string{os.Getenv("KAFKA_BROKER_URL")})
+
 	if err != nil {
-		panic (err)
+		panic(err)
 	}
 
 	consumer, err := worker.ConsumePartition(topic, 0, sarama.OffsetOldest)
@@ -31,7 +32,7 @@ func StartConsumer(topic string, uservice user.Service){
 	}
 
 	fmt.Println(("consumer started"))
-	sigchan := make(chan os.Signal, 1) 
+	sigchan := make(chan os.Signal, 1)
 
 	// Ctrl + C is SIGINT
 	// SIGTERM is gracefull shutdown
@@ -51,19 +52,19 @@ func StartConsumer(topic string, uservice user.Service){
 			case msg := <-consumer.Messages():
 				msgCount++
 				fmt.Printf("Received message Count %d: | Topic(%s) | Message(%s) \n", msgCount, string(msg.Topic), string(msg.Value))
-				
+
 				//if err, service, that sent, should be notified?
 				key, err := uuid.Parse(string(msg.Key))
-				if err != nil{
+				if err != nil {
 					log.Println(err)
 				}
 				message := KafkaMessageURLUpdate{}
 				err = json.Unmarshal(msg.Value, &message)
-				if err != nil{
+				if err != nil {
 					log.Println(err)
 				}
 				userUpdate := presenters.User{}
-				if message.FileType == "pfp"{
+				if message.FileType == "pfp" {
 					userUpdate.ID = key
 					userUpdate.ProfilePictureUrl = message.URL
 					_, err = uservice.UpdateUser(&userUpdate)
@@ -74,7 +75,7 @@ func StartConsumer(topic string, uservice user.Service){
 					log.Println("wrong request")
 				}
 
-			case <- sigchan:
+			case <-sigchan:
 				fmt.Println("Interrupt is detected")
 				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
 				doneCh <- struct{}{}

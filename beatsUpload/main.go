@@ -4,9 +4,9 @@ import (
 	"log"
 
 	"github.com/JulieWasNotAvailable/microservices/beatsUpload/api/router"
+	_ "github.com/JulieWasNotAvailable/microservices/beatsUpload/docs"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
-	_ "github.com/JulieWasNotAvailable/microservices/beatsUpload/docs"
 )
 
 type UpdateBeatURLRequest struct {
@@ -21,13 +21,15 @@ type UpdateBeatURLRequest struct {
 // @in header
 // @name Authorization
 // @host localhost:7773
-func main () {
+func main() {
 	app := fiber.New()
 
+	api := app.Group("/api")
+
 	router.SetupRoutes(app)
-	
-	log.Println("app running successully")
-	app.Get("/swagger/*", swagger.New(swagger.Config{}))
+
+	log.Println("app running successfully")
+	api.Get("/swagger/*", swagger.New(swagger.Config{}))
 
 	app.Listen(":7774")
 }

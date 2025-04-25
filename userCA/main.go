@@ -22,10 +22,10 @@ import (
 // @in header
 // @name Authorization
 // @host localhost:7773
-func main () {
-	
+func main() {
+
 	pgconfig := dbconnection.GetConfigs()
-	db, err := dbconnection.NewConnection(pgconfig) 
+	db, err := dbconnection.NewConnection(pgconfig)
 	if err != nil {
 		log.Fatal("Database Connection Error $s", err)
 	}
@@ -48,10 +48,11 @@ func main () {
 	metadataService := bmmetadata.NewService(metadataRepo)
 
 	app := fiber.New()
+	api := app.Group("/api")
 	app.Use(cors.New())
 
 	// app.Get("/swagger/*", swagger.HandlerDefault)
-	app.Get("/swagger/*", swagger.New(swagger.Config{ // custom
+	api.Get("/swagger/*", swagger.New(swagger.Config{ // custom
 		// Prefill OAuth ClientId on Authorize popup
 		// OAuth: &swagger.OAuthConfig{
 		// 	AppName:  "OAuth Provider",
@@ -61,13 +62,24 @@ func main () {
 		// OAuth2RedirectUrl: "http://localhost:8080/swagger/oauth2-redirect.html",
 	}))
 
-	api := app.Group("/api")
+	api.Get("/allGenres", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"genres": []string{"Action", "Comedy", "Drama", "Fantasy", "Horror"},
+		})
+	})
+
+	api.Post("/saveAnketa", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"message": "anketa saved",
+		})
+	})
+
 	routes.UserRouter(api, userService, metadataService)
 	routes.MetadataRoutes(api, metadataService, userService)
 	routes.GoogleRoutes(api, userService)
 	routes.WelcomeRouter(api)
 
 	go consumer.StartConsumer("profilepic_url_updates", userService)
-	
+
 	app.Listen(":7773")
 }
