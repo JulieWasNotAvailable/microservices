@@ -361,6 +361,34 @@ func GetAllUnpublishedBeats(service unpbeat.Service) fiber.Handler {
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatListSuccessResponse(beats))
 	}}
 
+// GetUnpublishedBeatById godoc
+// @Summary Get an unpublished beat by ID
+// @Description Retrieves an unpublished beat with the specified ID
+// @Tags Beats
+// @Accept json
+// @Produce json
+// @Param id path string true "Beat ID (UUID format)"
+// @Success 200 {object} presenters.UnpublishedBeatSuccessResponse
+// @Failure 422 {object} presenters.UnpublishedBeatErrorResponse
+// @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
+// @Router /unpbeats/unpublishedBeatById/{id} [get]
+func GetUnpublishedBeatById(service unpbeat.Service) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+
+		beatId := c.Params("id")
+		beatuuid, err := uuid.Parse(beatId)	
+		if err != nil {
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(errors.New("wrong id format")))
+		}
+
+		beat, err := service.GetUnpublishedBeatByID(beatuuid)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+		}
+
+		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse2(*beat))
+	}}
+
 func getIdFromJWT(c *fiber.Ctx) (uuid.UUID, error){
 	auth := c.GetReqHeaders()
 	authHeader, ok := auth["Authorization"]

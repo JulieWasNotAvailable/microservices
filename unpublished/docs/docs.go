@@ -875,6 +875,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/unpbeats/unpublishedBeatById/{id}": {
+            "get": {
+                "description": "Retrieves an unpublished beat with the specified ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Beats"
+                ],
+                "summary": "Get an unpublished beat by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Beat ID (UUID format)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.UnpublishedBeatSuccessResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.UnpublishedBeatErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.UnpublishedBeatErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/unpbeats/unpublishedBeatsByBeatmakerJWT": {
             "get": {
                 "security": [

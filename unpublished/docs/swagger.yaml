@@ -802,6 +802,35 @@ paths:
       summary: Get beats by status for current user
       tags:
       - beats
+  /unpbeats/unpublishedBeatById/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an unpublished beat with the specified ID
+      parameters:
+      - description: Beat ID (UUID format)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatSuccessResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UnpublishedBeatErrorResponse'
+      summary: Get an unpublished beat by ID
+      tags:
+      - Beats
   /unpbeats/unpublishedBeatsByBeatmakerJWT:
     get:
       description: Get all unpublished beats for the authenticated beatmaker

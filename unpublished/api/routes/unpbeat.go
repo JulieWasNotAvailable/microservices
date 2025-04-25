@@ -14,6 +14,7 @@ func SetupUnpublishedBeatRoutes(app fiber.Router, service unpbeat.Service, mserv
 	unp.Post("/makeEmptyBeat", internal.ProtectedRequiresBeatmaker(), handlers.SaveBeatDraft(service, mservice))
 	unp.Get("/sortByStatus/:status", internal.ProtectedRequiresBeatmaker(), handlers.GetBeatsSortByStatusAndJWT(service))
 	unp.Get("/unpublishedBeatsByBeatmakerJWT", internal.ProtectedRequiresBeatmaker(), handlers.GetUnpublishedBeatsByBeatmakerId(service))
+	unp.Get("/unpublishedBeatById/:id", handlers.GetUnpublishedBeatById(service))
 	unp.Get("/allUnpublishedBeats", handlers.GetAllUnpublishedBeats(service))
 	unp.Patch("/saveDraft", handlers.UpdateBeat(service, mservice))
 	unp.Get("/beatsForModerationByDate/:from/:to", handlers.GetBeatsInModeration(service))
