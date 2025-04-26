@@ -52,9 +52,9 @@ func main() {
 		return c.JSON("Welcome to unpublished beats service")
 	})
 
-	// go consumer.StartConsumer("beat_mfcc2", mfcc_channel)
-	// go consumer.StartConsumer("delete_approve", delete_approve_channel)
-	// go consumer.StartConsumerFileUpdate("beat_files_updates", unpBeatService, metadataBeatService)
+	go consumer.StartConsumer("beat_mfcc2", mfcc_channel)
+	go consumer.StartConsumer("delete_approve", delete_approve_channel)
+	go consumer.StartConsumerFileUpdate("beat_files_updates", unpBeatService, metadataBeatService)
 
 	app.Listen(":7772")
 }
