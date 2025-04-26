@@ -25,14 +25,14 @@ type UnpublishedBeat struct {
 	//url is added after publication
 	// URL             string    			`json:"url" validate:"required" example:"https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
 	Price           int       			`json:"price" validate:"required, gte=1" example:"2999"`
-	Tags            []Tag      			`json:"tags" validate:"required" gorm:"many2many:tag_beats;"` //many to many
+	Tags            []Tag      			`json:"tags" validate:"required" gorm:"many2many:beat_tags;"` //many to many
 	BPM             int       			`json:"bpm" validate:"required,gte=20,lte=400" example:"120"`
 	Description     string    			`json:"description" validate:"min=2,max=500" example:"Chill summer beat with tropical influences"`
-	Genres         	[]Genre      		`json:"genres" validate:"required" gorm:"many2many:genre_beats;"`       //many to many
-	Moods          	[]Mood      		`json:"moods" validate:"required" gorm:"many2many:mood_beats;"`       //many to many
-	KeynoteID       *uint       			`json:"keynoteId" validate:"required" example:"11"`    //keynote has many beats, but each beat has only one keynote`
-	Timestamps    	[]Timestamp         `json:"timestamps" validate:"required" gorm:"foreignKey:BeatID"` //a beat has many timestamps, but each timestamp has only one beat
-	Instruments   	[]Instrument        `json:"instruments" gorm:"many2many:instrument_beats"` //many to many
+	Genres         	[]Genre      		`json:"genres" validate:"required" gorm:"many2many:beat_genres;joinForeignKey:UnpublishedBeatID;joinReferences:GenreID;constraint:OnDelete:CASCADE"`   
+	Moods          	[]Mood      		`json:"moods" validate:"required" gorm:"many2many:beat_moods;constraint:OnDelete:CASCADE"`       //many to many
+	KeynoteID       *uint       		`json:"keynoteId" validate:"required" example:"2"`    //keynote has many beats, but each beat has only one keynote`
+	Timestamps    	[]Timestamp         `json:"timestamps" validate:"required" gorm:"foreignKey:BeatID;constraint:OnDelete:CASCADE"` //a beat has many timestamps, but each timestamp has only one beat
+	Instruments   	[]Instrument        `json:"instruments" gorm:"many2many:beat_instruments;constraint:OnDelete:CASCADE"` //many to many
 	Status          Status    			`json:"status" example:"draft"`
 	Err 			string	
 	SentToModerationAt int64 			`json:"sent_to_moderation_at"`
@@ -64,8 +64,13 @@ type AvailableFiles struct{
 //@Description entities.Genre
 type Genre struct{
 	ID uint `json:"id" swaggerignore:"true"`
-	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:genre_beats;" swaggerignore:"true"`
+	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:beat_genres;joinForeignKey:GenreID;joinReferences:UnpublishedBeatID"`
 	Name string `json:"name" example:"Jerk"`
+}
+
+type BeatGenre struct {
+    UnpublishedBeatID uuid.UUID `gorm:"primaryKey;constraint:OnDelete:CASCADE"` // Delete join entry if Track is deleted
+    GenreID uint `gorm:"primaryKey"`
 }
 
 type Timestamp struct{
@@ -78,14 +83,24 @@ type Timestamp struct{
 
 type Tag struct{
 	ID uint
-	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:tag_beats;" swaggerignore:"true"`
+	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:beat_tags;" swaggerignore:"true"`
 	Name string 
+}
+
+type BeatTag struct {
+    UnpublishedBeatID uuid.UUID `gorm:"primaryKey;constraint:OnDelete:CASCADE"` // Delete join entry if Track is deleted
+    TagID uint `gorm:"primaryKey"`
 }
 
 type Mood struct{
 	ID uint
-	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:mood_beats;" swaggerignore:"true"`
+	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:beat_moods;" swaggerignore:"true"`
 	Name string
+}
+
+type BeatMood struct {
+    UnpublishedBeatID uuid.UUID `gorm:"primaryKey;constraint:OnDelete:CASCADE"` // Delete join entry if Track is deleted
+    MoodID uint `gorm:"primaryKey"`
 }
 
 type Keynote struct{
@@ -96,20 +111,29 @@ type Keynote struct{
 
 type Instrument struct{
 	ID uint
-	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:instrument_beats;" swaggerignore:"true"`
+	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:beat_instruments;" swaggerignore:"true"`
 	Name string
+}
+
+type BeatInstrument struct {
+    UnpublishedBeatID uuid.UUID `gorm:"primaryKey;constraint:OnDelete:CASCADE"`
+    InstrumentID uint `gorm:"primaryKey"`
 }
 
 func MigrateAll(db *gorm.DB) error {
 	err := db.AutoMigrate(
 		&Instrument{},
+		&BeatInstrument{},
 		&Keynote{},
-		&AvailableFiles{},
 		&Genre{},
-		&Timestamp{},
+		&BeatGenre{},
 		&Mood{},
+		&BeatMood{},
 		&Tag{},
+		&BeatTag{},
 		&UnpublishedBeat{},
+		&AvailableFiles{},
+		&Timestamp{},
 	)
 	return err
 }

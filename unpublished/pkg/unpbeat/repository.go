@@ -124,8 +124,6 @@ func (r *repository) ReadUnpublishedInModeration(from int64, to int64) (*[]prese
 }
 
 func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
-	//Where("id = ?", unpublished.ID)
-	// unpublishedModel := entities.UnpublishedBeat{}
 	result := r.DB.Updates(unpublished)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -135,8 +133,11 @@ func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBe
 	}
 
 	var updated presenters.UnpublishedBeat
-	if err := r.DB.Where("id = ?", unpublished.ID).First(&updated).Preload("AvailableFiles").Preload("Tags").Preload("Genres").
-	Preload("Moods").Preload("Timestamps").Preload("Instruments").Error; err != nil {
+	if err := r.DB.Model(updated).Where("id = ?", unpublished.ID).
+	Preload("AvailableFiles").
+	Preload("Tags").Preload("Genres").
+	Preload("Moods").Preload("Timestamps").
+	Preload("Instruments").First(&updated).Error; err != nil {
 		return nil, err 
 	}
 

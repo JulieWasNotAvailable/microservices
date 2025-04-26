@@ -1,7 +1,6 @@
 package producer
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -25,7 +24,7 @@ func createProducer (brokersUrl []string) (sarama.AsyncProducer, error) {
 }
 
 //pushes Update Message to queue
-func pushMessageToQueue (topic string, key []byte, message []byte) error {
+func pushMessageToQueue (topic string, message []byte) error {
 	err := godotenv.Load(".env")
 		if err != nil {
 			return err
@@ -42,7 +41,6 @@ func pushMessageToQueue (topic string, key []byte, message []byte) error {
 	
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
-		Key: sarama.StringEncoder(key),
 		Value: sarama.StringEncoder(message),
 	}
 	
@@ -63,13 +61,8 @@ func pushMessageToQueue (topic string, key []byte, message []byte) error {
 	return nil
 }
 
-func CreateMessage(messageInBytes []byte, key string, topic string) error {
-	keyInBytes, err := json.Marshal(key)
-	if err != nil {
-		return err
-		}
-
-	err = pushMessageToQueue(topic, keyInBytes, messageInBytes)
+func CreateMessage(messageInBytes []byte, topic string) error {
+	err := pushMessageToQueue(topic, messageInBytes)
 	if err != nil {
 		return err
 		}

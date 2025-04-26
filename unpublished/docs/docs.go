@@ -979,6 +979,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Jerk"
+                },
+                "unpublishedBeat": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UnpublishedBeat"
+                    }
                 }
             }
         },
@@ -1015,6 +1021,17 @@ const docTemplate = `{
                 }
             }
         },
+        "entities.Status": {
+            "type": "string",
+            "enum": [
+                "processing",
+                "draft"
+            ],
+            "x-enum-varnames": [
+                "StatusInModeration",
+                "StatusDraft"
+            ]
+        },
         "entities.Tag": {
             "type": "object",
             "properties": {
@@ -1049,6 +1066,122 @@ const docTemplate = `{
                 "unpublishedbeatId": {
                     "type": "string",
                     "example": "01963e01-e46c-7996-996a-42ad3df115ac"
+                }
+            }
+        },
+        "entities.UnpublishedBeat": {
+            "description": "entitites.UnpublishedBeatErrorResponse",
+            "type": "object",
+            "required": [
+                "availableFiles",
+                "beatmakerId",
+                "bpm",
+                "genres",
+                "keynoteId",
+                "moods",
+                "name",
+                "price",
+                "tags",
+                "timestamps"
+            ],
+            "properties": {
+                "availableFiles": {
+                    "$ref": "#/definitions/entities.AvailableFiles"
+                },
+                "beatmakerId": {
+                    "type": "string",
+                    "example": "019628ef-cd76-7d2d-bf80-48b8011fad40"
+                },
+                "bpm": {
+                    "type": "integer",
+                    "maximum": 400,
+                    "minimum": 20,
+                    "example": 120
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "minLength": 2,
+                    "example": "Chill summer beat with tropical influences"
+                },
+                "err": {
+                    "type": "string"
+                },
+                "genres": {
+                    "description": "many to many",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Genre"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "019628ef-cd76-7d2d-bf80-48b8011fad40"
+                },
+                "instruments": {
+                    "description": "many to many",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Instrument"
+                    }
+                },
+                "keynoteId": {
+                    "description": "keynote has many beats, but each beat has only one keynote` + "`" + `",
+                    "type": "integer",
+                    "example": 2
+                },
+                "moods": {
+                    "description": "many to many",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Mood"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 60,
+                    "minLength": 2,
+                    "example": "Summer Vibes"
+                },
+                "picture": {
+                    "type": "string",
+                    "example": "https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
+                },
+                "price": {
+                    "description": "url is added after publication\nURL             string    \t\t\t` + "`" + `json:\"url\" validate:\"required\" example:\"https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4\"` + "`" + `",
+                    "type": "integer",
+                    "example": 2999
+                },
+                "sent_to_moderation_at": {
+                    "type": "integer"
+                },
+                "status": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entities.Status"
+                        }
+                    ],
+                    "example": "draft"
+                },
+                "tags": {
+                    "description": "many to many",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Tag"
+                    }
+                },
+                "timestamps": {
+                    "description": "a beat has many timestamps, but each timestamp has only one beat",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Timestamp"
+                    }
+                },
+                "updated_at": {
+                    "type": "integer"
                 }
             }
         },

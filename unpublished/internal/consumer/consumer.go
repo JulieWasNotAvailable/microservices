@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"log"
 	"encoding/json"
 
 	"github.com/IBM/sarama"
@@ -13,18 +12,19 @@ import (
 	// "github.com/JulieWasNotAvailable/microservices/user/pkg/user"
 )
 
-type KafkaMessage struct{
-	Key string	
-	Value string
-	Err string
-}
-
-type MessageData struct{	
+type KafkaMessageValue struct{
+	ID string
 	Value json.RawMessage //
 	Err string `json:"error"`
 }
 
-func StartConsumer(topic string, channel chan<- KafkaMessage){
+type KafkaMessageToMFCC struct{
+	ID string
+	Value string //
+	Err string `json:"error"`
+}
+
+func StartConsumer(topic string, channel chan<- KafkaMessageValue){
 	worker, err := connectConsumer([]string{os.Getenv("KAFKA_BROKER_URL")})
 	if err != nil {
 		panic (err)
@@ -51,26 +51,12 @@ func StartConsumer(topic string, channel chan<- KafkaMessage){
 				msgCount++
 				fmt.Printf("Received message Count %d: | Topic(%s) | Message(%s) \n", msgCount, string(msg.Topic), string(msg.Value))
 
-				messageModel := MessageData{}
-				err := json.Unmarshal(msg.Value, &messageModel)
+				messageValue:= KafkaMessageValue{}
+				err := json.Unmarshal(msg.Value, &messageValue)
 				if err != nil{
-					kafkaMessage := KafkaMessage{
-						Key: string(msg.Key),
-						Value: "", //mfcc, error
-						Err : err.Error(),
-					}
-					channel <- kafkaMessage
-				} else {
-					kafkaMessage := KafkaMessage{
-						Key: string(msg.Key),
-						Value: string(messageModel.Value), //mfcc, error
-						Err : messageModel.Err,
-					}
-					
-					log.Println(kafkaMessage.Value)
-					channel <- kafkaMessage
+					messageValue.Err = "couldn't unmarshal"
 				}
-
+				channel <- messageValue
 			case <- sigchan:
 				fmt.Println("Interrupt is detected")
 				

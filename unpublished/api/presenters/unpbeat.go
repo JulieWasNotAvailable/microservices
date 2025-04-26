@@ -29,11 +29,6 @@ type UnpublishedBeat struct {
 	UpdatedAt      int64 					`json:"updated_at"`
 }
 
-type BeatForPublishing struct {
-	Beat UnpublishedBeat
-	MFCC string
-}
-
 //@Description presenters.UnpublishedBeatSuccessResponse
 type UnpublishedBeatSuccessResponse struct {
 	Status 		bool   						`json:"status" example:"true"`
