@@ -26,6 +26,7 @@ type MetadataService interface {
 	CreateTag(tag *entities.Tag) (*entities.Tag, error)
 	GetAllTags() (*[]entities.Tag, error)
 	GetTagById(id uint) (*entities.Tag, error)
+	GetTagsByName(name string) (*[10]entities.Tag, error)
 	DeleteTagById(id uint) error
 
 	CreateMood(mood *entities.Mood) (*entities.Mood, error)
@@ -109,6 +110,10 @@ func (s *metadataService) GetAllTags() (*[]entities.Tag, error) {
 
 func (s *metadataService) GetTagById(id uint) (*entities.Tag, error) {
 	return s.repo.ReadTagById(id)
+}
+
+func (s *metadataService) GetTagsByName(name string) (*[10]entities.Tag, error){
+	return s.repo.ReadTagsByName(name)
 }
 
 func (s *metadataService) DeleteTagById(id uint) error {

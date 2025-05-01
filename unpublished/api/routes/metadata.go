@@ -27,6 +27,7 @@ func SetupMetadataBeatRoutes(app fiber.Router, service beatmetadata.MetadataServ
 
 	meta.Post("/tags", handlers.PostTag(service))
 	meta.Get("/tags", handlers.GetTags(service))
+	meta.Get("/tagsByName/:name", handlers.GetTagsByName(service))
 
 	meta.Post("/moods", handlers.PostMood(service))
 	meta.Get("/moods", handlers.GetMoods(service))

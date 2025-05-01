@@ -124,6 +124,13 @@ func (r *repository) ReadUnpublishedInModeration(from int64, to int64) (*[]prese
 }
 
 func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
+	emptyModel := entities.AvailableFiles{}
+	if unpublished.AvailableFiles != emptyModel{
+		err := r.DB.Where("id = ?", unpublished.AvailableFiles.ID).Delete(emptyModel).Error
+		if err != nil{
+			return nil, err
+		}
+	}
 	result := r.DB.Updates(unpublished)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {

@@ -63,9 +63,10 @@ type AvailableFiles struct{
 
 //@Description entities.Genre
 type Genre struct{
-	ID uint `json:"id" swaggerignore:"true"`
-	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:beat_genres;joinForeignKey:GenreID;joinReferences:UnpublishedBeatID"`
+	ID uint `json:"id"`
+	UnpublishedBeat []*UnpublishedBeat `json:"-" gorm:"many2many:beat_genres;joinForeignKey:GenreID;joinReferences:UnpublishedBeatID" swaggerignore:"true"`
 	Name string `json:"name" example:"Jerk"`
+	CreatedAt int64
 }
 
 type BeatGenre struct {
@@ -84,7 +85,8 @@ type Timestamp struct{
 type Tag struct{
 	ID uint
 	UnpublishedBeat []*UnpublishedBeat `gorm:"many2many:beat_tags;" swaggerignore:"true"`
-	Name string 
+	Name string 	`gorm:"unique;not null"`
+	CreatedAt int64 `json:"-"`
 }
 
 type BeatTag struct {

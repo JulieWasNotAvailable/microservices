@@ -218,7 +218,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(errors.New("wrong id format")))
 		}
 		log.Println("deleting beat with this id: ", delapproveuuid)
-		err = service.DeleteUnpublishedBeat(delapproveuuid)
+		// err = service.DeleteUnpublishedBeat(delapproveuuid)
 		if err != nil{
 			message := consumer.KafkaMessageValue{
 				ID : delete_approve.ID,
@@ -401,6 +401,35 @@ func GetUnpublishedBeatById(service unpbeat.Service) fiber.Handler {
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse2(*beat))
 	}}
+
+// DeleteUnpublishedBeatById godoc
+// @Summary Delete an unpublished beat by ID
+// @Description Deletes an unpublished beat with the specified ID
+// @Tags Beats
+// @Accept json
+// @Produce json
+// @Param id path string true "Beat ID (UUID format)"
+// @Success 200 {object} presenters.UnpublishedBeatSuccessResponse
+// @Failure 422 {object} presenters.UnpublishedBeatErrorResponse
+// @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
+// @Router /unpbeats/deleteUnpublishedBeatById/{id} [delete]
+func DeleteUnpublishedBeatById(service unpbeat.Service) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		beatId := c.Params("id")
+		beatuuid, err := uuid.Parse(beatId)	
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+		}
+
+		err = service.DeleteUnpublishedBeat(beatuuid)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+		}
+		return c.Status(http.StatusOK).JSON(fiber.Map{
+			"message":"deleted successfully",
+		})
+	}
+}
 
 func getIdFromJWT(c *fiber.Ctx) (uuid.UUID, error){
 	auth := c.GetReqHeaders()

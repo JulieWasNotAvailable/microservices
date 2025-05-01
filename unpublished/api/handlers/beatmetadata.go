@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/api/presenters"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/beatmetadata"
@@ -373,7 +374,12 @@ func PostTag(service beatmetadata.MetadataService) fiber.Handler {
 		if err := c.BodyParser(&tag); err != nil {
 			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateMetadataErrorResponse(err))
 		}
-
+		if tag.Name == ""{
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateMetadataErrorResponse(errors.New("tag name cannot be empty")))
+		}
+		if strings.ContainsAny(tag.Name, " \t\n\r") {
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateMetadataErrorResponse(errors.New("spaces are not allowed")))
+		}
 		created, err := service.CreateTag(&tag)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
@@ -394,6 +400,27 @@ func PostTag(service beatmetadata.MetadataService) fiber.Handler {
 func GetTags(service beatmetadata.MetadataService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		tags, err := service.GetAllTags()
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
+		}
+
+		return c.Status(http.StatusOK).JSON(presenters.CreateMetadataListResponse(tags))
+	}
+}
+
+// GetTagsByName godoc
+// @Summary Get tags by name
+// @Description Retrieve all tags from the system
+// @Tags tags
+// @Produce json
+// @Param name path string true "name"
+// @Success 200 {object} presenters.MetadataListResponse
+// @Failure 500 {object} presenters.MetadataErrorResponse
+// @Router /metadata/tagsByName/{name} [get]
+func GetTagsByName(service beatmetadata.MetadataService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		name := c.Params("name")
+		tags, err := service.GetTagsByName(name)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
 		}

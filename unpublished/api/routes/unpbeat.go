@@ -20,4 +20,5 @@ func SetupUnpublishedBeatRoutes(app fiber.Router, service unpbeat.Service, mserv
 	unp.Get("/beatsForModerationByDate/:from/:to", handlers.GetBeatsInModeration(service))
 	unp.Get("/sendToModeration/:id", handlers.SendToModeration(service))
 	unp.Get("/publishBeat/:id", handlers.PostPublishBeat(service, mfcc_channel, delete_approve_channel))
+	unp.Delete("/deleteUnpublishedBeatById/:id", handlers.DeleteUnpublishedBeatById(service))
 }

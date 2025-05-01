@@ -2,6 +2,7 @@ package beatmetadata
 
 import (
 	"errors"
+	"time"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/entities"
 	"github.com/google/uuid"
@@ -30,6 +31,7 @@ type MetadataRepository interface {
 	CreateTag(tag *entities.Tag) (*entities.Tag, error)
 	ReadAllTags() (*[]entities.Tag, error)
 	ReadTagById(id uint) (*entities.Tag, error)
+	ReadTagsByName(name string) (*[10]entities.Tag, error)
 	DeleteTagById(id uint) error
 
 	CreateMood(mood *entities.Mood) (*entities.Mood, error)
@@ -216,6 +218,7 @@ func (r *repository) DeleteTimestampById(id uint) error {
 }
 
 func (r *repository) CreateTag(tag *entities.Tag) (*entities.Tag, error) {
+	tag.CreatedAt = time.Now().Unix()
 	result := r.DB.Create(tag)
 	if result.Error != nil {
 		return nil, result.Error
@@ -239,6 +242,15 @@ func (r *repository) ReadTagById(id uint) (*entities.Tag, error) {
 		return nil, result.Error
 	}
 	return &tag, nil
+}
+
+func (r *repository) ReadTagsByName(name string) (*[10]entities.Tag, error) {
+	tags := [10]entities.Tag{}
+	err := r.DB.Where("name LIKE ?", name+"%").Find(&tags).Error
+	if err != nil{
+		return &[10]entities.Tag{}, nil
+	}
+	return &tags, nil
 }
 
 func (r *repository) DeleteTagById(id uint) error {
