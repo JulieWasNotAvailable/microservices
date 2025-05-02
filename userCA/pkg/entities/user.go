@@ -42,3 +42,8 @@ func (u *User) Validate() error {
 func (u *User) BeforeSave(tx *gorm.DB) error {
 	return u.Validate()
 }
+
+type UserFollowsBeatmaker struct {
+    UserID      int `json:"userId"`
+    BeatmakerID int `json:"beatmakerId"`
+} //many to many
