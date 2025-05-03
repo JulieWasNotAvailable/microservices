@@ -43,7 +43,7 @@ type UnpublishedBeat struct {
 // Validate - кастомная валидация
 func (beat *UnpublishedBeat) Validate() error {
 	if beat.Status != "draft" {
-		return errors.New("beat status can only be draft or in moderation")
+		return errors.New("you tried to save beat with a status different from draft, prohibited")
 	}
 	return nil
 }

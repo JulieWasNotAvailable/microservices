@@ -125,18 +125,65 @@ func (r *repository) ReadUnpublishedInModeration(from int64, to int64) (*[]prese
 
 func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
 	emptyModel := entities.AvailableFiles{}
-	if unpublished.AvailableFiles != emptyModel{
-		err := r.DB.Where("id = ?", unpublished.AvailableFiles.ID).Delete(emptyModel).Error
+
+	beatInitial := &entities.UnpublishedBeat{}
+	err := r.DB.Where("id = ?", unpublished.ID).First(&beatInitial).Error
 		if err != nil{
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, errors.New("unpublished beat not found or not owned by user")
+		} else {
 			return nil, err
 		}
 	}
-	result := r.DB.Updates(unpublished)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, errors.New("unpublished beat not found or not owned by user")
+	
+	//it needs to be a transaction
+	//i need to check that person tried to edit tags, and then delete the tags from beat_tags table
+	err = r.DB.Transaction(func(tx *gorm.DB) error {
+		
+		if unpublished.Tags != nil{
+			err := r.DB.Model(&unpublished).Association("Tags").Replace(unpublished.Tags)
+			if err != nil{
+				return err
+			}
 		}
-		return nil, result.Error
+
+		if unpublished.Genres != nil{
+			err := r.DB.Model(&unpublished).Association("Genres").Replace(unpublished.Genres)
+			if err != nil{
+				return err
+			}
+		}
+
+		if unpublished.Instruments != nil{
+			err := r.DB.Model(&unpublished).Association("Instruments").Replace(unpublished.Instruments)
+			if err != nil{
+				return err
+			}
+		}
+
+		if unpublished.Timestamps != nil{
+			err := r.DB.Model(&unpublished).Association("Timestamps").Replace(unpublished.Timestamps)
+			if err != nil{
+				return err
+			}
+		}
+
+		if unpublished.AvailableFiles != emptyModel{
+			err := r.DB.Model(&beatInitial).Association("AvailableFiles").Replace(unpublished.AvailableFiles)
+			if err != nil{
+				return err
+			}
+		}
+		
+		err := r.DB.Updates(unpublished).Error	
+		if err != nil {
+			return err
+		}
+
+		return nil	
+	})
+	if err != nil{
+		return nil, err
 	}
 
 	var updated presenters.UnpublishedBeat
