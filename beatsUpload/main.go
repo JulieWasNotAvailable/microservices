@@ -6,6 +6,7 @@ import (
 	"github.com/JulieWasNotAvailable/microservices/beatsUpload/api/router"
 	_ "github.com/JulieWasNotAvailable/microservices/beatsUpload/docs"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
 )
 
@@ -25,6 +26,7 @@ func main() {
 	app := fiber.New()
 
 	api := app.Group("/api")
+	app.Use(cors.New())
 
 	router.SetupRoutes(app)
 

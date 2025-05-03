@@ -1,33 +1,33 @@
 package consumer
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"log"
-	"encoding/json"
 
 	"github.com/IBM/sarama"
 	// "github.com/JulieWasNotAvailable/microservices/user/api/presenters"
 	// "github.com/JulieWasNotAvailable/microservices/user/pkg/user"
 )
 
-type KafkaMessage struct{
-	Key string	
+type KafkaMessage struct {
+	Key   string
 	Value string
-	Err string
+	Err   string
 }
 
-type MessageData struct{	
+type MessageData struct {
 	Value json.RawMessage //
-	Err string `json:"error"`
+	Err   string          `json:"error"`
 }
 
-func StartConsumer(topic string, channel chan<- KafkaMessage){
-	worker, err := connectConsumer([]string{os.Getenv("KAFKA_BROKER_URL")})
+func StartConsumer(topic string, channel chan<- KafkaMessage) {
+	worker, err := connectConsumer([]string{"broker:29092"})
 	if err != nil {
-		panic (err)
+		panic(err)
 	}
 
 	consumer, err := worker.ConsumePartition(topic, 0, sarama.OffsetNewest)
@@ -37,7 +37,7 @@ func StartConsumer(topic string, channel chan<- KafkaMessage){
 
 	fmt.Println(("consumer started"))
 
-	sigchan := make(chan os.Signal, 1) 
+	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 
 	msgCount := 0
@@ -53,27 +53,27 @@ func StartConsumer(topic string, channel chan<- KafkaMessage){
 
 				messageModel := MessageData{}
 				err := json.Unmarshal(msg.Value, &messageModel)
-				if err != nil{
+				if err != nil {
 					kafkaMessage := KafkaMessage{
-						Key: string(msg.Key),
+						Key:   string(msg.Key),
 						Value: "", //mfcc, error
-						Err : err.Error(),
+						Err:   err.Error(),
 					}
 					channel <- kafkaMessage
 				} else {
 					kafkaMessage := KafkaMessage{
-						Key: string(msg.Key),
+						Key:   string(msg.Key),
 						Value: string(messageModel.Value), //mfcc, error
-						Err : messageModel.Err,
+						Err:   messageModel.Err,
 					}
-					
+
 					log.Println(kafkaMessage.Value)
 					channel <- kafkaMessage
 				}
 
-			case <- sigchan:
+			case <-sigchan:
 				fmt.Println("Interrupt is detected")
-				
+
 				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
 				doneCh <- struct{}{}
 			}
@@ -86,7 +86,7 @@ func StartConsumer(topic string, channel chan<- KafkaMessage){
 		panic(err)
 	}
 	//we're waiting for a response from this channel
-	fmt.Println("Processed", msgCount, "messages")	
+	fmt.Println("Processed", msgCount, "messages")
 }
 
 func connectConsumer(brokersUrl []string) (sarama.Consumer, error) {
