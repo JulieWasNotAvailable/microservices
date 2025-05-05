@@ -14,14 +14,14 @@ type UnpublishedBeat struct {
 	AvailableFiles 	entities.AvailableFiles `validate:"required" gorm:"foreignKey:UnpublishedBeatID;constraint:OnDelete:CASCADE;"`
 	URL             string    				`json:"url" validate:"required" example:"https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
 	Price           int       				`json:"price" validate:"required" example:"2999"`
-	Tags            []entities.Tag      	`json:"tags" validate:"required" gorm:"many2many:tag_beats;"` //many to many
+	Tags            []entities.Tag      	`json:"tags" validate:"required" gorm:"many2many:beat_tags;"` //many to many
 	BPM             int       				`json:"bpm" validate:"required,gte=20,lte=400" example:"120"`
 	Description     string    				`json:"description" validate:"min=2,max=500" example:"Chill summer beat with tropical influences"`
-	Genres         	[]entities.Genre      	`json:"genres" validate:"required" gorm:"many2many:genre_beats;"`       //many to many
-	Moods          	[]entities.Mood      	`json:"moods" validate:"required" gorm:"many2many:mood_beats;"`       //many to many
+	Genres         	[]entities.Genre      	`json:"genres" validate:"required" gorm:"many2many:beat_genres;"`       //many to many
+	Moods          	[]entities.Mood      	`json:"moods" validate:"required" gorm:"many2many:beat_moods;"`       //many to many
 	KeynoteID       uint       				`json:"keynoteId" validate:"required" example:"11"`    //keynote has many beats, but each beat has only one keynote`
 	Timestamps    	[]entities.Timestamp    `json:"timestamps" validate:"required" gorm:"foreignKey:BeatID"` //a beat has many timestamps, but each timestamp has only one beat
-	Instruments   	[]entities.Instrument   `json:"instruments" gorm:"many2many:instrument_beats"` //many to many
+	Instruments   	[]entities.Instrument   `json:"instruments" gorm:"many2many:beat_instruments"` //many to many
 	Status          string    				`json:"status" example:"draft"`
 	Err 			string
 	SentToModerationAt int64 				`json:"sent_to_moderation_at"`

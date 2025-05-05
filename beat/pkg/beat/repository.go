@@ -42,8 +42,6 @@ func NewRepo(db *gorm.DB) Repository {
 }
 
 func (r repository) CreateBeat(beat entities.Beat) (entities.Beat, error) {
-	log.Println("in db")
-	log.Println(beat)
 	result := r.DB.Create(&beat)
 
 	if result.Error != nil {
