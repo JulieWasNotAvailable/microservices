@@ -13,15 +13,14 @@ import (
 )
 
 type KafkaMessageValue struct{
-	ID string
-	Value json.RawMessage //
+	ID string `json:"beat_id"`
+	Features json.RawMessage `json:"features"`
 	Err string `json:"error"`
 }
 
 type KafkaMessageToMFCC struct{
-	ID string
-	Value string //
-	Err string `json:"error"`
+	ID string`json:"id"`
+	Filename string `json:"filename"`
 }
 
 func StartConsumer(topic string, channel chan<- KafkaMessageValue){

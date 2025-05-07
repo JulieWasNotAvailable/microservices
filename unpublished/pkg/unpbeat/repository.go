@@ -52,8 +52,7 @@ func (r repository) CreateUnpublished(unpublished entities.UnpublishedBeat) (ent
 func (r *repository) ReadUnpublished() (*[]presenters.UnpublishedBeat, error) {
 	var unpublishedBeats []presenters.UnpublishedBeat
 
-	result := r.DB.Model(unpublishedBeats).Preload("AvailableFiles").Preload("Tags").Preload("Genres").
-	Preload("Moods").Preload("Timestamps").Preload("Instruments").Find(&unpublishedBeats)
+	result := r.DB.Scopes(WithBasicPreloads()).Find(&unpublishedBeats)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -65,8 +64,7 @@ func (r *repository) ReadUnpublished() (*[]presenters.UnpublishedBeat, error) {
 func (r *repository) ReadUnpublishedById(id uuid.UUID) (*presenters.UnpublishedBeat, error) {
 	var unpublished presenters.UnpublishedBeat
 	
-	result := r.DB.Where("id = ?", id).Preload("AvailableFiles").Preload("Tags").Preload("Genres").
-	Preload("Moods").Preload("Timestamps").Preload("Instruments").First(&unpublished)
+	result := r.DB.Where("id = ?", id).Scopes(WithBasicPreloads()).First(&unpublished)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, errors.New("unpublished beat not found")
@@ -81,8 +79,7 @@ func (r *repository) ReadUnpublishedByUser(userId uuid.UUID) (*[]presenters.Unpu
 	var unpublishedBeats []presenters.UnpublishedBeat
 
 	result := r.DB.Model(unpublishedBeats).
-		Where("beatmaker_id = ?", userId).Preload("AvailableFiles").Preload("Tags").Preload("Genres").
-		Preload("Moods").Preload("Timestamps").Preload("Instruments").
+		Where("beatmaker_id = ?", userId).Scopes(WithBasicPreloads()).
 		Find(&unpublishedBeats)
 
 	if result.Error != nil {
@@ -96,8 +93,7 @@ func (r *repository) ReadUnpublishedByBeatmakerandStatus(userId uuid.UUID, statu
 	var unpublishedBeats []presenters.UnpublishedBeat
 
 	result := r.DB.Model(unpublishedBeats).
-		Where("beatmaker_id = ?", userId).Where("status = ?", status).Preload("Tags").Preload("Genres").
-		Preload("Moods").Preload("Timestamps").Preload("Instruments").
+		Where("beatmaker_id = ?", userId).Where("status = ?", status).Scopes(WithBasicPreloads()).
 		Find(&unpublishedBeats)
 
 	if result.Error != nil {
@@ -112,8 +108,7 @@ func (r *repository) ReadUnpublishedInModeration(from int64, to int64) (*[]prese
 
 	result := r.DB.Model(unpublishedBeats).
 	Where("status = ?", "in_moderation").Where("sent_to_moderation_at >= ? AND sent_to_moderation_at <= ?", from, to).
-	Preload("Tags").Preload("AvailableFiles").Preload("Genres").
-	Preload("Moods").Preload("Timestamps").Preload("Instruments").
+	Scopes(WithBasicPreloads()).
 	Find(&unpublishedBeats)
 
 	if result.Error != nil {
@@ -187,11 +182,7 @@ func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBe
 	}
 
 	var updated presenters.UnpublishedBeat
-	if err := r.DB.Model(updated).Where("id = ?", unpublished.ID).
-	Preload("AvailableFiles").
-	Preload("Tags").Preload("Genres").
-	Preload("Moods").Preload("Timestamps").
-	Preload("Instruments").First(&updated).Error; err != nil {
+	if err := r.DB.Where("id = ?", unpublished.ID).Scopes(WithBasicPreloads()).First(&updated).Error; err != nil {
 		return nil, err 
 	}
 
@@ -210,4 +201,14 @@ func (r *repository) DeleteUnpublishedById(id uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func WithBasicPreloads() func(db *gorm.DB) *gorm.DB {
+    return func(db *gorm.DB) *gorm.DB {
+		return db.
+			Preload("Tags").Preload("Genres").
+			Preload("Moods").Preload("Timestamps").
+			Preload("Keynote").Preload("AvailableFiles").
+			Preload("Instruments")
+	}
 }

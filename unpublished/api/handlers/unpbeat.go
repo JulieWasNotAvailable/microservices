@@ -145,6 +145,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		// if url == "" {
 		// 	return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("mp3 file path is required to publish the beat")))
 		// }
+		filename := strings.Split(url, "/")[2]
 
 		beatModel := presenters.UnpublishedBeat{
 			ID : beatuuid,
@@ -158,7 +159,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		//send to kafka to Dmitry topic track_for_mfcc
 		message := consumer.KafkaMessageToMFCC{
 			ID : beatId,
-			Value : url,
+			Filename : filename,
 		}
 
 		messageBytes, err := json.Marshal(message)
@@ -191,7 +192,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		// log.Println("message receiver in handler: ", mfcc)
 		beatForPublishing := BeatForPublishing{
 			Beat : *beat,
-			MFCC : mfcc.Value,
+			MFCC : mfcc.Features,
 		}
 
 		beatForPublishingBytes, err := json.Marshal(beatForPublishing)
@@ -222,7 +223,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		if err != nil{
 			message := consumer.KafkaMessageValue{
 				ID : delete_approve.ID,
-				Value: []byte{},
+				Features: []byte{},
 				Err : "unsuccessful delete operation",
 			}
 			messageBytes, err := json.Marshal(message)
