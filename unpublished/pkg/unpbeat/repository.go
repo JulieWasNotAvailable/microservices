@@ -149,6 +149,13 @@ func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBe
 			}
 		}
 
+		if unpublished.Moods != nil{
+			err := r.DB.Model(&unpublished).Association("Moods").Replace(unpublished.Moods)
+			if err != nil{
+				return err
+			}
+		}
+
 		if unpublished.Instruments != nil{
 			err := r.DB.Model(&unpublished).Association("Instruments").Replace(unpublished.Instruments)
 			if err != nil{
