@@ -1,0 +1,439 @@
+basePath: /api
+definitions:
+  entities.Cart:
+    properties:
+      id:
+        type: string
+      licenses:
+        items:
+          $ref: '#/definitions/entities.License'
+        type: array
+      userId:
+        type: string
+    required:
+    - licenses
+    type: object
+  entities.License:
+    properties:
+      beatId:
+        type: string
+      beatmakerId:
+        type: string
+      cart:
+        items:
+          $ref: '#/definitions/entities.Cart'
+        type: array
+      id:
+        type: integer
+      licenseTemplateId:
+        type: integer
+      mp3:
+        type: boolean
+      price:
+        type: integer
+      wav:
+        type: boolean
+      zip:
+        type: boolean
+    type: object
+  entities.LicenseTemplate:
+    properties:
+      audioStreams:
+        type: integer
+      availableFilesId:
+        type: integer
+      description:
+        type: string
+      distributeCopies:
+        type: integer
+      id:
+        type: integer
+      liveProfit:
+        type: boolean
+      musicRecording:
+        type: boolean
+      musicVideos:
+        type: integer
+      name:
+        type: string
+      radioBroadcasting:
+        type: integer
+      userId:
+        type: string
+    type: object
+  presenters.ErrorResponse:
+    description: presenters.ErrorResponse
+    properties:
+      data:
+        example: ""
+        type: string
+      error:
+        example: error message
+        type: string
+      status:
+        example: false
+        type: boolean
+    type: object
+  presenters.LicenseTemplate:
+    properties:
+      audioStreams:
+        type: integer
+      availableFilesId:
+        type: integer
+      description:
+        type: string
+      distributeCopies:
+        type: integer
+      id:
+        type: integer
+      liveProfit:
+        type: boolean
+      musicRecording:
+        type: boolean
+      musicVideos:
+        type: integer
+      name:
+        type: string
+      radioBroadcasting:
+        type: integer
+      userId:
+        type: string
+    type: object
+  presenters.ListResponse:
+    description: presenters.ListResponse
+    properties:
+      data: {}
+      error:
+        example: ""
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+  presenters.SuccessResponse:
+    properties:
+      data: {}
+      error:
+        example: ""
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+info:
+  contact: {}
+  description: Deals with Cart, Licenses and License Template
+  title: Fiber Cart Service
+  version: "1.0"
+paths:
+  /cart/addLicenseToCart/{licenseId}:
+    get:
+      consumes:
+      - application/json
+      description: Adds a specified license to the authenticated user's cart
+      parameters:
+      - description: License ID to add to cart
+        in: path
+        name: licenseId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid license ID or attempting to add own license
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Add license to cart
+      tags:
+      - Cart
+  /cart/deleteLicense/{licenseId}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes a specified license from the authenticated user's cart
+      parameters:
+      - description: License ID to remove from cart
+        in: path
+        name: licenseId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid license ID
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove license from cart
+      tags:
+      - Cart
+  /cart/getByJWT:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all items in the authenticated user's cart
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User's cart items
+          schema:
+            $ref: '#/definitions/presenters.SuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user's cart
+      tags:
+      - Cart
+  /license/allLicenseTemplates:
+    get:
+      consumes:
+      - application/json
+      description: Returns all license templates in the system (admin only)
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: List of all license templates
+          schema:
+            $ref: '#/definitions/presenters.ListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+      summary: Get all license templates
+      tags:
+      - LicenseTemplate
+  /license/allLicenseTemplatesByBeatmakerJWT:
+    get:
+      consumes:
+      - application/json
+      description: Returns all license templates for the authenticated beatmaker
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of beatmaker's license templates
+          schema:
+            $ref: '#/definitions/presenters.SuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get beatmaker's license templates
+      tags:
+      - LicenseTemplate
+  /license/allLicenses:
+    get:
+      consumes:
+      - application/json
+      description: Returns all licenses in the system (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of all licenses
+          schema:
+            $ref: '#/definitions/presenters.ListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+      summary: Get all licenses
+      tags:
+      - License
+  /license/licenseTemplate:
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing license template (beatmaker only)
+      parameters:
+      - description: License template update data
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/presenters.LicenseTemplate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "401":
+          description: Unauthorized or template ownership mismatch
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "404":
+          description: Template not found
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update license template
+      tags:
+      - LicenseTemplate
+  /license/licensesForBeat/{beatId}:
+    get:
+      consumes:
+      - application/json
+      description: Returns all available licenses for a specific beat
+      parameters:
+      - description: Beat ID in UUID format
+        in: path
+        name: beatId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of licenses for the beat
+          schema:
+            $ref: '#/definitions/presenters.SuccessResponse'
+        "400":
+          description: Invalid beat ID format
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+      summary: Get licenses by beat ID
+      tags:
+      - License
+  /license/newLicense:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new license for a beat (beatmaker only)
+      parameters:
+      - description: License creation data
+        in: body
+        name: license
+        required: true
+        schema:
+          $ref: '#/definitions/entities.License'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Created license details
+          schema:
+            $ref: '#/definitions/entities.License'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "401":
+          description: Unauthorized or template ownership mismatch
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create new license
+      tags:
+      - License
+  /license/newLicenseTemplate:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new license template (beatmaker only)
+      parameters:
+      - description: License template data
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/entities.LicenseTemplate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created license template
+          schema:
+            $ref: '#/definitions/entities.LicenseTemplate'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create license template
+      tags:
+      - LicenseTemplate
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

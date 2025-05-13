@@ -1,7 +1,7 @@
 package presenters
 
 import (
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/entities"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 	"github.com/google/uuid"
 )
 

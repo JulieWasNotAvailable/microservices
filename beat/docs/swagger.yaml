@@ -1,0 +1,805 @@
+basePath: /api
+definitions:
+  entities.AvailableFiles:
+    properties:
+      beatID:
+        type: string
+      id:
+        type: string
+      mp3Url:
+        type: string
+      wavurl:
+        type: string
+      zipurl:
+        type: string
+    type: object
+  entities.Beat:
+    properties:
+      availableFiles:
+        $ref: '#/definitions/entities.AvailableFiles'
+      beatmakerId:
+        example: 019628ef-cd76-7d2d-bf80-48b8011fad40
+        type: string
+      bpm:
+        example: 120
+        maximum: 400
+        minimum: 20
+        type: integer
+      created_at:
+        type: integer
+      description:
+        example: Chill summer beat with tropical influences
+        maxLength: 500
+        minLength: 2
+        type: string
+      genres:
+        items:
+          $ref: '#/definitions/entities.Genre'
+        type: array
+      id:
+        example: 019628ef-cd76-7d2d-bf80-48b8011fad40
+        type: string
+      instruments:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Instrument'
+        type: array
+      keynoteId:
+        description: keynote has many beats, but each beat has only one keynote`
+        example: 11
+        type: integer
+      mfcc:
+        $ref: '#/definitions/entities.MFCC'
+      moods:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Mood'
+        type: array
+      name:
+        example: Summer Vibes
+        maxLength: 60
+        minLength: 2
+        type: string
+      picture:
+        example: https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
+        type: string
+      price:
+        example: 2999
+        type: integer
+      tags:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Tag'
+        type: array
+      timestamps:
+        description: a beat has many timestamps, but each timestamp has only one beat
+        items:
+          $ref: '#/definitions/entities.Timestamp'
+        type: array
+      url:
+        example: https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
+        type: string
+    required:
+    - availableFiles
+    - beatmakerId
+    - bpm
+    - genres
+    - keynoteId
+    - mfcc
+    - moods
+    - name
+    - price
+    - tags
+    - timestamps
+    - url
+    type: object
+  entities.Genre:
+    properties:
+      beat:
+        items:
+          $ref: '#/definitions/entities.Beat'
+        type: array
+      createdAt:
+        type: integer
+      name:
+        example: Jerk
+        type: string
+    type: object
+  entities.Instrument:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  entities.MFCC:
+    properties:
+      beatId:
+        type: string
+      col1:
+        type: number
+      col2:
+        type: number
+      id:
+        type: integer
+    type: object
+  entities.Mood:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  entities.Tag:
+    properties:
+      createdAt:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  entities.Timestamp:
+    properties:
+      beatId:
+        example: 01963e01-e46c-7996-996a-42ad3df115ac
+        type: string
+      name:
+        type: string
+      timeEnd:
+        maximum: 300
+        minimum: 2
+        type: integer
+      timeStart:
+        maximum: 299
+        minimum: 1
+        type: integer
+    required:
+    - timeEnd
+    - timeStart
+    type: object
+  entities.UnpublishedBeat:
+    properties:
+      availableFiles:
+        $ref: '#/definitions/entities.AvailableFiles'
+      beatmakerId:
+        example: 019628ef-cd76-7d2d-bf80-48b8011fad40
+        type: string
+      bpm:
+        example: 120
+        maximum: 400
+        minimum: 20
+        type: integer
+      created_at:
+        type: integer
+      description:
+        example: Chill summer beat with tropical influences
+        maxLength: 500
+        minLength: 2
+        type: string
+      err:
+        type: string
+      genres:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Genre'
+        type: array
+      id:
+        example: 019628ef-cd76-7d2d-bf80-48b8011fad40
+        type: string
+      instruments:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Instrument'
+        type: array
+      keynoteId:
+        description: keynote has many beats, but each beat has only one keynote`
+        example: 11
+        type: integer
+      moods:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Mood'
+        type: array
+      name:
+        example: Summer Vibes
+        maxLength: 60
+        minLength: 2
+        type: string
+      picture:
+        example: https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
+        type: string
+      price:
+        example: 2999
+        type: integer
+      sent_to_moderation_at:
+        type: integer
+      status:
+        example: draft
+        type: string
+      tags:
+        description: many to many
+        items:
+          $ref: '#/definitions/entities.Tag'
+        type: array
+      timestamps:
+        description: a beat has many timestamps, but each timestamp has only one beat
+        items:
+          $ref: '#/definitions/entities.Timestamp'
+        type: array
+      updated_at:
+        type: integer
+    required:
+    - availableFiles
+    - beatmakerId
+    - bpm
+    - genres
+    - keynoteId
+    - moods
+    - name
+    - price
+    - tags
+    - timestamps
+    type: object
+  presenters.BeatErrorResponse:
+    description: BeatErrorResponse
+    properties:
+      data:
+        example: ""
+        type: string
+      error:
+        example: error message
+        type: string
+      status:
+        example: false
+        type: boolean
+    type: object
+  presenters.BeatListResponse:
+    description: BeatListResponse
+    properties:
+      data: {}
+      error:
+        example: ""
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+  presenters.BeatSuccessResponse:
+    description: BeatSuccessResponse
+    properties:
+      data: {}
+      error:
+        example: ""
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+  presenters.Filters:
+    properties:
+      genres:
+        items:
+          type: integer
+        type: array
+      items_num:
+        type: integer
+      keynote:
+        type: integer
+      max_bpm:
+        type: integer
+      max_price:
+        type: integer
+      min_bpm:
+        type: integer
+      min_price:
+        type: integer
+      moods:
+        items:
+          type: integer
+        type: array
+      tags:
+        items:
+          type: integer
+        type: array
+    type: object
+  presenters.MetadataErrorResponse:
+    description: presenters.MetadataErrorResponse
+    properties:
+      data:
+        example: ""
+        type: string
+      error:
+        example: error message
+        type: string
+      status:
+        example: false
+        type: boolean
+    type: object
+  presenters.MetadataListResponse:
+    description: presenters.MetadataListResponse
+    properties:
+      data: {}
+      error:
+        example: ""
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+  presenters.MetadataSuccessResponse:
+    description: presenters.MetadataSuccessResponse
+    properties:
+      data: {}
+      error:
+        example: ""
+        type: string
+      status:
+        example: true
+        type: boolean
+    type: object
+info:
+  contact: {}
+  description: Deals Beats, Beat_Listened, filtering
+  title: Fiber Beat Service
+  version: "1.0"
+paths:
+  /beat/all:
+    get:
+      consumes:
+      - application/json
+      description: Returns all beats in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of all beats
+          schema:
+            $ref: '#/definitions/presenters.BeatListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+      summary: Get all beats
+      tags:
+      - Admin
+  /beat/beatsByDate/{from}/{to}:
+    get:
+      consumes:
+      - application/json
+      description: Returns beats created between the specified timestamps
+      parameters:
+      - description: Start timestamp (Unix epoch)
+        in: path
+        name: from
+        required: true
+        type: integer
+      - description: End timestamp (Unix epoch)
+        in: path
+        name: to
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of beats in date range
+          schema:
+            $ref: '#/definitions/presenters.BeatListResponse'
+        "400":
+          description: Invalid timestamp format
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+      summary: Get beats by date range
+      tags:
+      - Filters
+  /beat/beatsByMoodId/{moodId}:
+    get:
+      consumes:
+      - application/json
+      description: Returns beats matching a specific mood ID
+      parameters:
+      - description: Mood ID
+        in: path
+        name: moodId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of beats with this mood
+          schema:
+            $ref: '#/definitions/presenters.BeatListResponse'
+        "400":
+          description: Invalid mood ID
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+      summary: Get beats by mood
+      tags:
+      - Filters
+  /beat/byBeatId/{beatId}:
+    get:
+      consumes:
+      - application/json
+      description: Returns a single beat by its ID
+      parameters:
+      - description: Beat ID in UUID format
+        in: path
+        name: beatId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Beat details
+          schema:
+            $ref: '#/definitions/presenters.BeatSuccessResponse'
+        "400":
+          description: Invalid ID format
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+        "404":
+          description: Beat not found
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+      summary: Get beat by ID
+      tags:
+      - Admin
+  /beat/byBeatmakerId/{beatmakerId}:
+    get:
+      consumes:
+      - application/json
+      description: Returns all beats for a specific beatmaker
+      parameters:
+      - description: Beatmaker ID in UUID format
+        in: path
+        name: beatmakerId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of beats
+          schema:
+            $ref: '#/definitions/presenters.BeatListResponse'
+        "400":
+          description: Invalid ID format
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+      summary: Get beats by beatmaker
+      tags:
+      - Admin
+  /beat/exampleBeat:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new empty beat
+      parameters:
+      - description: Beat creation data
+        in: body
+        name: beat
+        required: true
+        schema:
+          $ref: '#/definitions/entities.UnpublishedBeat'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created beat details
+          schema:
+            $ref: '#/definitions/presenters.BeatSuccessResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+      summary: Create a beat
+      tags:
+      - Admin
+  /beat/filteredBeats:
+    get:
+      consumes:
+      - application/json
+      description: Returns beats matching the provided filters
+      parameters:
+      - description: Filter criteria
+        in: body
+        name: filters
+        required: true
+        schema:
+          $ref: '#/definitions/presenters.Filters'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Filtered list of beats
+          schema:
+            $ref: '#/definitions/presenters.BeatListResponse'
+        "400":
+          description: Invalid filter format
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+      summary: Filter beats
+      tags:
+      - Filters
+  /beat/withAllMoods:
+    get:
+      consumes:
+      - application/json
+      description: Returns beats that match ALL the specified mood IDs
+      parameters:
+      - description: Mood IDs to filter by
+        in: body
+        name: filters
+        required: true
+        schema:
+          $ref: '#/definitions/presenters.Filters'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of matching beats
+          schema:
+            $ref: '#/definitions/presenters.BeatListResponse'
+        "400":
+          description: Invalid mood format
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenters.BeatErrorResponse'
+      summary: Get beats by multiple moods
+      tags:
+      - Filters
+  /metadata/genres:
+    get:
+      description: Returns a list of all available music genres
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all genres
+      tags:
+      - Metadata
+  /metadata/genres/popular:
+    get:
+      description: Returns a list of currently popular genres
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get trending genres
+      tags:
+      - Metadata
+  /metadata/instruments:
+    get:
+      description: Returns a list of all available instruments
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all instruments
+      tags:
+      - Metadata
+  /metadata/keys:
+    get:
+      description: Returns a list of all available musical keys
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all keys
+      tags:
+      - Metadata
+  /metadata/mfccs:
+    get:
+      description: Returns a list of all available MFCC data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all MFCCs
+      tags:
+      - Metadata
+  /metadata/moods:
+    get:
+      description: Returns a list of all available mood categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all moods
+      tags:
+      - Metadata
+  /metadata/tags:
+    get:
+      description: Returns a list of all available tags
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all tags
+      tags:
+      - Tags
+  /metadata/tags/byName/{name}:
+    get:
+      description: Returns tag details for the specified name (ONLY 1 TAG WITH SPECIFIC
+        NAME)
+      parameters:
+      - description: Tag name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataSuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get tag by name
+      tags:
+      - Tags
+  /metadata/tags/byNameLike/{name}:
+    get:
+      description: Returns all of the tags for the specified name like%
+      parameters:
+      - description: Tag name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataSuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get MANY tags by name LIKE
+      tags:
+      - Tags
+  /metadata/tags/in_trend:
+    get:
+      description: Returns a list of popular genres. Takes beats that were created
+        this month (today minus 30 days), counts, how frequently were they used in
+        beat_genres table.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get trending tags
+      tags:
+      - Tags
+  /metadata/tags/random:
+    get:
+      description: Returns a list of randomly selected tags
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get random tags
+      tags:
+      - Tags
+  /metadata/timestamps:
+    get:
+      description: Returns a list of all available timestamps
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all timestamps
+      tags:
+      - Timestamp
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

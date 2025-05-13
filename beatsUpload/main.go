@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/JulieWasNotAvailable/microservices/beatsUpload/api/router"
+	"github.com/JulieWasNotAvailable/microservices/beatsUpload/api/routers"
 	_ "github.com/JulieWasNotAvailable/microservices/beatsUpload/docs"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"

@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/api/presenters"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/beatmetadata"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/entities"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/beatmetadata"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"

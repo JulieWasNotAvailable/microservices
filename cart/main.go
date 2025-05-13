@@ -4,14 +4,24 @@ import (
 	"log"
 
 	"github.com/JulieWasNotAvailable/microservices/cart/api/routers"
-	"github.com/JulieWasNotAvailable/microservices/cart/pkg/cart"
+	_ "github.com/JulieWasNotAvailable/microservices/cart/docs"
+	"github.com/JulieWasNotAvailable/microservices/cart/internal/cart"
+	"github.com/JulieWasNotAvailable/microservices/cart/internal/entities"
+	"github.com/JulieWasNotAvailable/microservices/cart/internal/license"
 	"github.com/JulieWasNotAvailable/microservices/cart/pkg/dbconnection"
-	"github.com/JulieWasNotAvailable/microservices/cart/pkg/entities"
-	"github.com/JulieWasNotAvailable/microservices/cart/pkg/license"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/swagger"
 )
 
+// @BasePath /api
+// @title Fiber Cart Service
+// @version 1.0
+// @description Deals with Cart, Licenses and License Template
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @host localhost:7000
 func main() {
 	app := fiber.New()
 
@@ -34,6 +44,7 @@ func main() {
 	api := app.Group("/api")
 	routers.SetupCartRoutes(api, cartService, licenseService)
 	routers.SetupLicenseRoutes(api, licenseService)
+	api.Get("/swagger/*", swagger.New(swagger.Config{}))
 	
 	app.Use(cors.New())
 

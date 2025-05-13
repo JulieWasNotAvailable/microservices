@@ -2,7 +2,7 @@ package routers
 
 import (
 	"github.com/JulieWasNotAvailable/microservices/beat/api/handlers"
-	"github.com/JulieWasNotAvailable/microservices/beat/pkg/metadata"
+	"github.com/JulieWasNotAvailable/microservices/beat/internal/metadata"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -19,6 +19,7 @@ func SetupMetadataBeatRoutes(app fiber.Router, service metadata.Service) {
 	meta.Get("/tags", handlers.GetAllTags(service))
 	meta.Get("/tags/random", handlers.GetRandomTags(service))
 	meta.Get("/tags/byName/:name", handlers.GetTagByName(service))
+	meta.Get("/tags/byNameLike/:name", handlers.GetTagsByNameLike(service))
 	meta.Get("/tags/in_trend", handlers.GetTagsInTrend(service))
 
 	// Timestamps endpoint

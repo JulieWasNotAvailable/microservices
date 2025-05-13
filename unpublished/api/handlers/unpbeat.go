@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/api/presenters"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/consumer"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/producer"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/beatmetadata"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/entities"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/unpbeat"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/consumer"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/producer"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/beatmetadata"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/unpbeat"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -142,9 +142,9 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		}
 
 		url := beat.AvailableFiles.MP3Url
-		// if url == "" {
-		// 	return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("mp3 file path is required to publish the beat")))
-		// }
+		if url == "" {
+			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("mp3 file path is required to publish the beat")))
+		}
 		filename := strings.Split(url, "/")[2]
 
 		beatModel := presenters.UnpublishedBeat{
@@ -223,7 +223,6 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		if err != nil{
 			message := consumer.KafkaMessageValue{
 				ID : delete_approve.ID,
-				Features: []byte{},
 				Err : "unsuccessful delete operation",
 			}
 			messageBytes, err := json.Marshal(message)
@@ -231,7 +230,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 				log.Println(err)
 			}
 			//нужен таймаут на сохранение бита в beat service
-			producer.CreateMessage(messageBytes, "publish_beat_main")
+			producer.CreateMessage(messageBytes, os.Getenv("KAFKA_PUBLISH_ERR_TOPIC"))
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 				"key": delapproveuuid,
 				"status": false,

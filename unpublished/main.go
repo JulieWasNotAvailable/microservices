@@ -4,11 +4,11 @@ import (
 	"log"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/api/routes"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/consumer"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/beatmetadata"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/dbconnection"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/entities"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/unpbeat"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/consumer"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/beatmetadata"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/dbconnection"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/unpbeat"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 
@@ -52,7 +52,7 @@ func main() {
 		return c.JSON("Welcome to unpublished beats service")
 	})
 
-	go consumer.StartConsumer("beat_mfcc2", mfcc_channel)
+	go consumer.StartConsumer("publish_beat", mfcc_channel)
 	go consumer.StartConsumer("delete_approve", delete_approve_channel)
 	go consumer.StartConsumerFileUpdate("beat_files_updates", unpBeatService, metadataBeatService)
 

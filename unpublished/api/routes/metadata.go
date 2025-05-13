@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/JulieWasNotAvailable/microservices/unpublished/api/handlers"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/beatmetadata"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/beatmetadata"
 	"github.com/gofiber/fiber/v2"
 )
 

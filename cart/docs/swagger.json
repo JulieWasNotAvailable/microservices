@@ -1,0 +1,677 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Deals with Cart, Licenses and License Template",
+        "title": "Fiber Cart Service",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/api",
+    "paths": {
+        "/cart/addLicenseToCart/{licenseId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Adds a specified license to the authenticated user's cart",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Add license to cart",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "License ID to add to cart",
+                        "name": "licenseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid license ID or attempting to add own license",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cart/deleteLicense/{licenseId}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Removes a specified license from the authenticated user's cart",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Remove license from cart",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "License ID to remove from cart",
+                        "name": "licenseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid license ID",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cart/getByJWT": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves all items in the authenticated user's cart",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Get user's cart",
+                "responses": {
+                    "200": {
+                        "description": "User's cart items",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.SuccessResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/license/allLicenseTemplates": {
+            "get": {
+                "description": "Returns all license templates in the system (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LicenseTemplate"
+                ],
+                "summary": "Get all license templates",
+                "responses": {
+                    "201": {
+                        "description": "List of all license templates",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/license/allLicenseTemplatesByBeatmakerJWT": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Returns all license templates for the authenticated beatmaker",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LicenseTemplate"
+                ],
+                "summary": "Get beatmaker's license templates",
+                "responses": {
+                    "200": {
+                        "description": "List of beatmaker's license templates",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.SuccessResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/license/allLicenses": {
+            "get": {
+                "description": "Returns all licenses in the system (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "License"
+                ],
+                "summary": "Get all licenses",
+                "responses": {
+                    "200": {
+                        "description": "List of all licenses",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/license/licenseTemplate": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Updates an existing license template (beatmaker only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LicenseTemplate"
+                ],
+                "summary": "Update license template",
+                "parameters": [
+                    {
+                        "description": "License template update data",
+                        "name": "template",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/presenters.LicenseTemplate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized or template ownership mismatch",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Template not found",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/license/licensesForBeat/{beatId}": {
+            "get": {
+                "description": "Returns all available licenses for a specific beat",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "License"
+                ],
+                "summary": "Get licenses by beat ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Beat ID in UUID format",
+                        "name": "beatId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of licenses for the beat",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid beat ID format",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/license/newLicense": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Creates a new license for a beat (beatmaker only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "License"
+                ],
+                "summary": "Create new license",
+                "parameters": [
+                    {
+                        "description": "License creation data",
+                        "name": "license",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entities.License"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Created license details",
+                        "schema": {
+                            "$ref": "#/definitions/entities.License"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized or template ownership mismatch",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/license/newLicenseTemplate": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Creates a new license template (beatmaker only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LicenseTemplate"
+                ],
+                "summary": "Create license template",
+                "parameters": [
+                    {
+                        "description": "License template data",
+                        "name": "template",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entities.LicenseTemplate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created license template",
+                        "schema": {
+                            "$ref": "#/definitions/entities.LicenseTemplate"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "entities.Cart": {
+            "type": "object",
+            "required": [
+                "licenses"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "licenses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.License"
+                    }
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.License": {
+            "type": "object",
+            "properties": {
+                "beatId": {
+                    "type": "string"
+                },
+                "beatmakerId": {
+                    "type": "string"
+                },
+                "cart": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Cart"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "licenseTemplateId": {
+                    "type": "integer"
+                },
+                "mp3": {
+                    "type": "boolean"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "wav": {
+                    "type": "boolean"
+                },
+                "zip": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "entities.LicenseTemplate": {
+            "type": "object",
+            "properties": {
+                "audioStreams": {
+                    "type": "integer"
+                },
+                "availableFilesId": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "distributeCopies": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "liveProfit": {
+                    "type": "boolean"
+                },
+                "musicRecording": {
+                    "type": "boolean"
+                },
+                "musicVideos": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "radioBroadcasting": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "presenters.ErrorResponse": {
+            "description": "presenters.ErrorResponse",
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "example": ""
+                },
+                "error": {
+                    "type": "string",
+                    "example": "error message"
+                },
+                "status": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "presenters.LicenseTemplate": {
+            "type": "object",
+            "properties": {
+                "audioStreams": {
+                    "type": "integer"
+                },
+                "availableFilesId": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "distributeCopies": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "liveProfit": {
+                    "type": "boolean"
+                },
+                "musicRecording": {
+                    "type": "boolean"
+                },
+                "musicVideos": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "radioBroadcasting": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "presenters.ListResponse": {
+            "description": "presenters.ListResponse",
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "string",
+                    "example": ""
+                },
+                "status": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "presenters.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "string",
+                    "example": ""
+                },
+                "status": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

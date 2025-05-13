@@ -6,14 +6,27 @@ import (
 	"strings"
 
 	"github.com/JulieWasNotAvailable/microservices/cart/api/presenters"
-	"github.com/JulieWasNotAvailable/microservices/cart/pkg/cart"
-	"github.com/JulieWasNotAvailable/microservices/cart/pkg/license"
+	"github.com/JulieWasNotAvailable/microservices/cart/internal/cart"
+	"github.com/JulieWasNotAvailable/microservices/cart/internal/license"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
-// PayForCart(cardId) —> заглушка
+
+// PostAddToCart adds a license to the user's cart
+// @Summary Add license to cart
+// @Description Adds a specified license to the authenticated user's cart
+// @Tags Cart
+// @Accept json
+// @Produce json
+// @Param licenseId path int true "License ID to add to cart"
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]string "Success message"
+// @Failure 400 {object} presenters.ErrorResponse "Invalid license ID or attempting to add own license"
+// @Failure 401 {object} presenters.ErrorResponse "Unauthorized"
+// @Failure 500 {object} presenters.ErrorResponse "Internal server error"
+// @Router /cart/addLicenseToCart/{licenseId} [get]
 func PostAddToCart(service cart.Service, licenseService license.Service) fiber.Handler{
 	return func(c *fiber.Ctx) error {
 		userId, err := getIdFromJWT(c)
@@ -46,6 +59,17 @@ func PostAddToCart(service cart.Service, licenseService license.Service) fiber.H
 	}
 }
 
+// GetCartByUser retrieves the cart for the authenticated user
+// @Summary Get user's cart
+// @Description Retrieves all items in the authenticated user's cart
+// @Tags Cart
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} presenters.SuccessResponse "User's cart items"
+// @Failure 401 {object} presenters.ErrorResponse "Unauthorized"
+// @Failure 500 {object} presenters.ErrorResponse "Internal server error"
+// @Router /cart/getByJWT [get]
 func GetCartByUser(service cart.Service) fiber.Handler{
 	return func(c *fiber.Ctx) error {
 		userId, err := getIdFromJWT(c)
@@ -61,6 +85,19 @@ func GetCartByUser(service cart.Service) fiber.Handler{
 	}
 }
 
+// DeleteLicenseFromCart removes a license from the user's cart
+// @Summary Remove license from cart
+// @Description Removes a specified license from the authenticated user's cart
+// @Tags Cart
+// @Accept json
+// @Produce json
+// @Param licenseId path int true "License ID to remove from cart"
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]string "Success message"
+// @Failure 400 {object} presenters.ErrorResponse "Invalid license ID"
+// @Failure 401 {object} presenters.ErrorResponse "Unauthorized"
+// @Failure 500 {object} presenters.ErrorResponse "Internal server error"
+// @Router /cart/deleteLicense/{licenseId} [delete]
 func DeleteLicenseFromCart(service cart.Service) fiber.Handler{
 	return func(c *fiber.Ctx) error {
 		userId, err := getIdFromJWT(c)
