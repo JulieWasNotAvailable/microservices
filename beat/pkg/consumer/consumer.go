@@ -15,7 +15,7 @@ import (
 
 type KafkaMessageBeatForPublishing struct {
 	Beat entities.UnpublishedBeat
-	MFCC entities.MFCC
+	MFCC []float64
 }
 
 func StartConsumerPublisher(topic string, service beat.Service) {

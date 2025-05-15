@@ -25,26 +25,37 @@ import (
 // @Failure 500 {object} presenters.BeatErrorResponse "Internal server error"
 // @Router /beat/exampleBeat [post]
 func CreateBeat(service beat.Service) fiber.Handler {
-    return func(c *fiber.Ctx) error {
-        // Parse request body into Beat entity
-        var newBeat entities.UnpublishedBeat
-		mfcc := entities.MFCC{
-			Col1 : 1,
-			Col2 : 2,
-			// BeatId: newBeat.ID,
+	return func(c *fiber.Ctx) error {
+		// Parse request body into Beat entity
+		newBeat := entities.UnpublishedBeat{
+			Name:      "1146",
+			KeynoteID: 1,
 		}
-        if err := c.BodyParser(&newBeat); err != nil {
-            return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
-        }
+		mfccfloat := []float64{1, 1.234567325, 2.567865430, 3.456754321, 3.456754321, 3.456754321,
+			3.456754322, 3.456754323, 3.456754324, 3.456754325, 3.456754326,
+			3.456754327, 3.456754328, 3.456754329, 3.456754330, 3.456754331,
+			3.456754332, 3.456754333, 3.456754334, 3.456754335, 3.456754336,
+			3.456754337, 3.456754338, 3.456754339, 3.456754340, 3.456754341,
+			3.456754342, 3.456754343, 3.456754344, 3.456754345, 3.456754346,
+			3.456754347, 3.456754348, 3.456754349, 3.456754350, 3.456754351,
+			3.456754352, 3.456754353, 3.456754354, 3.456754355, 3.456754356,
+			3.456754357, 3.456754358, 3.456754359, 3.456754360, 3.456754361,
+			3.456754362, 3.456754363, 3.456754364, 3.456754365, 3.456754366,
+			3.456754367, 3.456754368, 3.456754369, 3.456754370, 3.456754371,
+			3.456754372, 3.456754373, 3.456754374, 3.456754375, 3.456754376,
+			3.456754377, 3.456754378, 3.456754379, 3.456754380}
+		if err := c.BodyParser(&newBeat); err != nil {
+			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
+		}
 
-        // Call service to create the beat
-        createdBeat, err := service.CreateBeat(newBeat, mfcc)
-        if err != nil {
-            return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
-        }
+		// Call service to create the beat
+		createdBeat, err := service.CreateBeat(newBeat, mfccfloat)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
+		}
 
-        return c.Status(http.StatusCreated).JSON(presenters.CreateBeatSuccessResponse(createdBeat))
-    }
+		return c.Status(http.StatusCreated).JSON(presenters.CreateBeatSuccessResponse(createdBeat))
+	}
 }
 
 // GetAllBeats retrieves all beats
@@ -142,8 +153,8 @@ func GetFilteredBeats(service beat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		filters := presenters.Filters{}
 		if err := c.BodyParser(&filters); err != nil {
-            return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
-        }
+			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
+		}
 
 		log.Println(filters)
 
@@ -169,7 +180,7 @@ func GetFilteredBeats(service beat.Service) fiber.Handler {
 // @Failure 500 {object} presenters.BeatErrorResponse "Internal server error"
 // @Router /beat/beatsByMoodId/{moodId} [get]
 func GetBeatsByMoodId(service beat.Service) fiber.Handler {
-	return func(c *fiber.Ctx) error { 
+	return func(c *fiber.Ctx) error {
 		moodId, err := c.ParamsInt("moodId")
 		if err != nil {
 			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
@@ -196,11 +207,11 @@ func GetBeatsByMoodId(service beat.Service) fiber.Handler {
 // @Failure 500 {object} presenters.BeatErrorResponse "Internal server error"
 // @Router /beat/withAllMoods [get]
 func GetBeatsWithAllMoods(service beat.Service) fiber.Handler {
-	return func(c *fiber.Ctx) error { 
+	return func(c *fiber.Ctx) error {
 		filters := presenters.Filters{}
 		if err := c.BodyParser(&filters); err != nil {
-            return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
-        }
+			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
+		}
 
 		beats, err := service.FindBeatsWithAllMoods(filters.Moods)
 		if err != nil {
@@ -224,7 +235,7 @@ func GetBeatsWithAllMoods(service beat.Service) fiber.Handler {
 // @Failure 500 {object} presenters.BeatErrorResponse "Internal server error"
 // @Router /beat/beatsByDate/{from}/{to} [get]
 func GetBeatsByDate(service beat.Service) fiber.Handler {
-	return func(c *fiber.Ctx) error { 
+	return func(c *fiber.Ctx) error {
 		from, err := c.ParamsInt("from")
 		if err != nil {
 			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
@@ -234,7 +245,7 @@ func GetBeatsByDate(service beat.Service) fiber.Handler {
 		if err != nil {
 			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
 		}
-		
+
 		beats, err := service.ReadBeatsByDate(int64(from), int64(to))
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))

@@ -1,11 +1,12 @@
 package consumer
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"encoding/json"
 
 	"github.com/IBM/sarama"
 	// "github.com/JulieWasNotAvailable/microservices/user/api/presenters"
@@ -14,7 +15,7 @@ import (
 
 type KafkaMessageValue struct{
 	ID string `json:"beat_id"`
-	Features json.RawMessage `json:"features"`
+	Features []float64 `json:"features"`
 	Err string `json:"error"`
 }
 
@@ -54,6 +55,7 @@ func StartConsumer(topic string, channel chan<- KafkaMessageValue){
 				err := json.Unmarshal(msg.Value, &messageValue)
 				if err != nil{
 					messageValue.Err = "couldn't unmarshal"
+					log.Println("cannot parse the message")
 				}
 				channel <- messageValue
 			case <- sigchan:

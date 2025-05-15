@@ -22,7 +22,7 @@ import (
 
 type BeatForPublishing struct {
 	Beat presenters.UnpublishedBeat
-	MFCC json.RawMessage
+	MFCC []float64
 }
 
 // Hello godoc
@@ -199,9 +199,8 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		if err != nil{
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
-
-		topic := os.Getenv("KAFKA_PUBLISH_TOPIC")
-		err = producer.CreateMessage(beatForPublishingBytes, topic)
+		
+		err = producer.CreateMessage(beatForPublishingBytes, "publish_beat_main4")
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}

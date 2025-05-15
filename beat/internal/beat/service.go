@@ -3,16 +3,17 @@ package beat
 import (
 	"encoding/json"
 	"log"
+	"reflect"
 	"time"
 
 	"github.com/JulieWasNotAvailable/microservices/beat/api/presenters"
-	"github.com/JulieWasNotAvailable/microservices/beat/pkg/producer"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/entities"
+	"github.com/JulieWasNotAvailable/microservices/beat/pkg/producer"
 	"github.com/google/uuid"
 )
 
 type Service interface {
-	CreateBeat(beat entities.UnpublishedBeat, mfcc entities.MFCC) (entities.Beat, error)
+	CreateBeat(beat entities.UnpublishedBeat, mfcc []float64) (entities.Beat, error)
 
 	// helpers
 	ReadBeats() (*[]entities.Beat, error)
@@ -34,8 +35,15 @@ func NewService(r Repository) Service {
 	return &service{repository: r}
 }
 
-func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfcc entities.MFCC) (entities.Beat, error) {
+func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat []float64) (entities.Beat, error) {
 	uuid, err := uuid.NewV7()
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println(mfccfloat)
+	mfcc := entities.MFCC{}
+	mfcc, err = fillDataFromArray(mfccfloat, &mfcc)
 	if err != nil {
 		log.Println(err)
 	}
@@ -60,7 +68,7 @@ func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfcc enti
 		CreatedAt:      time.Now().Unix(), // или unpublishedBeat.CreatedAt, если нужно сохранить оригинальное значение
 	}
 
-	log.Println(beat)
+	// log.Println(beat)
 
 	beat, err = s.repository.CreateBeat(beat)
 	if err != nil {
@@ -128,4 +136,20 @@ func (s *service) DeleteBeatById(id string) error {
 
 func (s *service) FindBeatsWithAllMoods(moodIDs []uint) ([]presenters.Beat, error) {
 	return s.repository.FindBeatsWithAllMoods(moodIDs)
+}
+
+func fillDataFromArray(arr []float64, data *entities.MFCC) (entities.MFCC, error) {
+    val := reflect.ValueOf(data).Elem() // Dereference the pointer to the struct
+	
+    // Iterate over struct fields and assign from array
+	log.Println(len(arr))
+    for i := 2; i < (val.NumField()-1); i++ {
+        field := val.Field(i)
+		log.Println(i)
+        if field.Kind() == reflect.Float64 && field.CanSet() {
+            field.SetFloat(arr[i-2]) // Assign array value to struct field
+        }
+    }
+
+    return *data, nil
 }
