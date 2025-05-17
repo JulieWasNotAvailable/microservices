@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/JulieWasNotAvailable/microservices/beatsUpload/api/routers"
+	router "github.com/JulieWasNotAvailable/microservices/beatsUpload/api/routers"
 	_ "github.com/JulieWasNotAvailable/microservices/beatsUpload/docs"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
@@ -25,6 +25,7 @@ func main() {
 	app := fiber.New()
 
 	api := app.Group("/api")
+	// app.Use(cors.New())
 
 	router.SetupRoutes(app)
 

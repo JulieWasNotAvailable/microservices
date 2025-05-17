@@ -20,7 +20,9 @@ type KafkaMessageURLUpdate struct {
 }
 
 func StartConsumer(topic string, uservice user.Service) {
-	worker, err := connectConsumer([]string{os.Getenv("KAFKA_BROKER_URL")})
+	brokerUrl := []string{"broker:29092"}
+
+	worker, err := connectConsumer(brokerUrl)
 
 	if err != nil {
 		panic(err)

@@ -1,0 +1,10 @@
+Flask
+Flask-Cors
+aiokafka
+boto3
+botocore
+flasgger
+pydantic
+python-dotenv
+librosa
+kafka-python

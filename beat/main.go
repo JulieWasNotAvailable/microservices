@@ -2,17 +2,17 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/JulieWasNotAvailable/microservices/beat/api/routers"
+	_ "github.com/JulieWasNotAvailable/microservices/beat/docs"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/beat"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/metadata"
 	"github.com/JulieWasNotAvailable/microservices/beat/pkg/consumer"
 	"github.com/JulieWasNotAvailable/microservices/beat/pkg/dbconnection"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
-	_ "github.com/JulieWasNotAvailable/microservices/beat/docs"
 )
 
 // @BasePath /api
@@ -25,14 +25,14 @@ import (
 // @host localhost:7771
 func main() {
 	app := fiber.New()
-	
+
 	pgconfig := dbconnection.GetConfigs()
 	db, err := dbconnection.NewConnection(pgconfig)
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 	err = entities.MigrateAll(db)
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -43,11 +43,13 @@ func main() {
 	beatService := beat.NewService(beatRepo)
 
 	api := app.Group("/api")
+	app.Use(cors.New())
+
 	routers.SetupMetadataBeatRoutes(api, metaService)
 	routers.SetupBeatRoutes(api, beatService)
 	api.Get("/swagger/*", swagger.New(swagger.Config{}))
 
-	go consumer.StartConsumerPublisher(os.Getenv("KAFKA_PUBLISH_TOPIC"), beatService)
+	go consumer.StartConsumerPublisher("publish_beat_main", beatService)
 
 	app.Listen(":7771")
 }

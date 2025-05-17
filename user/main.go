@@ -5,7 +5,7 @@ import (
 
 	"github.com/JulieWasNotAvailable/microservices/user/api/routers"
 	_ "github.com/JulieWasNotAvailable/microservices/user/docs"
-	"github.com/JulieWasNotAvailable/microservices/user/pkg/consumer"
+	// "github.com/JulieWasNotAvailable/microservices/user/pkg/consumer"
 	"github.com/JulieWasNotAvailable/microservices/user/internal/bmmetadata"
 	"github.com/JulieWasNotAvailable/microservices/user/pkg/dbconnection"
 	"github.com/JulieWasNotAvailable/microservices/user/internal/entities"
@@ -79,7 +79,7 @@ func main() {
 	routes.GoogleRoutes(api, userService)
 	routes.WelcomeRouter(api)
 
-	go consumer.StartConsumer("profilepic_url_updates", userService)
+	// go consumer.StartConsumer("profilepic_url_updates", userService)
 
 	app.Listen(":7773")
 }

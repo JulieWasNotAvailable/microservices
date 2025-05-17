@@ -19,13 +19,15 @@ type KafkaMessageBeatForPublishing struct {
 }
 
 func StartConsumerPublisher(topic string, service beat.Service) {
-	worker, err := connectConsumer([]string{os.Getenv("KAFKA_BROKER_URL")})
+	brokerUrl := []string{"broker:29092"}
+
+	worker, err := connectConsumer(brokerUrl)
 
 	if err != nil {
 		panic(err)
 	}
 
-	consumer, err := worker.ConsumePartition(topic, 0, sarama.OffsetOldest)
+	consumer, err := worker.ConsumePartition(topic, 0, sarama.OffsetNewest)
 	if err != nil {
 		panic(err)
 	}
@@ -47,12 +49,16 @@ func StartConsumerPublisher(topic string, service beat.Service) {
 				msgCount++
 				fmt.Printf("Received message Count %d: | Topic(%s) | Message(%s) \n", msgCount, string(msg.Topic), string(msg.Value))
 
-				messageValue := KafkaMessageBeatForPublishing{}
-				err = json.Unmarshal(msg.Value, &messageValue)
+				message := KafkaMessageBeatForPublishing{}
+				err = json.Unmarshal(msg.Value, &message)
 				if err != nil {
 					log.Println(err)
 				}
-				_, err := service.CreateBeat(messageValue.Beat, messageValue.MFCC)
+
+				log.Println("message float")
+				log.Println(message.MFCC)
+				log.Println()
+				_, err := service.CreateBeat(message.Beat, message.MFCC)
 				if err != nil {
 					log.Println(err)
 				}
