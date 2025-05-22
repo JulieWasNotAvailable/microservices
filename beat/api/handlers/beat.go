@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/JulieWasNotAvailable/microservices/beat/api/presenters"
@@ -155,8 +154,6 @@ func GetFilteredBeats(service beat.Service) fiber.Handler {
 		if err := c.BodyParser(&filters); err != nil {
 			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
 		}
-
-		log.Println(filters)
 
 		//add pagination
 

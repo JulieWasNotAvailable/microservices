@@ -13,7 +13,7 @@ type Service interface {
 	GetUnpublishedBeatsByUser(userID uuid.UUID) ([]presenters.UnpublishedBeat, error)
 	GetUnpublishedInModeration(from int64, to int64) (*[]presenters.UnpublishedBeat, error)
 	GetUnpublishedByBeatmakerandStatus(userId uuid.UUID, status string) (*[]presenters.UnpublishedBeat, error)
-	UpdateUnpublishedBeat(beat *presenters.UnpublishedBeat) (*presenters.UnpublishedBeat, error)
+	UpdateUnpublishedBeat(unpublished *entities.UnpublishedBeat) (*presenters.UnpublishedBeat, error)
 	DeleteUnpublishedBeat(id uuid.UUID) error
 }
 
@@ -54,7 +54,7 @@ func (s *service) GetUnpublishedByBeatmakerandStatus(userId uuid.UUID, status st
 	return beats, err
 }
 
-func (s *service) UpdateUnpublishedBeat(beat *presenters.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
+func (s *service) UpdateUnpublishedBeat(beat *entities.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
 	return s.repository.UpdateUnpublishedById(beat)
 }
 

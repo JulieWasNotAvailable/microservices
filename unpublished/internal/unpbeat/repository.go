@@ -2,6 +2,7 @@ package unpbeat
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/api/presenters"
@@ -17,7 +18,7 @@ type Repository interface {
 	ReadUnpublishedByUser(id uuid.UUID) (*[]presenters.UnpublishedBeat, error)
 	ReadUnpublishedInModeration(from int64, to int64) (*[]presenters.UnpublishedBeat, error)
 	ReadUnpublishedByBeatmakerandStatus(userId uuid.UUID, status string) (*[]presenters.UnpublishedBeat, error)
-	UpdateUnpublishedById(unpublished *presenters.UnpublishedBeat) (*presenters.UnpublishedBeat, error)
+	UpdateUnpublishedById(unpublished *entities.UnpublishedBeat) (*presenters.UnpublishedBeat, error)
 	DeleteUnpublishedById(id uuid.UUID) error
 }
 
@@ -118,10 +119,8 @@ func (r *repository) ReadUnpublishedInModeration(from int64, to int64) (*[]prese
 	return &unpublishedBeats, nil
 }
 
-func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
-	emptyModel := entities.AvailableFiles{}
+func (r *repository) UpdateUnpublishedById(unpublished *entities.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
 	beatInitial := &entities.UnpublishedBeat{}
-
 	err := r.DB.Where("id = ?", unpublished.ID).First(&beatInitial).Error
 		if err != nil{
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -130,9 +129,32 @@ func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBe
 			return nil, err
 		}
 	}
+
+	genres := unpublished.Genres
+	for _, genre := range(genres){
+		err := r.DB.Where("id = ?", genre.ID).First(&entities.Genre{}).Error
+		if err != nil {
+			return nil, fmt.Errorf("genre %d does not exist", genre.ID)
+		}
+	}
+	moods := unpublished.Moods
+	for _, mood := range(moods){
+		err := r.DB.Where("id = ?", mood.ID).First(&entities.Genre{}).Error
+		if err != nil {
+			return nil, fmt.Errorf("mood %d does not exist", mood.ID)
+		}
+	}
+	instruments := unpublished.Instruments
+	for _, instrument := range(instruments){
+		err := r.DB.Where("id = ?", instrument.ID).First(&entities.Genre{}).Error
+		if err != nil {
+			return nil, fmt.Errorf("instrument %d does not exist", instrument.ID)
+		}
+	}
 	
 	//it needs to be a transaction
 	//i need to check that person tried to edit tags, and then delete the tags from beat_tags table
+	emptyModel := entities.AvailableFiles{}
 	err = r.DB.Transaction(func(tx *gorm.DB) error {
 		
 		if unpublished.Tags != nil{
@@ -171,14 +193,13 @@ func (r *repository) UpdateUnpublishedById(unpublished *presenters.UnpublishedBe
 		}
 
 		if unpublished.AvailableFiles != emptyModel{
-			err := r.DB.Model(&unpublished).Association("AvailableFiles").Replace(&unpublished.AvailableFiles)
+			err := r.DB.Model(&unpublished).Association("AvailableFiles").Replace(unpublished.AvailableFiles)
 			if err != nil{
 				return err
 			}
 		}
-		
+		unpublished.Status = beatInitial.Status
 		err := r.DB.Updates(unpublished).Error	
-
 		if err != nil {
 			return err
 		}

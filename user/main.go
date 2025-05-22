@@ -5,11 +5,13 @@ import (
 
 	"github.com/JulieWasNotAvailable/microservices/user/api/routers"
 	_ "github.com/JulieWasNotAvailable/microservices/user/docs"
+
 	"github.com/JulieWasNotAvailable/microservices/user/pkg/consumer"
+	"github.com/JulieWasNotAvailable/microservices/user/internal/activity"
 	"github.com/JulieWasNotAvailable/microservices/user/internal/bmmetadata"
-	"github.com/JulieWasNotAvailable/microservices/user/pkg/dbconnection"
 	"github.com/JulieWasNotAvailable/microservices/user/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/user/internal/user"
+	"github.com/JulieWasNotAvailable/microservices/user/pkg/dbconnection"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
@@ -29,38 +31,25 @@ func main() {
 	if err != nil {
 		log.Fatal("Database Connection Error $s", err)
 	}
-	err = entities.MigrateUser(db)
+	err = entities.MigrateAll(db)
 	if err != nil {
-		log.Fatal("Cannot Migrate User Error $s", err)
-	}
-	err = entities.MigrateMetadata(db)
-	if err != nil {
-		log.Fatal("Cannot Migrate Metadata Error $s", err)
-	}
-	err = entities.MigrateRole(db)
-	if err != nil {
-		log.Fatal("Cannot Migrate Role Error $s", err)
+		log.Fatal("Cannot Migrate Error $s", err)
 	}
 
 	userRepo := user.NewRepo(db)
 	metadataRepo := bmmetadata.NewRepo(db)
+	activityRepo := activity.NewRepo(db)
+
 	userService := user.NewService(userRepo)
 	metadataService := bmmetadata.NewService(metadataRepo)
+	activityService := activity.NewService(activityRepo)
 
 	app := fiber.New()
 	api := app.Group("/api")
 	app.Use(cors.New())
 
 	// app.Get("/swagger/*", swagger.HandlerDefault)
-	api.Get("/swagger/*", swagger.New(swagger.Config{ // custom
-		// Prefill OAuth ClientId on Authorize popup
-		// OAuth: &swagger.OAuthConfig{
-		// 	AppName:  "OAuth Provider",
-		// 	ClientId: "21bb4edc-05a7-4afc-86f1-2e151e4ba6e2",
-		// },
-		// Ability to change OAuth2 redirect uri location
-		// OAuth2RedirectUrl: "http://localhost:8080/swagger/oauth2-redirect.html",
-	}))
+	api.Get("/swagger/*", swagger.New(swagger.Config{}))
 
 	api.Get("/allGenres", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
@@ -78,6 +67,7 @@ func main() {
 	routes.MetadataRoutes(api, metadataService, userService)
 	routes.GoogleRoutes(api, userService)
 	routes.WelcomeRouter(api)
+	routes.ActivityRoutes(api, activityService)
 
 	go consumer.StartConsumer("profilepic_url_updates", userService)
 

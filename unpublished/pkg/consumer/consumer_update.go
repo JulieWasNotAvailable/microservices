@@ -9,7 +9,6 @@ import (
 	"syscall"
 
 	"github.com/IBM/sarama"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/api/presenters"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/beatmetadata"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/unpbeat"
@@ -61,7 +60,7 @@ func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice bea
 				}
 			
 				updateDataFiles := entities.AvailableFiles{}
-				updateDataBeat := presenters.UnpublishedBeat{
+				updateDataBeat := entities.UnpublishedBeat{
 					ID : key,
 				}
 				switch message.FileType {

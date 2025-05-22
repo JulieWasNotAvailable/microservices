@@ -15,6 +15,359 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/activity/listened": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Record that a user listened to a beat",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "listen"
+                ],
+                "summary": "Record a listen",
+                "parameters": [
+                    {
+                        "description": "Listen data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.requestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listen recorded",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/postNewLike": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add a like to a beat by the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "likes"
+                ],
+                "summary": "Like a beat",
+                "parameters": [
+                    {
+                        "description": "Beat id data",
+                        "name": "beatId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.requestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Like created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/totalLikesCountForBeats": {
+            "post": {
+                "description": "Get the total number of likes for a list of beats",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "likes"
+                ],
+                "summary": "Get total likes for multiple beats",
+                "parameters": [
+                    {
+                        "description": "List of beat IDs",
+                        "name": "requestBodyList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.requestBodyList"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Total likes count",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/viewLikesCountByBeatId/{beatId}": {
+            "get": {
+                "description": "Get the number of likes for a specific beat",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "likes"
+                ],
+                "summary": "Get like count for a beat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Beat ID",
+                        "name": "beatId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Like count",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/viewLikesCountByUserId/{userId}": {
+            "get": {
+                "description": "Get the number of likes given by a specific user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "likes"
+                ],
+                "summary": "Get like count for a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Like count",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/viewMyLikes": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all likes by the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "likes"
+                ],
+                "summary": "Get user's likes",
+                "responses": {
+                    "200": {
+                        "description": "List of likes",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/{beatId}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Remove a like from a beat by the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "likes"
+                ],
+                "summary": "Remove a like",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Beat ID",
+                        "name": "beatId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Like removed successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/beat/all": {
             "get": {
                 "description": "Returns all beats in the system",
@@ -731,7 +1084,6 @@ const docTemplate = `{
                 "bpm",
                 "genres",
                 "keynoteId",
-                "mfcc",
                 "moods",
                 "name",
                 "price",
@@ -784,8 +1136,11 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 11
                 },
-                "mfcc": {
-                    "$ref": "#/definitions/entities.MFCC"
+                "likes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Like"
+                    }
                 },
                 "moods": {
                     "description": "many to many",
@@ -803,6 +1158,10 @@ const docTemplate = `{
                 "picture": {
                     "type": "string",
                     "example": "https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"
+                },
+                "plays": {
+                    "type": "integer",
+                    "example": 105
                 },
                 "price": {
                     "type": "integer",
@@ -857,20 +1216,14 @@ const docTemplate = `{
                 }
             }
         },
-        "entities.MFCC": {
+        "entities.Like": {
             "type": "object",
             "properties": {
-                "beatId": {
+                "beatID": {
                     "type": "string"
                 },
-                "col1": {
-                    "type": "number"
-                },
-                "col2": {
-                    "type": "number"
-                },
-                "id": {
-                    "type": "integer"
+                "userID": {
+                    "type": "string"
                 }
             }
         },
@@ -1032,6 +1385,25 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "integer"
+                }
+            }
+        },
+        "handlers.requestBody": {
+            "type": "object",
+            "properties": {
+                "beatId": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.requestBodyList": {
+            "type": "object",
+            "properties": {
+                "beatids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

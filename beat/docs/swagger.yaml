@@ -48,8 +48,10 @@ definitions:
         description: keynote has many beats, but each beat has only one keynote`
         example: 11
         type: integer
-      mfcc:
-        $ref: '#/definitions/entities.MFCC'
+      likes:
+        items:
+          $ref: '#/definitions/entities.Like'
+        type: array
       moods:
         description: many to many
         items:
@@ -63,6 +65,9 @@ definitions:
       picture:
         example: https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4
         type: string
+      plays:
+        example: 105
+        type: integer
       price:
         example: 2999
         type: integer
@@ -85,7 +90,6 @@ definitions:
     - bpm
     - genres
     - keynoteId
-    - mfcc
     - moods
     - name
     - price
@@ -112,16 +116,12 @@ definitions:
       name:
         type: string
     type: object
-  entities.MFCC:
+  entities.Like:
     properties:
-      beatId:
+      beatID:
         type: string
-      col1:
-        type: number
-      col2:
-        type: number
-      id:
-        type: integer
+      userID:
+        type: string
     type: object
   entities.Mood:
     properties:
@@ -241,6 +241,18 @@ definitions:
     - tags
     - timestamps
     type: object
+  handlers.requestBody:
+    properties:
+      beatId:
+        type: string
+    type: object
+  handlers.requestBodyList:
+    properties:
+      beatids:
+        items:
+          type: string
+        type: array
+    type: object
   presenters.BeatErrorResponse:
     description: BeatErrorResponse
     properties:
@@ -344,6 +356,240 @@ info:
   title: Fiber Beat Service
   version: "1.0"
 paths:
+  /activity/{beatId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a like from a beat by the authenticated user
+      parameters:
+      - description: Beat ID
+        in: path
+        name: beatId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Like removed successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Remove a like
+      tags:
+      - likes
+  /activity/listened:
+    post:
+      consumes:
+      - application/json
+      description: Record that a user listened to a beat
+      parameters:
+      - description: Listen data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.requestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Listen recorded
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Record a listen
+      tags:
+      - listen
+  /activity/postNewLike:
+    post:
+      consumes:
+      - application/json
+      description: Add a like to a beat by the authenticated user
+      parameters:
+      - description: Beat id data
+        in: body
+        name: beatId
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.requestBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Like created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Like a beat
+      tags:
+      - likes
+  /activity/totalLikesCountForBeats:
+    post:
+      consumes:
+      - application/json
+      description: Get the total number of likes for a list of beats
+      parameters:
+      - description: List of beat IDs
+        in: body
+        name: requestBodyList
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.requestBodyList'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Total likes count
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get total likes for multiple beats
+      tags:
+      - likes
+  /activity/viewLikesCountByBeatId/{beatId}:
+    get:
+      consumes:
+      - application/json
+      description: Get the number of likes for a specific beat
+      parameters:
+      - description: Beat ID
+        in: path
+        name: beatId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Like count
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get like count for a beat
+      tags:
+      - likes
+  /activity/viewLikesCountByUserId/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: Get the number of likes given by a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Like count
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get like count for a user
+      tags:
+      - likes
+  /activity/viewMyLikes:
+    get:
+      consumes:
+      - application/json
+      description: Get all likes by the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of likes
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get user's likes
+      tags:
+      - likes
   /beat/all:
     get:
       consumes:

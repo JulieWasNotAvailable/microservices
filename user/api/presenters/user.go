@@ -20,7 +20,6 @@ type User struct {
 	RoleID          uint   `json:"roleId,omitempty" example:"1"`
 	SubscriptionID  int   `json:"subscriptionId,omitempty" example:"1"`
 	
-	UsersFavourites int `json:"usersFavourites,omitempty" example:"1"`
 	FollowerOf      int `json:"followerOf,omitempty" example:"4"`
 	Metadata  	 	Metadata   `gorm:"foreignKey:UserID"`
 }
@@ -57,7 +56,6 @@ func CreateUserSuccessResponse(data *entities.User) *UserSuccessResponse {
 		RoleID:          data.RoleID,
 		SubscriptionID:  data.SubscriptionID,
 		Email:           data.Email,
-		UsersFavourites: data.UsersFavourites,
 		FollowerOf:      data.FollowerOf,
 	}
 

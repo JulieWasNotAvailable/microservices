@@ -5,11 +5,11 @@ import (
 )
 
 type AvailableFiles struct {
-	ID     uuid.UUID
-	MP3Url string
-	WAVUrl string
-	ZIPUrl string
-	BeatId uuid.UUID
+	ID     uuid.UUID `json:"id"`
+	MP3Url string    `json:"mp3url"`
+	WAVUrl string    `json:"wavurl"`
+	ZIPUrl string    `json:"zipurl"`
+	BeatId uuid.UUID `json:"beatId"`
 }
 
 // @Description entities.Genre
@@ -22,15 +22,15 @@ type Genre struct {
 type Timestamp struct {
 	ID        uint      `json:"id" swaggerignore:"true"`
 	BeatId    uuid.UUID `json:"beatId" example:"01963e01-e46c-7996-996a-42ad3df115ac"`
-	Name      string
-	TimeStart int64 `validate:"required,gte=1,lte=299"`
-	TimeEnd   int64 `validate:"required,gte=2,lte=300"`
+	Name      string    `json:"name"`
+	TimeStart int64     `validate:"required,gte=1,lte=299"`
+	TimeEnd   int64     `validate:"required,gte=2,lte=300"`
 }
 
 type Tag struct {
-	ID   uint
+	ID   uint    `json:"id"`
 	Beat []*Beat `json:"-" gorm:"many2many:beat_tags;" swaggerignore:"true"`
-	Name string
+	Name string  `json:"name"`
 }
 
 type TrendingTags []struct {
@@ -46,41 +46,38 @@ type TrendingGenres []struct {
 }
 
 type Mood struct {
-	ID   uint
+	ID   uint    `json:"id"`
 	Beat []*Beat `json:"-" gorm:"many2many:beat_moods;" swaggerignore:"true"`
-	Name string
+	Name string  `json:"name"`
 }
 
 type Keynote struct {
-	ID    uint
+	ID    uint   `json:"id"`
 	Beats []Beat `json:"-" gorm:"foreignKey:KeynoteID" swaggerignore:"true"`
-	Name  string
+	Name  string `json:"name"`
 }
 
 type Instrument struct {
-	ID   uint
+	ID   uint    `json:"id"`
 	Beat []*Beat `json:"-" gorm:"many2many:beat_instruments;" swaggerignore:"true"`
-	Name string
+	Name string  `json:"name"`
 }
 
 type MFCC struct {
-	ID     uint
-	BeatId uuid.UUID
-	col1   int
-	col2   int
+	ID     uint      `json:"id"`
+	BeatId uuid.UUID `json:"beatId"`
 }
 
-//SHIFT ALT + F
 type Filters struct {
 	Genres   []uint `json:"genres,omitempty"`
 	Moods    []uint `json:"moods,omitempty"`
 	Tags     []uint `json:"tags,omitempty"`
-	MinPrice int     `json:"min_price,omitempty"`
-	MaxPrice int     `json:"max_price,omitempty"`
-	MinBPM   int     `json:"min_bpm,omitempty"`
-	MaxBPM   int     `json:"max_bpm,omitempty"`
-	Keynote  uint    `json:"keynote,omitempty"`
-	ItemsNum int     `json:"items_num,omitempty"`
+	MinPrice int    `json:"min_price,omitempty"`
+	MaxPrice int    `json:"max_price,omitempty"`
+	MinBPM   int    `json:"min_bpm,omitempty"`
+	MaxBPM   int    `json:"max_bpm,omitempty"`
+	Keynote  uint   `json:"keynote,omitempty"`
+	ItemsNum int    `json:"items_num,omitempty"`
 }
 
 // @Description presenters.MetadataSuccessResponse

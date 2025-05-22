@@ -2,12 +2,12 @@ package presenters
 
 import "github.com/google/uuid"
 
-type AvailableFiles struct{
-	ID uuid.UUID
-	MP3 string
-	WAV string
-	ZIP string
-	UnpublishedBeatId uuid.UUID
+type AvailableFiles struct {
+	ID                uuid.UUID `json:"id"`
+	MP3Url            string    `json:"mp3url"`
+	WAVUrl            string    `json:"wavurl"`
+	ZIPUrl            string    `json:"zipurl"`
+	UnpublishedBeatId uuid.UUID `json:"unpublishedBeatId"`
 }
 
 type Instrument struct {

@@ -41,7 +41,6 @@ func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat
 		log.Println(err)
 	}
 
-	log.Println(mfccfloat)
 	mfcc := entities.MFCC{}
 	mfcc, err = fillDataFromArray(mfccfloat, &mfcc)
 	if err != nil {
@@ -67,8 +66,6 @@ func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat
 		MFCC:           mfcc,
 		CreatedAt:      time.Now().Unix(), // или unpublishedBeat.CreatedAt, если нужно сохранить оригинальное значение
 	}
-
-	// log.Println(beat)
 
 	beat, err = s.repository.CreateBeat(beat)
 	if err != nil {
@@ -142,10 +139,8 @@ func fillDataFromArray(arr []float64, data *entities.MFCC) (entities.MFCC, error
     val := reflect.ValueOf(data).Elem() // Dereference the pointer to the struct
 	
     // Iterate over struct fields and assign from array
-	log.Println(len(arr))
     for i := 2; i < (val.NumField()-1); i++ {
         field := val.Field(i)
-		log.Println(i)
         if field.Kind() == reflect.Float64 && field.CanSet() {
             field.SetFloat(arr[i-2]) // Assign array value to struct field
         }

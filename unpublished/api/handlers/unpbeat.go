@@ -87,14 +87,14 @@ func SaveBeatDraft(service unpbeat.Service, metaservice beatmetadata.MetadataSer
 // @Tags beats
 // @Accept json
 // @Produce json
-// @Param beat body presenters.UnpublishedBeat true "Beat data to update"
+// @Param beat body entities.UnpublishedBeat true "Beat data to update"
 // @Success 200 {object} object "Successfully updated beat"
 // @Failure 422 {object} object "Unprocessable entity - invalid request body"
 // @Failure 500 {object} object "Internal server error"
 // @Router /unpbeats/saveDraft [patch]
 func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var requestBody presenters.UnpublishedBeat
+		var requestBody entities.UnpublishedBeat
 		err := c.BodyParser(&requestBody)
 		if err != nil {
 			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(err))
@@ -147,9 +147,9 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		}
 		filename := strings.Split(url, "/")[2]
 
-		beatModel := presenters.UnpublishedBeat{
+		beatModel := entities.UnpublishedBeat{
 			ID : beatuuid,
-			Status: string(entities.StatusInModeration),
+			Status: entities.StatusInModeration,
 		}
 		_, err = service.UpdateUnpublishedBeat(&beatModel)
 		if err != nil{
@@ -174,10 +174,10 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 
 		mfcc := <- mfcc_channel
 		if mfcc.Err != "" {
-			errMessage := presenters.UnpublishedBeat{
+			errMessage := entities.UnpublishedBeat{
 				ID : beatuuid,
 				Err : mfcc.Err,
-				Status: string(entities.StatusDraft),
+				Status: entities.StatusDraft,
 			}
 			_, err = service.UpdateUnpublishedBeat(&errMessage)
 			if err != nil {
@@ -199,7 +199,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		if err != nil{
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
-		
+
 		err = producer.CreateMessage(beatForPublishingBytes, "publish_beat_main4")
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
@@ -260,9 +260,9 @@ func SendToModeration(service unpbeat.Service) fiber.Handler {
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
-		requestBody := presenters.UnpublishedBeat{
+		requestBody := entities.UnpublishedBeat{
 			ID : uuid,
-			Status: string(entities.StatusInModeration),
+			Status: entities.StatusInModeration,
 			SentToModerationAt: time.Now().Unix(),
 		}
 		beat, err := service.UpdateUnpublishedBeat(&requestBody)

@@ -5,14 +5,15 @@ import (
 	"os"
 
 	"github.com/JulieWasNotAvailable/microservices/beat/api/routers"
+	_ "github.com/JulieWasNotAvailable/microservices/beat/docs"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/beat"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/entities"
+	"github.com/JulieWasNotAvailable/microservices/beat/internal/activity"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/metadata"
 	"github.com/JulieWasNotAvailable/microservices/beat/pkg/consumer"
 	"github.com/JulieWasNotAvailable/microservices/beat/pkg/dbconnection"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
-	_ "github.com/JulieWasNotAvailable/microservices/beat/docs"
 )
 
 // @BasePath /api
@@ -42,9 +43,13 @@ func main() {
 	beatRepo := beat.NewRepo(db)
 	beatService := beat.NewService(beatRepo)
 
+	activityRepo := activity.NewRepo(db)
+	activityService := activity.NewService(activityRepo)
+
 	api := app.Group("/api")
 	routers.SetupMetadataBeatRoutes(api, metaService)
 	routers.SetupBeatRoutes(api, beatService)
+	routers.SetupActivityRoutes(api, activityService)
 	api.Get("/swagger/*", swagger.New(swagger.Config{}))
 
 	go consumer.StartConsumerPublisher(os.Getenv("KAFKA_PUBLISH_TOPIC"), beatService)

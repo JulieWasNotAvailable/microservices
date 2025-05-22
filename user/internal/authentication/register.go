@@ -69,7 +69,7 @@ func Register(service user.Service) fiber.Handler {
 		token := jwt.New(jwt.SigningMethodHS256)
 		claims := token.Claims.(jwt.MapClaims)
 		claims["id"] = newUser.ID
-		claims["role"] = newUser.ID
+		claims["role"] = user.RoleID
 		claims["iat"] = time.Now().Unix()
 		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 

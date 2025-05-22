@@ -4,7 +4,7 @@ import "github.com/google/uuid"
 
 type MFCC struct {
 	ID     uint
-	BeatId uuid.UUID
+	BeatID uuid.UUID
 	Crm1   float64
 	Crm2   float64
 	Crm3   float64

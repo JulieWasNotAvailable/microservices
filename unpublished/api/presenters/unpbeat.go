@@ -11,7 +11,7 @@ type UnpublishedBeat struct {
 	Name               string                  `json:"name" validate:"required,min=2,max=60" example:"Summer Vibes"`
 	Picture            string                  `json:"picture" example:"https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
 	BeatmakerID        uuid.UUID               `json:"beatmakerId" validate:"required" example:"019628ef-cd76-7d2d-bf80-48b8011fad40"`
-	AvailableFiles     entities.AvailableFiles `validate:"required" gorm:"foreignKey:UnpublishedBeatID;constraint:OnDelete:CASCADE;"`
+	AvailableFiles     entities.AvailableFiles `json:"availableFiles" validate:"required" gorm:"foreignKey:UnpublishedBeatID;constraint:OnDelete:CASCADE;"`
 	URL                string                  `json:"url" validate:"required" example:"https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
 	Price              int                     `json:"price" validate:"required" example:"2999"`
 	Tags               []entities.Tag          `json:"tags" validate:"required" gorm:"many2many:beat_tags;"` //many to many
@@ -24,10 +24,10 @@ type UnpublishedBeat struct {
 	Timestamps         []entities.Timestamp    `json:"timestamps" validate:"required" gorm:"foreignKey:BeatID"` //a beat has many timestamps, but each timestamp has only one beat
 	Instruments        []entities.Instrument   `json:"instruments" gorm:"many2many:beat_instruments"`           //many to many
 	Status             string                  `json:"status" example:"draft"`
-	Err                string
-	SentToModerationAt int64 `json:"sent_to_moderation_at"`
-	CreatedAt          int64 `json:"created_at"`
-	UpdatedAt          int64 `json:"updated_at"`
+	Err                string                  `json:"error"`
+	SentToModerationAt int64                   `json:"sent_to_moderation_at"`
+	CreatedAt          int64                   `json:"created_at"`
+	UpdatedAt          int64                   `json:"updated_at"`
 }
 
 // @Description presenters.UnpublishedBeatSuccessResponse

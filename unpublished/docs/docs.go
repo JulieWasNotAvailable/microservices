@@ -847,7 +847,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/presenters.UnpublishedBeat"
+                            "$ref": "#/definitions/entities.UnpublishedBeat"
                         }
                     }
                 ],
@@ -1058,6 +1058,9 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "integer"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string",
                     "example": "Jerk"
@@ -1131,6 +1134,108 @@ const docTemplate = `{
                 "unpublishedbeatId": {
                     "type": "string",
                     "example": "01963e01-e46c-7996-996a-42ad3df115ac"
+                }
+            }
+        },
+        "entities.UnpublishedBeat": {
+            "description": "entitites.UnpublishedBeatErrorResponse",
+            "type": "object",
+            "required": [
+                "bpm",
+                "genres",
+                "keynoteId",
+                "moods",
+                "name",
+                "price",
+                "tags",
+                "timestamps"
+            ],
+            "properties": {
+                "bpm": {
+                    "type": "integer",
+                    "maximum": 400,
+                    "minimum": 20,
+                    "example": 120
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "minLength": 2,
+                    "example": "Chill summer beat with tropical influences"
+                },
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Genre"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "019628ef-cd76-7d2d-bf80-48b8011fad40"
+                },
+                "instruments": {
+                    "description": "many to many",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Instrument"
+                    }
+                },
+                "keynote": {
+                    "description": "` + "`" + `gorm:\"foreignKey:UnpublishedBeatID;constraint:OnDelete:CASCADE;\" validate:\"required\"` + "`" + `",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entities.Keynote"
+                        }
+                    ]
+                },
+                "keynoteId": {
+                    "description": "keynote has many beats, but each beat has only one keynote` + "`" + `",
+                    "type": "integer",
+                    "example": 2
+                },
+                "moods": {
+                    "description": "many to many",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Mood"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 60,
+                    "minLength": 2,
+                    "example": "Summer Vibes"
+                },
+                "price": {
+                    "type": "integer",
+                    "example": 2999
+                },
+                "tags": {
+                    "description": "many to many",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Tag"
+                    }
+                },
+                "timestamps": {
+                    "description": "a beat has many timestamps, but each timestamp has only one beat",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Timestamp"
+                    }
+                }
+            }
+        },
+        "presenters.Keynote": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "C# Minor"
                 }
             }
         },
@@ -1221,7 +1326,7 @@ const docTemplate = `{
                     "minLength": 2,
                     "example": "Chill summer beat with tropical influences"
                 },
-                "err": {
+                "error": {
                     "type": "string"
                 },
                 "genres": {
@@ -1241,6 +1346,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entities.Instrument"
                     }
+                },
+                "keynote": {
+                    "$ref": "#/definitions/presenters.Keynote"
                 },
                 "keynoteId": {
                     "description": "keynote has many beats, but each beat has only one keynote` + "`" + `",
