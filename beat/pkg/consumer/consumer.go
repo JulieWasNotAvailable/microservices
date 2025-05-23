@@ -19,7 +19,7 @@ type KafkaMessageBeatForPublishing struct {
 }
 
 func StartConsumerPublisher(topic string, service beat.Service) {
-	brokerUrl := []string{"broker:29092"}
+	brokerUrl := []string{"localhost:9092"}
 
 	worker, err := connectConsumer(brokerUrl)
 
@@ -55,9 +55,6 @@ func StartConsumerPublisher(topic string, service beat.Service) {
 					log.Println(err)
 				}
 
-				log.Println("message float")
-				log.Println(message.MFCC)
-				log.Println()
 				_, err := service.CreateBeat(message.Beat, message.MFCC)
 				if err != nil {
 					log.Println(err)
