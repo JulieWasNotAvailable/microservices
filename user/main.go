@@ -69,7 +69,7 @@ func main() {
 	routes.WelcomeRouter(api)
 	routes.ActivityRoutes(api, activityService)
 
-	go consumer.StartConsumer("profilepic_url_updates", userService)
+	// go consumer.StartConsumer("profilepic_url_updates", userService)
 
 	app.Listen(":7773")
 }

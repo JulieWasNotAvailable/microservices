@@ -71,3 +71,18 @@ type MFCC struct {
 	Spc    float64
 	Err    string
 }
+
+// ID uint
+// BeatId string
+// BPM 157
+// Chroma1 int64
+// Chroma2 int64
+// Chroma3 int64
+// ...
+// Chroma12 int64
+// Melspec int64
+// Mfcc1 int64
+// ...
+// Mfcc50 int64
+// Spectral int64
+// Err string

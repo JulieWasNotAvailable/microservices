@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/api/presenters"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/consumer"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/producer"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/beatmetadata"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/unpbeat"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/consumer"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/producer"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -71,9 +71,9 @@ func SaveBeatDraft(service unpbeat.Service, metaservice beatmetadata.MetadataSer
 		}
 
 		beatReponse := presenters.UnpublishedBeat{
-			ID: createdBeat.ID,
-			Status: string(createdBeat.Status),
-			BeatmakerID: beatmakeruuid,
+			ID:             createdBeat.ID,
+			Status:         string(createdBeat.Status),
+			BeatmakerID:    beatmakeruuid,
 			AvailableFiles: createdAvailbableFiles,
 		}
 
@@ -102,11 +102,11 @@ func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) 
 
 		beat, err := service.UpdateUnpublishedBeat(&requestBody)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse2(*beat))
-}
+	}
 }
 
 // PostPublishBeat godoc
@@ -123,11 +123,11 @@ func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) 
 func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.KafkaMessageValue, delete_approve_channel <-chan consumer.KafkaMessageValue) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		beatId := c.Params("id")
-		beatuuid, err := uuid.Parse(beatId)	
+		beatuuid, err := uuid.Parse(beatId)
 		if err != nil {
 			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(errors.New("wrong id format")))
 		}
-		
+
 		beat, err := service.GetUnpublishedBeatByID(beatuuid)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
@@ -147,23 +147,23 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		}
 		filename := strings.Split(url, "/")[2]
 
-		beatModel := entities.UnpublishedBeat{
-			ID : beatuuid,
-			Status: entities.StatusInModeration,
+		beatModel := presenters.UnpublishedBeat{
+			ID:     beatuuid,
+			Status: string(entities.StatusInModeration),
 		}
 		_, err = service.UpdateUnpublishedBeat(&beatModel)
-		if err != nil{
+		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
-	
+
 		//send to kafka to Dmitry topic track_for_mfcc
 		message := consumer.KafkaMessageToMFCC{
-			ID : beatId,
-			Filename : filename,
+			ID:       beatId,
+			Filename: filename,
 		}
 
 		messageBytes, err := json.Marshal(message)
-		if err != nil{
+		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
@@ -172,31 +172,31 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
-		mfcc := <- mfcc_channel
+		mfcc := <-mfcc_channel
 		if mfcc.Err != "" {
-			errMessage := entities.UnpublishedBeat{
-				ID : beatuuid,
-				Err : mfcc.Err,
-				Status: entities.StatusDraft,
+			errMessage := presenters.UnpublishedBeat{
+				ID:     beatuuid,
+				Err:    mfcc.Err,
+				Status: string(entities.StatusDraft),
 			}
 			_, err = service.UpdateUnpublishedBeat(&errMessage)
 			if err != nil {
 				return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(errors.New("couldn't update the error status of the beat")))
 			}
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-				"kafka message":mfcc,
-				"status": false,
-				"error": mfcc.Err})
+				"kafka message": mfcc,
+				"status":        false,
+				"error":         mfcc.Err})
 		}
 
 		// log.Println("message receiver in handler: ", mfcc)
 		beatForPublishing := BeatForPublishing{
-			Beat : *beat,
-			MFCC : mfcc.Features,
+			Beat: *beat,
+			MFCC: mfcc.Features,
 		}
 
 		beatForPublishingBytes, err := json.Marshal(beatForPublishing)
-		if err != nil{
+		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
@@ -205,39 +205,39 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
-		delete_approve := <- delete_approve_channel
-		if delete_approve.Err != ""{
+		delete_approve := <-delete_approve_channel
+		if delete_approve.Err != "" {
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 				"kafka message": delete_approve,
-				"status": false,
-				"error": delete_approve.Err})
+				"status":        false,
+				"error":         delete_approve.Err})
 		}
-	
-		delapproveuuid, err := uuid.Parse(delete_approve.ID)	
+
+		delapproveuuid, err := uuid.Parse(delete_approve.ID)
 		if err != nil {
 			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(errors.New("wrong id format")))
 		}
 		log.Println("deleting beat with this id: ", delapproveuuid)
 		// err = service.DeleteUnpublishedBeat(delapproveuuid)
-		if err != nil{
+		if err != nil {
 			message := consumer.KafkaMessageValue{
-				ID : delete_approve.ID,
-				Err : "unsuccessful delete operation",
+				ID:  delete_approve.ID,
+				Err: "unsuccessful delete operation",
 			}
 			messageBytes, err := json.Marshal(message)
-			if err != nil{
+			if err != nil {
 				log.Println(err)
 			}
 			//нужен таймаут на сохранение бита в beat service
 			producer.CreateMessage(messageBytes, os.Getenv("KAFKA_PUBLISH_ERR_TOPIC"))
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-				"key": delapproveuuid,
+				"key":    delapproveuuid,
 				"status": false,
-				"error": err})  
-				}
-				
-		return c.Status(http.StatusOK).JSON(fiber.Map{"message":"updated successfully"})
+				"error":  err})
 		}
+
+		return c.Status(http.StatusOK).JSON(fiber.Map{"message": "updated successfully"})
+	}
 }
 
 // SendToModeration godoc
@@ -254,24 +254,25 @@ func SendToModeration(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		beatId := c.Params("id")
 		if beatId == "" {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(errors.New("id cannot be empty"))) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(errors.New("id cannot be empty")))
 		}
 		uuid, err := uuid.Parse(beatId)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
-		requestBody := entities.UnpublishedBeat{
+		requestBody := presenters.UnpublishedBeat{
 			ID : uuid,
-			Status: entities.StatusInModeration,
+			Status: string(entities.StatusInModeration),
 			SentToModerationAt: time.Now().Unix(),
 		}
 		beat, err := service.UpdateUnpublishedBeat(&requestBody)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse2(*beat))
-}}
+	}
+}
 
 // GetUnpublishedBeatsByBeatmakerId godoc
 // @Summary Get user's unpublished beats
@@ -286,16 +287,17 @@ func GetUnpublishedBeatsByBeatmakerId(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		uuid, err := getIdFromJWT(c)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		beats, err := service.GetUnpublishedBeatsByUser(uuid)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatListSuccessResponse(beats))
-	}}
+	}
+}
 
 // GetBeatsSortByStatusAndJWT godoc
 // @Summary Get beats by status for current user
@@ -313,16 +315,17 @@ func GetBeatsSortByStatusAndJWT(service unpbeat.Service) fiber.Handler {
 		log.Println(status)
 		uuid, err := getIdFromJWT(c)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		beats, err := service.GetUnpublishedByBeatmakerandStatus(uuid, status)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatListSuccessResponse(*beats))
-	}}
+	}
+}
 
 // GetBeatsInModeration godoc
 // @Summary Get beats in moderation by date range. Warning: uses unix data.
@@ -339,20 +342,21 @@ func GetBeatsInModeration(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		fromInt, err := c.ParamsInt("from")
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 		toInt, err := c.ParamsInt("to")
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		beats, err := service.GetUnpublishedInModeration(int64(fromInt), int64(toInt))
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatListSuccessResponse(*beats))
-	}}
+	}
+}
 
 // GetAllUnpublishedBeats godoc
 // @Summary Get all unpublished beats
@@ -367,11 +371,12 @@ func GetAllUnpublishedBeats(service unpbeat.Service) fiber.Handler {
 
 		beats, err := service.GetAllUnpublishedBeats()
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatListSuccessResponse(beats))
-	}}
+	}
+}
 
 // GetUnpublishedBeatById godoc
 // @Summary Get an unpublished beat by ID
@@ -388,18 +393,19 @@ func GetUnpublishedBeatById(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 
 		beatId := c.Params("id")
-		beatuuid, err := uuid.Parse(beatId)	
+		beatuuid, err := uuid.Parse(beatId)
 		if err != nil {
 			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(errors.New("wrong id format")))
 		}
 
 		beat, err := service.GetUnpublishedBeatByID(beatuuid)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse2(*beat))
-	}}
+	}
+}
 
 // DeleteUnpublishedBeatById godoc
 // @Summary Delete an unpublished beat by ID
@@ -415,22 +421,22 @@ func GetUnpublishedBeatById(service unpbeat.Service) fiber.Handler {
 func DeleteUnpublishedBeatById(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		beatId := c.Params("id")
-		beatuuid, err := uuid.Parse(beatId)	
+		beatuuid, err := uuid.Parse(beatId)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		err = service.DeleteUnpublishedBeat(beatuuid)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err)) 
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 		return c.Status(http.StatusOK).JSON(fiber.Map{
-			"message":"deleted successfully",
+			"message": "deleted successfully",
 		})
 	}
 }
 
-func getIdFromJWT(c *fiber.Ctx) (uuid.UUID, error){
+func getIdFromJWT(c *fiber.Ctx) (uuid.UUID, error) {
 	auth := c.GetReqHeaders()
 	authHeader, ok := auth["Authorization"]
 	if !ok {
