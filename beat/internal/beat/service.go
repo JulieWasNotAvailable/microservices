@@ -70,7 +70,7 @@ func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat
 	beat, err = s.repository.CreateBeat(beat)
 	if err != nil {
 		message := producer.KafkaMessageValue{
-			ID:  beat.ID.String(),
+			ID:  unpublishedBeat.ID.String(),
 			Err: "",
 		}
 		messageInBytes, err := json.Marshal(message)

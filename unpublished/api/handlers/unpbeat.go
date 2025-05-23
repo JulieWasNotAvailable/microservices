@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -141,15 +140,14 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("the beat you tried to publish does not belong to you")))
 		}
 
-		url := beat.AvailableFiles.MP3Url
-		if url == "" {
+		filename := beat.AvailableFiles.MP3Url
+		if filename == "" {
 			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("mp3 file path is required to publish the beat")))
 		}
-		filename := strings.Split(url, "/")[2]
 
-		beatModel := presenters.UnpublishedBeat{
+		beatModel := entities.UnpublishedBeat{
 			ID:     beatuuid,
-			Status: string(entities.StatusInModeration),
+			Status: entities.StatusInModeration,
 		}
 		_, err = service.UpdateUnpublishedBeat(&beatModel)
 		if err != nil {
@@ -174,10 +172,10 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 
 		mfcc := <-mfcc_channel
 		if mfcc.Err != "" {
-			errMessage := presenters.UnpublishedBeat{
+			errMessage := entities.UnpublishedBeat{
 				ID:     beatuuid,
 				Err:    mfcc.Err,
-				Status: string(entities.StatusDraft),
+				Status: entities.StatusDraft,
 			}
 			_, err = service.UpdateUnpublishedBeat(&errMessage)
 			if err != nil {
@@ -200,7 +198,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
-		err = producer.CreateMessage(beatForPublishingBytes, "publish_beat_main4")
+		err = producer.CreateMessage(beatForPublishingBytes, "publish_beat_main")
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
@@ -213,29 +211,8 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 				"error":         delete_approve.Err})
 		}
 
-		delapproveuuid, err := uuid.Parse(delete_approve.ID)
-		if err != nil {
-			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(errors.New("wrong id format")))
-		}
-		log.Println("deleting beat with this id: ", delapproveuuid)
-		// err = service.DeleteUnpublishedBeat(delapproveuuid)
-		if err != nil {
-			message := consumer.KafkaMessageValue{
-				ID:  delete_approve.ID,
-				Err: "unsuccessful delete operation",
-			}
-			messageBytes, err := json.Marshal(message)
-			if err != nil {
-				log.Println(err)
-			}
-			//нужен таймаут на сохранение бита в beat service
-			producer.CreateMessage(messageBytes, os.Getenv("KAFKA_PUBLISH_ERR_TOPIC"))
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-				"key":    delapproveuuid,
-				"status": false,
-				"error":  err})
-		}
-
+		log.Println("deleting beat with this id: ", beatuuid)
+		_ = service.DeleteUnpublishedBeat(beatuuid)
 		return c.Status(http.StatusOK).JSON(fiber.Map{"message": "updated successfully"})
 	}
 }
@@ -260,9 +237,9 @@ func SendToModeration(service unpbeat.Service) fiber.Handler {
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
-		requestBody := presenters.UnpublishedBeat{
+		requestBody := entities.UnpublishedBeat{
 			ID : uuid,
-			Status: string(entities.StatusInModeration),
+			Status: entities.StatusInModeration,
 			SentToModerationAt: time.Now().Unix(),
 		}
 		beat, err := service.UpdateUnpublishedBeat(&requestBody)

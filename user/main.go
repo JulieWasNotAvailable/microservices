@@ -6,7 +6,7 @@ import (
 	"github.com/JulieWasNotAvailable/microservices/user/api/routers"
 	_ "github.com/JulieWasNotAvailable/microservices/user/docs"
 
-	"github.com/JulieWasNotAvailable/microservices/user/pkg/consumer"
+	// "github.com/JulieWasNotAvailable/microservices/user/pkg/consumer"
 	"github.com/JulieWasNotAvailable/microservices/user/internal/activity"
 	"github.com/JulieWasNotAvailable/microservices/user/internal/bmmetadata"
 	"github.com/JulieWasNotAvailable/microservices/user/internal/entities"

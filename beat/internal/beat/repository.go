@@ -3,7 +3,6 @@ package beat
 import (
 	// "github.com/JulieWasNotAvailable/microservices/beat/pkg/entities"
 	"errors"
-	"log"
 	"strings"
 
 	"github.com/JulieWasNotAvailable/microservices/beat/api/presenters"
@@ -116,7 +115,6 @@ func (r *repository)ReadBeatsByDate(from int64, to int64) (*[]presenters.Beat, e
 	if err != nil{
 		return nil, err
 	}
-	log.Println(beatModels)
 	return &beatModels, nil
 }
 
@@ -149,7 +147,6 @@ func (r *repository) ReadFilteredBeats(filters presenters.Filters) (*[]presenter
 	if err != nil{
 		return nil, err
 	}
-	log.Println("beats: ", beats)
 	
 	result, err := FilterBeatsByNumericFields(beats, filters)
 	if err != nil {
@@ -211,7 +208,6 @@ func WithAllMoodsGenres(moodIDs []uint, genreIDs []uint, tagIDs []uint) func(db 
 		for i, id := range allparams {
 			args[i] = id
 		}
-		log.Println(args)
 
 		var builder strings.Builder
 		
@@ -234,7 +230,6 @@ func WithAllMoodsGenres(moodIDs []uint, genreIDs []uint, tagIDs []uint) func(db 
 			builder = *tagBuilder(&builder, tagIDs)
 		}
 		builder.Write([]byte(")) "))
-		log.Println(builder.String())
 		
 		isFirst = true
 		builder.Write([]byte("SELECT * FROM beats b WHERE "))
@@ -259,7 +254,6 @@ func WithAllMoodsGenres(moodIDs []uint, genreIDs []uint, tagIDs []uint) func(db 
 		}
 
 		query := builder.String()
-		log.Println(query)
 		return db.Raw(query, args...)
 	}
 }

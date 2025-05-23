@@ -5,7 +5,6 @@ import (
 
 	"github.com/JulieWasNotAvailable/microservices/beat/api/routers"
 	_ "github.com/JulieWasNotAvailable/microservices/beat/docs"
-	_ "github.com/JulieWasNotAvailable/microservices/beat/docs"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/beat"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/activity"
@@ -13,7 +12,6 @@ import (
 	"github.com/JulieWasNotAvailable/microservices/beat/pkg/consumer"
 	"github.com/JulieWasNotAvailable/microservices/beat/pkg/dbconnection"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
 )
@@ -33,11 +31,9 @@ func main() {
 	pgconfig := dbconnection.GetConfigs()
 	db, err := dbconnection.NewConnection(pgconfig)
 	if err != nil {
-	if err != nil {
 		log.Fatal(err)
 	}
 	err = entities.MigrateAll(db)
-	if err != nil {
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,7 +57,6 @@ func main() {
 	routers.SetupActivityRoutes(api, activityService)
 	api.Get("/swagger/*", swagger.New(swagger.Config{}))
 
-	go consumer.StartConsumerPublisher("publish_beat_main", beatService)
 	go consumer.StartConsumerPublisher("publish_beat_main", beatService)
 
 	app.Listen(":7771")

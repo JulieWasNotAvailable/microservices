@@ -25,7 +25,7 @@ type KafkaMessageToMFCC struct {
 }
 
 func StartConsumer(topic string, channel chan<- KafkaMessageValue) {
-	brokerUrl := []string{"broker:29092"}
+	brokerUrl := []string{"localhost:9092"}
 
 	worker, err := connectConsumer(brokerUrl)
 	if err != nil {

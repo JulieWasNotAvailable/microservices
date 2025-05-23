@@ -12,5 +12,5 @@ func ActivityRoutes(app fiber.Router, service activity.Service) {
 	activity.Post("/subscribeTo/:beatmakerId", guards.Protected(), handlers.PostSubscribeToBeatmaker(service))
 	activity.Get("/viewMySubscriptions", guards.Protected(), handlers.GetMySubscriptions(service))
 	activity.Get("/followersNumberByBeatmakerId/:beatmakerId", handlers.GetFollowersCountByBeatmakerId(service))
-	activity.Delete("/:beatmakerId", guards.Protected(), handlers.DeleteSub(service))
+	activity.Delete("unsubscribe/:beatmakerId", guards.Protected(), handlers.DeleteSub(service))
 }

@@ -28,7 +28,7 @@ func pushMessageToQueue(topic string, message []byte) error {
 		return err
 	}
 
-	brokerUrl := []string{"broker:29092"}
+	brokerUrl := []string{"localhost:9092"}
 	// brokerUrl := []string{os.Getenv("KAFKA_BROKER_URL")}
 
 	producer, err := createProducer(brokerUrl)
