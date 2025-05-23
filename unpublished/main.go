@@ -4,12 +4,13 @@ import (
 	"log"
 
 	"github.com/JulieWasNotAvailable/microservices/unpublished/api/routes"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/consumer"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/beatmetadata"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/dbconnection"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/unpbeat"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/consumer"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
 
 	_ "github.com/JulieWasNotAvailable/microservices/unpublished/docs"
@@ -42,6 +43,8 @@ func main() {
 
 	app := fiber.New()
 	api := app.Group("/api")
+	app.Use(cors.New())
+
 	mfcc_channel := make(chan consumer.KafkaMessageValue)
 	delete_approve_channel := make(chan consumer.KafkaMessageValue)
 
@@ -58,5 +61,3 @@ func main() {
 
 	app.Listen(":7772")
 }
-
-

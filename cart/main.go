@@ -42,10 +42,12 @@ func main() {
 	licenseService := license.NewService(licenseRepo)
 
 	api := app.Group("/api")
+	app.Use(cors.New())
+
 	routers.SetupCartRoutes(api, cartService, licenseService)
 	routers.SetupLicenseRoutes(api, licenseService)
 	api.Get("/swagger/*", swagger.New(swagger.Config{}))
-	
+
 	app.Use(cors.New())
 
 	app.Listen(":7000")

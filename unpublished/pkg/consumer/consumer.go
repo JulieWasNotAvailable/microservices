@@ -13,21 +13,23 @@ import (
 	// "github.com/JulieWasNotAvailable/microservices/user/pkg/user"
 )
 
-type KafkaMessageValue struct{
-	ID string `json:"beat_id"`
+type KafkaMessageValue struct {
+	ID       string    `json:"beat_id"`
 	Features []float64 `json:"features"`
-	Err string `json:"error"`
+	Err      string    `json:"error"`
 }
 
-type KafkaMessageToMFCC struct{
-	ID string`json:"id"`
+type KafkaMessageToMFCC struct {
+	ID       string `json:"id"`
 	Filename string `json:"filename"`
 }
 
-func StartConsumer(topic string, channel chan<- KafkaMessageValue){
-	worker, err := connectConsumer([]string{os.Getenv("KAFKA_BROKER_URL")})
+func StartConsumer(topic string, channel chan<- KafkaMessageValue) {
+	brokerUrl := []string{"broker:29092"}
+
+	worker, err := connectConsumer(brokerUrl)
 	if err != nil {
-		panic (err)
+		panic(err)
 	}
 
 	consumer, err := worker.ConsumePartition(topic, 0, sarama.OffsetNewest)
@@ -37,7 +39,7 @@ func StartConsumer(topic string, channel chan<- KafkaMessageValue){
 
 	fmt.Println(("consumer started"))
 
-	sigchan := make(chan os.Signal, 1) 
+	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 
 	msgCount := 0
@@ -51,16 +53,16 @@ func StartConsumer(topic string, channel chan<- KafkaMessageValue){
 				msgCount++
 				fmt.Printf("Received message Count %d: | Topic(%s) | Message(%s) \n", msgCount, string(msg.Topic), string(msg.Value))
 
-				messageValue:= KafkaMessageValue{}
+				messageValue := KafkaMessageValue{}
 				err := json.Unmarshal(msg.Value, &messageValue)
-				if err != nil{
+				if err != nil {
 					messageValue.Err = "couldn't unmarshal"
 					log.Println("cannot parse the message")
 				}
 				channel <- messageValue
-			case <- sigchan:
+			case <-sigchan:
 				fmt.Println("Interrupt is detected")
-				
+
 				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
 				doneCh <- struct{}{}
 			}
@@ -73,7 +75,7 @@ func StartConsumer(topic string, channel chan<- KafkaMessageValue){
 		panic(err)
 	}
 	//we're waiting for a response from this channel
-	fmt.Println("Processed", msgCount, "messages")	
+	fmt.Println("Processed", msgCount, "messages")
 }
 
 func connectConsumer(brokersUrl []string) (sarama.Consumer, error) {
