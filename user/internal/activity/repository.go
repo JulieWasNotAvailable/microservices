@@ -13,6 +13,8 @@ type Repository interface {
 	ReadSubsByUserId(userId uuid.UUID) ([]entities.User_Follows_Beatmakers, error)
 	ReadSubsCountByBeatmakerId(beatmakerId uuid.UUID) (int, error)
 	DeleteSub(userId uuid.UUID, beatmakerId uuid.UUID) (entities.User_Follows_Beatmakers, error)
+
+	CheckBeatmakerRole(beatmakerId uuid.UUID) (bool, error)
 }
 
 type repository struct {
@@ -83,4 +85,16 @@ func (r *repository) ReadSubsCountByBeatmakerId(beatmakerId uuid.UUID) (int, err
     return int(count), nil
 }
 
-
+func (r *repository) CheckBeatmakerRole(beatmakerId uuid.UUID) (bool, error) {
+	beatmaker := entities.User{
+		ID: beatmakerId,
+	}
+	err := r.DB.First(&beatmaker).Error
+	if err != nil {
+		return false, err
+	}
+	if beatmaker.RoleID != 2 {
+		return false, errors.New("this user is not a beatmaker")
+	}
+	return true, nil
+}

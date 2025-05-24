@@ -10,6 +10,8 @@ type Service interface {
 	FetchSubsCountByBeatmakerId(beatmakerId uuid.UUID) (int, error)
 	FetchSubsByUserId(userId uuid.UUID) ([]entities.User_Follows_Beatmakers, error)
 	RemoveSub(userId uuid.UUID, beatmakerId uuid.UUID) (entities.User_Follows_Beatmakers, error)
+
+	CheckBeatmakerRole(beatmakerId uuid.UUID) (bool, error)
 }
 
 type service struct {
@@ -27,6 +29,10 @@ func (s *service) FetchSubsByUserId(userId uuid.UUID) ([]entities.User_Follows_B
 }
 
 func (s *service) FetchSubsCountByBeatmakerId(beatmakerId uuid.UUID) (int, error) {
+	_, err := s.CheckBeatmakerRole(beatmakerId)
+	if err != nil {
+		return 0, err
+	}
 	return s.repository.ReadSubsCountByBeatmakerId(beatmakerId)
 }
 
@@ -36,4 +42,8 @@ func (s *service) InsertSub(userId uuid.UUID, beatmakerId uuid.UUID) (entities.U
 
 func (s *service) RemoveSub(userId uuid.UUID, beatmakerId uuid.UUID) (entities.User_Follows_Beatmakers, error) {
 	return s.repository.DeleteSub(userId, beatmakerId)
+}
+
+func (s *service) CheckBeatmakerRole(beatmakerId uuid.UUID) (bool, error) {
+	return s.repository.CheckBeatmakerRole(beatmakerId)
 }

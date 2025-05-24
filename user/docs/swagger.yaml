@@ -1,5 +1,24 @@
 basePath: /api
 definitions:
+  authentication.LoginInput:
+    description: Login Input
+    properties:
+      email:
+        example: john_molly@example.com
+        type: string
+      password:
+        example: securepassword123
+        type: string
+    type: object
+  authentication.RegisterInput:
+    properties:
+      email:
+        example: eugene@example.com
+        type: string
+      password:
+        example: securepassword123
+        type: string
+    type: object
   entities.Metadata:
     properties:
       description:
@@ -26,8 +45,14 @@ definitions:
   entities.User:
     description: User
     properties:
+      beatmakerFollowedByUser:
+        items:
+          $ref: '#/definitions/entities.User_Follows_Beatmakers'
+        type: array
       email:
         example: 550e8400-e29b-41d4-a716-446655440000
+        maxLength: 50
+        minLength: 5
         type: string
       firstname:
         example: John
@@ -46,9 +71,14 @@ definitions:
       password:
         description: Never exposed in responses
         example: securepassword123
+        maxLength: 20
+        minLength: 6
         type: string
       patronymic:
         example: Smith
+        type: string
+      profilepicture:
+        example: https://storage.yandexcloud.net/imagesall/01961f2b-61b4-74ee-8e5b-26044ec630ea
         type: string
       roleId:
         example: 1
@@ -56,30 +86,23 @@ definitions:
       subscriptionId:
         example: 1
         type: integer
+      userFollowsBeatmaker:
+        items:
+          $ref: '#/definitions/entities.User_Follows_Beatmakers'
+        type: array
       username:
         example: johndoe
         type: string
-      usersFavourites:
-        example: 5
-        type: integer
+    required:
+    - email
+    - password
+    - roleId
     type: object
-  middleware.LoginInput:
-    description: Login Input
+  entities.User_Follows_Beatmakers:
     properties:
-      email:
-        example: john_molly@example.com
-        type: string
-      password:
-        example: securepassword123
-        type: string
-    type: object
-  middleware.RegisterInput:
-    properties:
-      email:
-        example: eugene@example.com
-        type: string
-      password:
-        example: securepassword123
+      beatmaker:
+        $ref: '#/definitions/entities.User'
+      userId:
         type: string
     type: object
   presenters.Data:
@@ -161,6 +184,9 @@ definitions:
       patronymic:
         example: Smith
         type: string
+      profilepicture:
+        example: https://storage.yandexcloud.net/imagesall/01961f2b-61b4-74ee-8e5b-26044ec630ea
+        type: string
       roleId:
         example: 1
         type: integer
@@ -170,9 +196,6 @@ definitions:
       username:
         example: johndoe
         type: string
-      usersFavourites:
-        example: 1
-        type: integer
     type: object
   presenters.UserErrorResponse:
     description: Error response for user operations
@@ -200,13 +223,148 @@ definitions:
         type: boolean
     type: object
 info:
-  contact:
-    name: API Support
-  description: This is a sample server.
-  termsOfService: http://swagger.io/terms/
-  title: Fiber Swagger Example API
+  contact: {}
+  title: Fiber User Service
   version: "1.0"
 paths:
+  /activity/followersNumberByBeatmakerId/{beatmakerId}:
+    get:
+      consumes:
+      - application/json
+      description: Get the number of followers for a specific beatmaker
+      parameters:
+      - description: Beatmaker ID
+        in: path
+        name: beatmakerId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Followers count
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid beatmaker ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get beatmaker's followers count
+      tags:
+      - activity
+  /activity/subscribeTo/{beatmakerId}:
+    post:
+      consumes:
+      - application/json
+      description: Subscribe the authenticated user to a beatmaker
+      parameters:
+      - description: Beatmaker ID to subscribe to
+        in: path
+        name: beatmakerId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscription details
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid beatmaker ID or self-subscription attempt
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Subscribe to a beatmaker
+      tags:
+      - activity
+  /activity/unsubscribe/{beatmakerId}:
+    delete:
+      consumes:
+      - application/json
+      description: Unsubscribe the authenticated user from a beatmaker
+      parameters:
+      - description: Beatmaker ID to unsubscribe from
+        in: path
+        name: beatmakerId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Unsubscription confirmation
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid beatmaker ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Unsubscribe from a beatmaker
+      tags:
+      - activity
+  /activity/viewMySubscriptions:
+    get:
+      consumes:
+      - application/json
+      description: Get all beatmakers the authenticated user is subscribed to
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of subscriptions
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get user's subscriptions
+      tags:
+      - activity
   /auth/google/getjwt:
     post:
       consumes:
@@ -261,7 +419,7 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/middleware.LoginInput'
+          $ref: '#/definitions/authentication.LoginInput'
       produces:
       - application/json
       responses:
@@ -406,7 +564,7 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/middleware.RegisterInput'
+          $ref: '#/definitions/authentication.RegisterInput'
       produces:
       - application/json
       responses:
@@ -464,6 +622,30 @@ paths:
       tags:
       - users
   /user/me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve current user details from JWT token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.UserSuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.UserErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get current user by JWT
+      tags:
+      - users
     patch:
       consumes:
       - application/json
@@ -642,30 +824,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete user
-      tags:
-      - users
-    get:
-      consumes:
-      - application/json
-      description: Retrieve current user details from JWT token
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/presenters.UserSuccessResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/presenters.UserErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/presenters.UserErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Get current user by JWT
       tags:
       - users
   /users/me/upgrade:

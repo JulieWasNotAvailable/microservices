@@ -30,7 +30,7 @@ import (
 // @Failure 400 {object} map[string]interface{} "Invalid request format"
 // @Failure 401 {object} map[string]interface{} "Invalid Google token"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router api/auth/google/getjwt [post]
+// @Router /auth/google/getjwt [post]
 func HandleGoogleAuth(service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 

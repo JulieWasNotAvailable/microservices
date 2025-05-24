@@ -9,15 +9,220 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/activity/followersNumberByBeatmakerId/{beatmakerId}": {
+            "get": {
+                "description": "Get the number of followers for a specific beatmaker",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activity"
+                ],
+                "summary": "Get beatmaker's followers count",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Beatmaker ID",
+                        "name": "beatmakerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Followers count",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid beatmaker ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/subscribeTo/{beatmakerId}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Subscribe the authenticated user to a beatmaker",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activity"
+                ],
+                "summary": "Subscribe to a beatmaker",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Beatmaker ID to subscribe to",
+                        "name": "beatmakerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription details",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid beatmaker ID or self-subscription attempt",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/unsubscribe/{beatmakerId}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Unsubscribe the authenticated user from a beatmaker",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activity"
+                ],
+                "summary": "Unsubscribe from a beatmaker",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Beatmaker ID to unsubscribe from",
+                        "name": "beatmakerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unsubscription confirmation",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid beatmaker ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/viewMySubscriptions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all beatmakers the authenticated user is subscribed to",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activity"
+                ],
+                "summary": "Get user's subscriptions",
+                "responses": {
+                    "200": {
+                        "description": "List of subscriptions",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/auth/google/getjwt": {
             "post": {
                 "description": "Authenticate user using Google OAuth token and return JWT",
@@ -101,7 +306,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/middleware.LoginInput"
+                            "$ref": "#/definitions/authentication.LoginInput"
                         }
                     }
                 ],
@@ -321,7 +526,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/middleware.RegisterInput"
+                            "$ref": "#/definitions/authentication.RegisterInput"
                         }
                     }
                 ],
@@ -406,6 +611,44 @@ const docTemplate = `{
             }
         },
         "/user/me": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve current user details from JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get current user by JWT",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.UserSuccessResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.UserErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.UserErrorResponse"
+                        }
+                    }
+                }
+            },
             "patch": {
                 "security": [
                     {
@@ -642,44 +885,6 @@ const docTemplate = `{
             }
         },
         "/users/me": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieve current user details from JWT token",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get current user by JWT",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presenters.UserSuccessResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/presenters.UserErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/presenters.UserErrorResponse"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "security": [
                     {
@@ -763,6 +968,33 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "authentication.LoginInput": {
+            "description": "Login Input",
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john_molly@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "securepassword123"
+                }
+            }
+        },
+        "authentication.RegisterInput": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "eugene@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "securepassword123"
+                }
+            }
+        },
         "entities.Metadata": {
             "type": "object",
             "properties": {
@@ -798,9 +1030,22 @@ const docTemplate = `{
         "entities.User": {
             "description": "User",
             "type": "object",
+            "required": [
+                "email",
+                "password",
+                "roleId"
+            ],
             "properties": {
+                "beatmakerFollowedByUser": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.User_Follows_Beatmakers"
+                    }
+                },
                 "email": {
                     "type": "string",
+                    "maxLength": 50,
+                    "minLength": 5,
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "firstname": {
@@ -825,11 +1070,17 @@ const docTemplate = `{
                 "password": {
                     "description": "Never exposed in responses",
                     "type": "string",
+                    "maxLength": 20,
+                    "minLength": 6,
                     "example": "securepassword123"
                 },
                 "patronymic": {
                     "type": "string",
                     "example": "Smith"
+                },
+                "profilepicture": {
+                    "type": "string",
+                    "example": "https://storage.yandexcloud.net/imagesall/01961f2b-61b4-74ee-8e5b-26044ec630ea"
                 },
                 "roleId": {
                     "type": "integer",
@@ -839,40 +1090,26 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "userFollowsBeatmaker": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.User_Follows_Beatmakers"
+                    }
+                },
                 "username": {
                     "type": "string",
                     "example": "johndoe"
-                },
-                "usersFavourites": {
-                    "type": "integer",
-                    "example": 5
                 }
             }
         },
-        "middleware.LoginInput": {
-            "description": "Login Input",
+        "entities.User_Follows_Beatmakers": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "john_molly@example.com"
+                "beatmaker": {
+                    "$ref": "#/definitions/entities.User"
                 },
-                "password": {
-                    "type": "string",
-                    "example": "securepassword123"
-                }
-            }
-        },
-        "middleware.RegisterInput": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "eugene@example.com"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "securepassword123"
+                "userId": {
+                    "type": "string"
                 }
             }
         },
@@ -985,6 +1222,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Smith"
                 },
+                "profilepicture": {
+                    "type": "string",
+                    "example": "https://storage.yandexcloud.net/imagesall/01961f2b-61b4-74ee-8e5b-26044ec630ea"
+                },
                 "roleId": {
                     "type": "integer",
                     "example": 1
@@ -996,10 +1237,6 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "example": "johndoe"
-                },
-                "usersFavourites": {
-                    "type": "integer",
-                    "example": 1
                 }
             }
         },
@@ -1054,8 +1291,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "Fiber Swagger Example API",
-	Description:      "This is a sample server.",
+	Title:            "Fiber User Service",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
