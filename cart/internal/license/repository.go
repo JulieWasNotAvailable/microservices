@@ -80,7 +80,7 @@ func (r *repository) ReadLicenseByBeatId(beatId uuid.UUID) (*[]presenters.Licens
 	var licenses []presenters.License
 
 	result := r.DB.Model(&entities.License{}).
-		Where("beat_id = ?", beatId).
+		Where("beat_id = ?", beatId).Preload("LicenseTemplate").
 		Find(&licenses)
 
 	if result.Error != nil {
@@ -92,7 +92,7 @@ func (r *repository) ReadLicenseByBeatId(beatId uuid.UUID) (*[]presenters.Licens
 
 func (r *repository) ReadLicenseById(id uint) (*presenters.License, error) {
 	license := presenters.License{}
-	result := r.DB.Where("id = ?", id).First(&license)
+	result := r.DB.Where("id = ?", id).First(&license).Preload("LicenseTemplate")
 	if result.Error != nil {
 		return nil, result.Error
 	}

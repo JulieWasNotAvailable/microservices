@@ -19,8 +19,8 @@ type CartLicenses struct {
 func MigrateAll(db *gorm.DB) error {
 	err := db.AutoMigrate(
 		&Cart{},
-		&License{},
 		&LicenseTemplate{},
+		&License{},
 	)
 	return err
 }

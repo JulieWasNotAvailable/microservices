@@ -174,7 +174,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "LicenseTemplate"
+                    "Admin"
                 ],
                 "summary": "Get all license templates",
                 "responses": {
@@ -243,7 +243,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "License"
+                    "Admin"
                 ],
                 "summary": "Get all licenses",
                 "responses": {
@@ -488,40 +488,11 @@
         }
     },
     "definitions": {
-        "entities.Cart": {
-            "type": "object",
-            "required": [
-                "licenses"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "licenses": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.License"
-                    }
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
         "entities.License": {
             "type": "object",
             "properties": {
                 "beatId": {
                     "type": "string"
-                },
-                "beatmakerId": {
-                    "type": "string"
-                },
-                "cart": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Cart"
-                    }
                 },
                 "id": {
                     "type": "integer"
@@ -529,17 +500,8 @@
                 "licenseTemplateId": {
                     "type": "integer"
                 },
-                "mp3": {
-                    "type": "boolean"
-                },
                 "price": {
                     "type": "integer"
-                },
-                "wav": {
-                    "type": "boolean"
-                },
-                "zip": {
-                    "type": "boolean"
                 }
             }
         },
@@ -564,6 +526,9 @@
                 "liveProfit": {
                     "type": "boolean"
                 },
+                "mp3": {
+                    "type": "boolean"
+                },
                 "musicRecording": {
                     "type": "boolean"
                 },
@@ -578,6 +543,12 @@
                 },
                 "userId": {
                     "type": "string"
+                },
+                "wav": {
+                    "type": "boolean"
+                },
+                "zip": {
+                    "type": "boolean"
                 }
             }
         },
@@ -620,6 +591,9 @@
                 "liveProfit": {
                     "type": "boolean"
                 },
+                "mp3": {
+                    "type": "boolean"
+                },
                 "musicRecording": {
                     "type": "boolean"
                 },
@@ -634,6 +608,12 @@
                 },
                 "userId": {
                     "type": "string"
+                },
+                "wav": {
+                    "type": "boolean"
+                },
+                "zip": {
+                    "type": "boolean"
                 }
             }
         },

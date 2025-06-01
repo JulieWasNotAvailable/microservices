@@ -1,22 +1,28 @@
 package entities
 
-import "github.com/google/uuid"
+import (
+	"errors"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type License struct {
-	ID                uint      `json:"id"`
-	BeatID            uuid.UUID `json:"beatId"`
-	Cart              []*Cart   `gorm:"many2many:cart_licenses;" json:"-"`
-	LicenseTemplateID uint      `json:"licenseTemplateId"`
-	MP3               bool      `json:"mp3"`
-	WAV               bool      `json:"wav"`
-	ZIP               bool      `json:"zip"`
-	UserID            uuid.UUID `json:"-"`
-	Price             int       `json:"price"`
+	ID                uint            `json:"id"`
+	BeatID            uuid.UUID       `json:"beatId"`
+	Cart              []*Cart         `json:"-" gorm:"many2many:cart_licenses;"`
+	LicenseTemplateID uint            `json:"licenseTemplateId"`
+	LicenseTemplate   LicenseTemplate `json:"licenseTemplate" gorm:"foreignKey:LicenseTemplateID"`
+	UserID            uuid.UUID       `json:"-"`
+	Price             int             `json:"price"`
 }
 
 type LicenseTemplate struct {
 	ID                uint       `json:"id"`
 	Name              string     `json:"name"`
+	MP3               bool       `json:"mp3"`
+	WAV               bool       `json:"wav"`
+	ZIP               bool       `json:"zip"`
 	Description       string     `json:"description"`
 	MusicRecording    bool       `json:"musicRecording"`
 	LiveProfit        bool       `json:"liveProfit"`
@@ -25,6 +31,22 @@ type LicenseTemplate struct {
 	RadioBroadcasting int        `json:"radioBroadcasting"`
 	MusicVideos       int        `json:"musicVideos"`
 	AvailableFilesID  int        `json:"availableFilesId"`
-	License           []*License `json:"-" gorm:"many2many:license_template_licenses;joinForeignKey:LicenseID;joinReferences:LicenseTemplateID"`
-	UserID            uuid.UUID  `json:"userId"`
+	License           []*License `json:"license" gorm:"foreignKey:LicenseTemplateID"`
+	UserID            uuid.UUID  `json:"-"`
+}
+
+func (model *LicenseTemplate) BeforeSave(tx *gorm.DB) (err error) {
+	if model.DistributeCopies != -1 && model.DistributeCopies < 1 {
+		return errors.New("distribute copies value must be either -1 or >= 1")
+	}
+	if model.AudioStreams != -1 && model.AudioStreams < 1 {
+		return errors.New("audio streams value must be either -1 or >= 1")
+	}
+	if model.RadioBroadcasting != -1 && model.RadioBroadcasting < 1 {
+		return errors.New("radio broadcasting value must be either -1 or >= 1")
+	}
+	if model.MusicVideos != -1 && model.MusicVideos < 1 {
+		return errors.New("music videos value must be either -1 or >= 1")
+	}
+	return nil
 }

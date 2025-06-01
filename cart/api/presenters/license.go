@@ -1,21 +1,24 @@
 package presenters
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type License struct {
-	ID                uint      `json:"id"`
-	BeatID            uuid.UUID `json:"beatId"`
-	LicenseTemplateID uint      `json:"licenseTemplateId"`
-	MP3               bool      `json:"mp3"`
-	WAV               bool      `json:"wav"`
-	ZIP               bool      `json:"zip"`
-	UserID            uuid.UUID `json:"beatmakerId"`
-	Price             int       `json:"price"`
+	ID                uint            `json:"id"`
+	BeatID            uuid.UUID       `json:"beatId"`
+	LicenseTemplateID uint            `json:"licenseTemplateId"`
+	LicenseTemplate   LicenseTemplate `json:"licenseTemplate" gorm:"foreignKey:LicenseTemplateID"`
+	UserID            uuid.UUID       `json:"beatmakerId"`
+	Price             int             `json:"price"`
 }
 
 type LicenseTemplate struct {
 	ID                uint      `json:"id"`
 	Name              string    `json:"name"`
+	MP3               bool      `json:"mp3"`
+	WAV               bool      `json:"wav"`
+	ZIP               bool      `json:"zip"`
 	Description       string    `json:"description"`
 	MusicRecording    bool      `json:"musicRecording"`
 	LiveProfit        bool      `json:"liveProfit"`

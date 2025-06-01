@@ -181,7 +181,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "LicenseTemplate"
+                    "Admin"
                 ],
                 "summary": "Get all license templates",
                 "responses": {
@@ -250,7 +250,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "License"
+                    "Admin"
                 ],
                 "summary": "Get all licenses",
                 "responses": {
@@ -495,40 +495,11 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "entities.Cart": {
-            "type": "object",
-            "required": [
-                "licenses"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "licenses": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.License"
-                    }
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
         "entities.License": {
             "type": "object",
             "properties": {
                 "beatId": {
                     "type": "string"
-                },
-                "beatmakerId": {
-                    "type": "string"
-                },
-                "cart": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Cart"
-                    }
                 },
                 "id": {
                     "type": "integer"
@@ -536,17 +507,8 @@ const docTemplate = `{
                 "licenseTemplateId": {
                     "type": "integer"
                 },
-                "mp3": {
-                    "type": "boolean"
-                },
                 "price": {
                     "type": "integer"
-                },
-                "wav": {
-                    "type": "boolean"
-                },
-                "zip": {
-                    "type": "boolean"
                 }
             }
         },
@@ -571,6 +533,9 @@ const docTemplate = `{
                 "liveProfit": {
                     "type": "boolean"
                 },
+                "mp3": {
+                    "type": "boolean"
+                },
                 "musicRecording": {
                     "type": "boolean"
                 },
@@ -585,6 +550,12 @@ const docTemplate = `{
                 },
                 "userId": {
                     "type": "string"
+                },
+                "wav": {
+                    "type": "boolean"
+                },
+                "zip": {
+                    "type": "boolean"
                 }
             }
         },
@@ -627,6 +598,9 @@ const docTemplate = `{
                 "liveProfit": {
                     "type": "boolean"
                 },
+                "mp3": {
+                    "type": "boolean"
+                },
                 "musicRecording": {
                     "type": "boolean"
                 },
@@ -641,6 +615,12 @@ const docTemplate = `{
                 },
                 "userId": {
                     "type": "string"
+                },
+                "wav": {
+                    "type": "boolean"
+                },
+                "zip": {
+                    "type": "boolean"
                 }
             }
         },
