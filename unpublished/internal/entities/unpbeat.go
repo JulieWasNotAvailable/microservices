@@ -19,7 +19,7 @@ const (
 type UnpublishedBeat struct {
 	ID                 uuid.UUID      `json:"id" example:"019628ef-cd76-7d2d-bf80-48b8011fad40"`
 	Name               string         `json:"name" validate:"required,min=2,max=60" example:"Summer Vibes"`
-	Picture            string         `json:"-" example:"https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
+	Picture            string         `json:"picture" example:"https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
 	BeatmakerID        uuid.UUID      `json:"-" validate:"required" example:"019628ef-cd76-7d2d-bf80-48b8011fad40"`
 	AvailableFiles     AvailableFiles `json:"-" gorm:"foreignKey:UnpublishedBeatID;constraint:OnDelete:CASCADE;" validate:"required"`
 	Price              int            `json:"price" validate:"required, gte=1" example:"2999"`

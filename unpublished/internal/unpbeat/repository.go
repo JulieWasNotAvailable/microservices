@@ -20,6 +20,8 @@ type Repository interface {
 	ReadUnpublishedByBeatmakerandStatus(userId uuid.UUID, status string) (*[]presenters.UnpublishedBeat, error)
 	UpdateUnpublishedById(unpublished *entities.UnpublishedBeat) (*presenters.UnpublishedBeat, error)
 	DeleteUnpublishedById(id uuid.UUID) error
+
+	CheckTagExists(name string) (uint, error)
 }
 
 type repository struct {
@@ -41,6 +43,7 @@ func (r repository) CreateUnpublished(unpublished entities.UnpublishedBeat) (ent
 	unpublished.ID = id
 	time := time.Now().Unix()
 	unpublished.CreatedAt = time
+	unpublished.Price = 1000
 	result := r.DB.Create(&unpublished)
 
 	if result.Error != nil {
@@ -240,4 +243,16 @@ func WithBasicPreloads() func(db *gorm.DB) *gorm.DB {
 			Preload("Keynote").Preload("AvailableFiles").
 			Preload("Instruments")
 	}
+}
+
+func (r *repository) CheckTagExists(name string) (uint, error) {
+	tag := entities.Tag{}
+	result := r.DB.Where("name = ?", name).First(&tag)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return 0, nil
+		}
+		return 0, result.Error
+	}
+	return tag.ID, nil
 }

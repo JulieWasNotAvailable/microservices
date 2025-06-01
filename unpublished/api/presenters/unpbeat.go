@@ -11,6 +11,7 @@ type UnpublishedBeat struct {
 	Name               string                  `json:"name" validate:"required,min=2,max=60" example:"Summer Vibes"`
 	Picture            string                  `json:"picture" example:"https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
 	BeatmakerID        uuid.UUID               `json:"beatmakerId" validate:"required" example:"019628ef-cd76-7d2d-bf80-48b8011fad40"`
+	BeatmakerName      string                  `json:"beatmakerName"`
 	AvailableFiles     entities.AvailableFiles `json:"availableFiles" validate:"required" gorm:"foreignKey:UnpublishedBeatID;constraint:OnDelete:CASCADE;"`
 	URL                string                  `json:"url" validate:"required" example:"https://storage.yandexcloud.net/mp3beats/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
 	Price              int                     `json:"price" validate:"required" example:"2999"`

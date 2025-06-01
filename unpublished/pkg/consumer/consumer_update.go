@@ -30,7 +30,7 @@ func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice bea
 		panic(err)
 	}
 
-	consumer, err := worker.ConsumePartition(topic, 0, sarama.OffsetOldest)
+	consumer, err := worker.ConsumePartition(topic, 0, sarama.OffsetNewest)
 	if err != nil {
 		panic(err)
 	}

@@ -52,6 +52,7 @@ func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat
 		Name:           unpublishedBeat.Name,
 		Picture:        unpublishedBeat.Picture,
 		BeatmakerID:    unpublishedBeat.BeatmakerID,
+		BeatmakerName:  unpublishedBeat.BeatmakerName,
 		AvailableFiles: unpublishedBeat.AvailableFiles,
 		URL:            unpublishedBeat.AvailableFiles.MP3Url,
 		Price:          unpublishedBeat.Price,
@@ -136,15 +137,15 @@ func (s *service) FindBeatsWithAllMoods(moodIDs []uint) ([]presenters.Beat, erro
 }
 
 func fillDataFromArray(arr []float64, data *entities.MFCC) (entities.MFCC, error) {
-    val := reflect.ValueOf(data).Elem() // Dereference the pointer to the struct
-	
-    // Iterate over struct fields and assign from array
-    for i := 2; i < (val.NumField()-1); i++ {
-        field := val.Field(i)
-        if field.Kind() == reflect.Float64 && field.CanSet() {
-            field.SetFloat(arr[i-2]) // Assign array value to struct field
-        }
-    }
+	val := reflect.ValueOf(data).Elem() // Dereference the pointer to the struct
 
-    return *data, nil
+	// Iterate over struct fields and assign from array
+	for i := 2; i < (val.NumField() - 1); i++ {
+		field := val.Field(i)
+		if field.Kind() == reflect.Float64 && field.CanSet() {
+			field.SetFloat(arr[i-2]) // Assign array value to struct field
+		}
+	}
+
+	return *data, nil
 }

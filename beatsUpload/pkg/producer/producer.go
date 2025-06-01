@@ -39,7 +39,7 @@ func createProducer(brokersUrl []string) (sarama.AsyncProducer, error) {
 
 // pushes Update Message to queue
 func pushMessageToQueue(topic string, key []byte, message []byte) error {
-	brokerUrl := []string{"broker:29092"}
+	brokerUrl := []string{"localhost:9092"}
 
 	producer, err := createProducer(brokerUrl)
 	if err != nil {
@@ -86,6 +86,7 @@ func CreateMessage(message KafkaMessage, key string, topic string) error {
 	err = pushMessageToQueue(topic, keyInBytes, messageInBytes)
 	if err != nil {
 		log.Println("created message successfully")
+		log.Printf("message: %s, key: %s, topic: %s", message, key, topic)
 	}
 
 	return nil

@@ -64,6 +64,7 @@ func Login(service user.Service) fiber.Handler {
 
 	claims["id"] = user.ID
 	claims["role"] = user.RoleID
+	claims["username"] = user.Username
 	claims["iat"] = time.Now().Unix()
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 

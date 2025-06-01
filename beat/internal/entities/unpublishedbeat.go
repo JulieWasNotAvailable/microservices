@@ -7,6 +7,7 @@ type UnpublishedBeat struct {
 	Name               string         `json:"name" validate:"required,min=2,max=60" example:"Summer Vibes"`
 	Picture            string         `json:"picture" example:"https://storage.yandexcloud.net/imagesall/019623bd-3d0b-7dc2-8a1f-f782adeb42b4"`
 	BeatmakerID        uuid.UUID      `json:"beatmakerId" validate:"required" example:"019628ef-cd76-7d2d-bf80-48b8011fad40"`
+	BeatmakerName      string         `json:"beatmakerName"`
 	AvailableFiles     AvailableFiles `validate:"required" gorm:"foreignKey:UnpublishedBeatID;constraint:OnDelete:CASCADE;"`
 	Price              int            `json:"price" validate:"required" example:"2999"`
 	Tags               []Tag          `json:"tags" validate:"required" gorm:"many2many:tag_beats;"` //many to many

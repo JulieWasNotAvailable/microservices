@@ -75,7 +75,6 @@ func SaveBeatDraft(service unpbeat.Service, metaservice beatmetadata.MetadataSer
 			BeatmakerID:    beatmakeruuid,
 			AvailableFiles: createdAvailbableFiles,
 		}
-
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse2(beatReponse))
 	}
 }
@@ -95,6 +94,7 @@ func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) 
 	return func(c *fiber.Ctx) error {
 		var requestBody entities.UnpublishedBeat
 		err := c.BodyParser(&requestBody)
+
 		if err != nil {
 			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(err))
 		}
@@ -133,6 +133,10 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		}
 
 		beatmakerid, err := getIdFromJWT(c)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
+		}
+		beatmakerName, err := getBeatmakerNameFromJWT(c)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
@@ -188,6 +192,7 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		}
 
 		// log.Println("message receiver in handler: ", mfcc)
+		beat.BeatmakerName = beatmakerName
 		beatForPublishing := BeatForPublishing{
 			Beat: *beat,
 			MFCC: mfcc.Features,
@@ -440,4 +445,28 @@ func getIdFromJWT(c *fiber.Ctx) (uuid.UUID, error) {
 	}
 
 	return uuid, nil
+}
+
+func getBeatmakerNameFromJWT(c *fiber.Ctx) (string, error) {
+	auth := c.GetReqHeaders()
+	authHeader, ok := auth["Authorization"]
+	if !ok {
+		return "", errors.New("auth header is absent")
+	}
+	splitToken := strings.Split(authHeader[0], "Bearer ")
+	tokenStr := splitToken[1]
+
+	token, _, err := jwt.NewParser().ParseUnverified(tokenStr, jwt.MapClaims{})
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", err
+	}
+
+	name := claims["username"].(string)
+
+	return name, nil
 }

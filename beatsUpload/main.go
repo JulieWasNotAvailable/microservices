@@ -5,6 +5,9 @@ import (
 
 	router "github.com/JulieWasNotAvailable/microservices/beatsUpload/api/routers"
 	_ "github.com/JulieWasNotAvailable/microservices/beatsUpload/docs"
+	// "github.com/JulieWasNotAvailable/microservices/beatsUpload/internal/beat"
+	// "github.com/JulieWasNotAvailable/microservices/beatsUpload/pkg/consumer"
+	// "github.com/JulieWasNotAvailable/microservices/beatsUpload/pkg/dbconnection"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 )
@@ -31,6 +34,11 @@ func main() {
 
 	log.Println("app running successfully")
 	api.Get("/swagger/*", swagger.New(swagger.Config{}))
+
+	// s3 := dbconnection.S3Connect()
+	// beatService := beat.NewService(s3)
+
+	// consumer.StartConsumer("beat_deleted", beatService)
 
 	app.Listen(":7774")
 }

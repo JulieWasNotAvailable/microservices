@@ -252,6 +252,32 @@ func GetBeatsByDate(service beat.Service) fiber.Handler {
 	}
 }
 
+// DeleteBeatById godoc
+// @Summary Delete beat by ID
+// @Description Deletes beat with the specified ID
+// @Tags Beats
+// @Accept json
+// @Produce json
+// @Param id path string true "Beat ID (UUID format)"
+// @Success 200 {object} presenters.BeatSuccessResponse
+// @Failure 422 {object} presenters.BeatErrorResponse
+// @Failure 500 {object} presenters.BeatErrorResponse
+// @Router /beat/deleteBeatById/{id} [delete]
+func DeleteBeatById(service beat.Service) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		beatId := c.Params("id")
+
+		err := service.DeleteBeatById(beatId)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
+		}
+
+		return c.Status(http.StatusOK).JSON(fiber.Map{
+			"message": "deleted successfully",
+		})
+	}
+}
+
 // Helper function to filter beats based on query parameters
 // func filterBeats(beats *[]presenters.Beat, filters struct {
 // 	Genre    string

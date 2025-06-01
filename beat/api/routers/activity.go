@@ -12,9 +12,9 @@ func SetupActivityRoutes(app fiber.Router, service activity.Service) {
 	activity.Post("/postNewLike", guards.Protected(), handlers.PostLike(service))
 	activity.Delete("/:beatId", guards.Protected(), handlers.DeleteLike(service))
 	activity.Get("/viewMyLikes", guards.Protected(), handlers.GetLikesByUserId(service))
-	activity.Get("/viewLikesCountByBeatId/:beatId", handlers.GetLikesCountByBeatId(service))
 	activity.Get("/viewLikesCountByUserId/:userId", handlers.GetLikesCountByUserId(service))
 	activity.Post("/totalLikesCountForBeats", handlers.GetTotalLikesOfBeats(service))
 
 	activity.Post("/listened", guards.Protected(), handlers.PostListened(service))
+	// activity.Get("/viewLikesCountByBeatId/:beatId", handlers.GetLikesCountByBeatId(service))
 }

@@ -182,8 +182,7 @@ func UpdateFile(ctx *fiber.Ctx) error {
 			"err": err.Error(),
 			"allowed content types" : allowedContentypes})	}
 	
-	url := "storage.yandexcloud.net/"
-	address := url + bucketName + "/" + req.ObjectKey	
+	address := req.ObjectKey	
 	message := producer.KafkaMessage{
 		FileType: producer.FileType(filetype),
 		URL : address,
