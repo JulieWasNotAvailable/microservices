@@ -36,17 +36,17 @@ type LicenseTemplate struct {
 }
 
 func (model *LicenseTemplate) BeforeSave(tx *gorm.DB) (err error) {
-	if model.DistributeCopies != -1 && model.DistributeCopies < 1 {
-		return errors.New("distribute copies value must be either -1 or >= 1")
+	if model.DistributeCopies < -1 {
+		return errors.New("distribute copies value must be > -1 ")
 	}
-	if model.AudioStreams != -1 && model.AudioStreams < 1 {
-		return errors.New("audio streams value must be either -1 or >= 1")
+	if model.AudioStreams < -1 {
+		return errors.New("audio streams value must be > -1 ")
 	}
-	if model.RadioBroadcasting != -1 && model.RadioBroadcasting < 1 {
-		return errors.New("radio broadcasting value must be either -1 or >= 1")
+	if model.RadioBroadcasting < -1 {
+		return errors.New("radio broadcasting value must be > -1 ")
 	}
-	if model.MusicVideos != -1 && model.MusicVideos < 1 {
-		return errors.New("music videos value must be either -1 or >= 1")
+	if model.MusicVideos < -1 {
+		return errors.New("music videos value must be > -1 ")
 	}
 	return nil
 }
