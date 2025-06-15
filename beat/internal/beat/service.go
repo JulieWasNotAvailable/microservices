@@ -63,9 +63,9 @@ func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat
 		Moods:          unpublishedBeat.Moods,
 		KeynoteID:      unpublishedBeat.KeynoteID,
 		Timestamps:     unpublishedBeat.Timestamps,
-		Instruments:    unpublishedBeat.Instruments,
-		MFCC:           mfcc,
-		CreatedAt:      time.Now().Unix(), // или unpublishedBeat.CreatedAt, если нужно сохранить оригинальное значение
+		// Instruments:    unpublishedBeat.Instruments,
+		MFCC:      mfcc,
+		CreatedAt: time.Now().Unix(), // или unpublishedBeat.CreatedAt, если нужно сохранить оригинальное значение
 	}
 
 	beat, err = s.repository.CreateBeat(beat)

@@ -11,7 +11,7 @@ func SetupMetadataBeatRoutes(app fiber.Router, service metadata.Service) {
 	meta.Get("/genres", handlers.GetAllGenres(service))
 	meta.Get("/moods", handlers.GetAllMoods(service))
 	meta.Get("/keys", handlers.GetAllKeys(service))
-	meta.Get("/instruments", handlers.GetAllInstruments(service))
+	// meta.Get("/instruments", handlers.GetAllInstruments(service))
 	// meta.Get("/files", handlers.GetAllAvailableFiles(service))
 	meta.Get("/mfccs", handlers.GetAllMFCCs(service))
 

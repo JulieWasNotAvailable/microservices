@@ -11,7 +11,7 @@ type Service interface {
 
 	ReadAllMoods() (*[]entities.Mood, error)
 	ReadAllKeys() (*[]entities.Keynote, error)
-	ReadAllInstruments() (*[]entities.Instrument, error)
+	// ReadAllInstruments() (*[]entities.Instrument, error)
 
 	ReadRandomTags() (*[]entities.Tag, error)
 	ReadTagByName(name string) (*entities.Tag, error)
@@ -44,9 +44,9 @@ func (s *service) ReadAllGenres() (*[]entities.Genre, error) {
 }
 
 // ReadAllInstruments implements Service.
-func (s *service) ReadAllInstruments() (*[]entities.Instrument, error) {
-	return s.repository.ReadAllInstruments()
-}
+// func (s *service) ReadAllInstruments() (*[]entities.Instrument, error) {
+// 	return s.repository.ReadAllInstruments()
+// }
 
 // ReadAllKeys implements Service.
 func (s *service) ReadAllKeys() (*[]entities.Keynote, error) {
@@ -96,4 +96,3 @@ func (s *service) ReadTagByName(name string) (*entities.Tag, error) {
 func (s *service) ReadTagsByNameLike(name string) (*[]entities.Tag, error) {
 	return s.repository.ReadTagsByNameLike(name)
 }
-

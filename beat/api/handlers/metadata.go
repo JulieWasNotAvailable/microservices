@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/JulieWasNotAvailable/microservices/beat/internal/metadata"
 	"github.com/JulieWasNotAvailable/microservices/beat/api/presenters"
+	"github.com/JulieWasNotAvailable/microservices/beat/internal/metadata"
+	"github.com/gofiber/fiber/v2"
 )
 
 // GetAllGenres retrieves all music genres
@@ -73,16 +73,16 @@ func GetAllKeys(service metadata.Service) fiber.Handler {
 // @Success 200 {object} presenters.MetadataListResponse
 // @Failure 500 {object} presenters.MetadataErrorResponse
 // @Router /metadata/instruments [get]
-func GetAllInstruments(service metadata.Service) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		instruments, err := service.ReadAllInstruments()
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
-		}
+// func GetAllInstruments(service metadata.Service) fiber.Handler {
+// 	return func(c *fiber.Ctx) error {
+// 		instruments, err := service.ReadAllInstruments()
+// 		if err != nil {
+// 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
+// 		}
 
-		return c.Status(http.StatusOK).JSON(presenters.CreateMetadataListResponse(instruments))
-	}
-}
+// 		return c.Status(http.StatusOK).JSON(presenters.CreateMetadataListResponse(instruments))
+// 	}
+// }
 
 // GetAllTags retrieves all tags
 // @Summary Get all tags

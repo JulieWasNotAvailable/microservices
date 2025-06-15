@@ -149,6 +149,10 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("mp3 file path is required to publish the beat")))
 		}
 
+		if beat.KeynoteID == 0 {
+			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("data is not full")))
+		}
+
 		beatModel := entities.UnpublishedBeat{
 			ID:     beatuuid,
 			Status: entities.StatusInModeration,
@@ -243,8 +247,8 @@ func SendToModeration(service unpbeat.Service) fiber.Handler {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 		requestBody := entities.UnpublishedBeat{
-			ID : uuid,
-			Status: entities.StatusInModeration,
+			ID:                 uuid,
+			Status:             entities.StatusInModeration,
 			SentToModerationAt: time.Now().Unix(),
 		}
 		beat, err := service.UpdateUnpublishedBeat(&requestBody)

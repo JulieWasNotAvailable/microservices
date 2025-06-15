@@ -9,13 +9,14 @@ import (
 
 type Repository interface {
 	CreateNewLicenseTemplate(userId uuid.UUID, data entities.LicenseTemplate) (entities.LicenseTemplate, error)
-	ReadLicenseTemplateById(id uint) (*presenters.LicenseTemplate, error)
+	ReadLicenseTemplateById(id uint) (presenters.LicenseTemplate, error)
 	ReadAllLicenseTemplateByBeamakerId(beatmakerId uuid.UUID) (*[]presenters.LicenseTemplate, error)
 	UpdateLicenseTemplate(data presenters.LicenseTemplate) error
 
 	ReadLicenseByBeatId(beatId uuid.UUID) (*[]presenters.License, error)
 	ReadLicenseById(id uint) (*presenters.License, error)
 	CreateNewLicense(license entities.License) (entities.License, error)
+	CreateNewLicenseList(userId uuid.UUID, licenses []entities.License) ([]entities.License, error)
 
 	//admin
 	ReadAllLicenseTemplate() (*[]presenters.LicenseTemplate, error)
@@ -41,6 +42,25 @@ func (r *repository) CreateNewLicense(license entities.License) (entities.Licens
 	return license, nil
 }
 
+func (r *repository) CreateNewLicenseList(userId uuid.UUID, licenses []entities.License) ([]entities.License, error) {
+	err := r.DB.Transaction(func(tx *gorm.DB) error {
+		for _, license := range licenses {
+			license.UserID = userId
+			err := r.DB.Create(&license).Error
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return []entities.License{}, err
+	}
+
+	return licenses, nil
+}
+
 func (r *repository) CreateNewLicenseTemplate(userId uuid.UUID, data entities.LicenseTemplate) (entities.LicenseTemplate, error) {
 	data.UserID = userId
 
@@ -52,14 +72,14 @@ func (r *repository) CreateNewLicenseTemplate(userId uuid.UUID, data entities.Li
 	return data, nil
 }
 
-func (r *repository) ReadLicenseTemplateById(id uint) (*presenters.LicenseTemplate, error) {
+func (r *repository) ReadLicenseTemplateById(id uint) (presenters.LicenseTemplate, error) {
 	var licenseTemplateModel presenters.LicenseTemplate
-	result := r.DB.Where("id = ?", id).First(&licenseTemplateModel)
-	if result.Error == nil {
-		return &licenseTemplateModel, result.Error
+	err := r.DB.Where("id = ?", id).First(&licenseTemplateModel).Error
+	if err != nil {
+		return licenseTemplateModel, err
 	}
 
-	return &licenseTemplateModel, nil
+	return licenseTemplateModel, nil
 }
 
 func (r *repository) ReadAllLicenseTemplateByBeamakerId(beatmakerId uuid.UUID) (*[]presenters.LicenseTemplate, error) {
@@ -102,7 +122,7 @@ func (r *repository) ReadLicenseById(id uint) (*presenters.License, error) {
 func (r *repository) UpdateLicenseTemplate(data presenters.LicenseTemplate) error {
 	result := r.DB.Model(&entities.LicenseTemplate{}).
 		Where("id = ?", data.ID).
-		Updates(data)
+		Updates(&data)
 
 	if result.Error != nil {
 		return result.Error
@@ -114,7 +134,6 @@ func (r *repository) UpdateLicenseTemplate(data presenters.LicenseTemplate) erro
 
 	return nil
 }
-
 
 func (r *repository) ReadAllLicenseTemplate() (*[]presenters.LicenseTemplate, error) {
 	var licenseTemplates []presenters.LicenseTemplate

@@ -50,5 +50,5 @@ func main() {
 
 	app.Use(cors.New())
 
-	app.Listen(":7000")
+	app.Listen(":7775")
 }

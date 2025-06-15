@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log"
 
 	"github.com/JulieWasNotAvailable/microservices/cart/api/presenters"
 	"github.com/JulieWasNotAvailable/microservices/cart/internal/entities"
@@ -91,7 +92,7 @@ func PatchLicenseTemplate(service license.Service) fiber.Handler {
 		if err := c.BodyParser(&template); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(presenters.CreateErrorResponse(err))
 		}
-
+		log.Println("patching template: ", template)
 		beatmakerId, err := getIdFromJWT(c)
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(presenters.CreateErrorResponse(err))

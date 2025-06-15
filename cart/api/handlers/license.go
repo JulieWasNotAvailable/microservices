@@ -10,6 +10,10 @@ import (
 	"github.com/google/uuid"
 )
 
+var ErrUserNotOwner = errors.New("user does not own the template")
+type LicenseList struct {
+	Licenses []entities.License `json:"licenses"`
+}
 // GetLicensesForBeat retrieves all licenses for a specific beat
 // @Summary Get licenses by beat ID
 // @Description Returns all available licenses for a specific beat
@@ -66,7 +70,7 @@ func PostNewLicense(service license.Service) fiber.Handler {
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenters.CreateErrorResponse(err))
 		}
-	
+
 		if licenseTemplate.UserID != beatmakerId {
 			return c.Status(fiber.StatusUnauthorized).JSON(presenters.CreateErrorResponse(errors.New("this license template does not belong to the beatmaker")))
 		}
@@ -77,7 +81,44 @@ func PostNewLicense(service license.Service) fiber.Handler {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenters.CreateErrorResponse(err))
 		}
 
-		return c.Status(fiber.StatusOK).JSON(newLicense)
+		return c.Status(fiber.StatusOK).JSON(presenters.CreateSuccessResponse(newLicense))
+	}
+}
+
+// PostNewLicense creates several new licenses for a beat
+// @Summary Create licenses
+// @Description Creates a new license for a beat (beatmaker only)
+// @Tags License
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param license body entities.License true "License creation data"
+// @Success 200 {object} entities.License "Created license details"
+// @Failure 400 {object} presenters.ErrorResponse "Invalid request body"
+// @Failure 401 {object} presenters.ErrorResponse "Unauthorized or template ownership mismatch"
+// @Failure 500 {object} presenters.ErrorResponse "Internal server error"
+// @Router /license/newLisenseList [post]
+func PostNewLicenseList(service license.Service) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var requestBody LicenseList
+		if err := c.BodyParser(&requestBody); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(presenters.CreateErrorResponse(err))
+		}
+		
+		beatmakerId, err := getIdFromJWT(c)
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(presenters.CreateErrorResponse(err))
+		}
+
+		newLicenses, err := service.InsertNewLicenseList(beatmakerId, requestBody.Licenses)
+		if err != nil {
+			if errors.Is(err, ErrUserNotOwner) {
+				return c.Status(fiber.StatusUnauthorized).JSON(presenters.CreateErrorResponse(err))
+			}
+			return err
+		}
+
+		return c.Status(fiber.StatusOK).JSON(presenters.CreateSuccessResponse(newLicenses))
 	}
 }
 

@@ -23,7 +23,7 @@ type KafkaMessageURLUpdate struct {
 }
 
 func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice beatmetadata.MetadataService) {
-	brokerUrl := []string{"localhost:9092"}
+	brokerUrl := []string{"broker:29092"}
 
 	worker, err := connectConsumer(brokerUrl)
 	if err != nil {
@@ -63,7 +63,7 @@ func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice bea
 
 				updateDataFiles := entities.AvailableFiles{}
 				updateDataBeat := entities.UnpublishedBeat{
-					ID : key,
+					ID: key,
 				}
 				switch message.FileType {
 				case "mp3":
@@ -94,11 +94,11 @@ func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice bea
 					log.Println("error in ConsumerFileUpdate", err)
 				}
 
-				case <-sigchan:
-					fmt.Println("Interrupt is detected")
+			case <-sigchan:
+				fmt.Println("Interrupt is detected")
 
-					//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
-					doneCh <- struct{}{}
+				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
+				doneCh <- struct{}{}
 			}
 		}
 	}()
@@ -111,4 +111,3 @@ func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice bea
 	//we're waiting for a response from this channel
 	fmt.Println("Processed", msgCount, "messages")
 }
-

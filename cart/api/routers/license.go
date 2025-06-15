@@ -11,6 +11,7 @@ func SetupLicenseRoutes(app fiber.Router, service license.Service) {
 	license := app.Group("/license")
 	license.Post("/newLicense", guards.ProtectedRequiresBeatmaker(), handlers.PostNewLicense(service))
 	license.Get("/licensesForBeat/:beatId", handlers.GetLicensesForBeat(service))
+	license.Post("/licenseList", handlers.PostNewLicenseList(service))
 
 	license.Post("/newLicenseTemplate", guards.ProtectedRequiresBeatmaker(), handlers.PostNewLicenseTemplate(service))
 	license.Get("/allLicenseTemplatesByBeatmakerJWT", guards.ProtectedRequiresBeatmaker(), handlers.GetAllLicenseTemplatesByBeatmakerId(service))

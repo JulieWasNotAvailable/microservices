@@ -137,6 +137,35 @@ func GetBeatsByBeatmakerId(service beat.Service) fiber.Handler {
 	}
 }
 
+// GetBeatsByJWT retrieves beats by JWT
+// @Summary Get beats by JWT
+// @Description Returns all beats
+// @Tags Admin
+// @Accept json
+// @Produce json
+// @Param beatmakerId path string true "Beatmaker ID in UUID format"
+// @Success 200 {object} presenters.BeatListResponse "List of beats"
+// @Failure 400 {object} presenters.BeatErrorResponse "Invalid ID format"
+// @Failure 500 {object} presenters.BeatErrorResponse "Internal server error"
+// @Router /beat/byBeatmakerByJWT [get]
+func GetBeatsByJWT(service beat.Service) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// Parse UUID from request parameters
+		beatmakerId, err := getIdFromJWT(c)
+		if err != nil {
+			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
+		}
+
+		// Call service to get beats by beatmaker ID
+		beats, err := service.ReadBeatsByBeatmakerId(beatmakerId)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
+		}
+
+		return c.Status(http.StatusOK).JSON(presenters.CreateBeatListResponse(beats))
+	}
+}
+
 // GetFilteredBeats retrieves beats with filters
 // @Summary Filter beats
 // @Description Returns beats matching the provided filters
@@ -147,7 +176,7 @@ func GetBeatsByBeatmakerId(service beat.Service) fiber.Handler {
 // @Success 200 {object} presenters.BeatListResponse "Filtered list of beats"
 // @Failure 400 {object} presenters.BeatErrorResponse "Invalid filter format"
 // @Failure 500 {object} presenters.BeatErrorResponse "Internal server error"
-// @Router /beat/filteredBeats [get]
+// @Router /beat/filteredBeats [post]
 func GetFilteredBeats(service beat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		filters := presenters.Filters{}
