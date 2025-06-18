@@ -17,13 +17,13 @@ import (
 	"github.com/gofiber/swagger"
 )
 
-// @BasePath /api
-// @title Fiber User Service
-// @version 1.0
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
-// @host localhost:7773
+//	@BasePath					/api
+//	@title						Fiber User Service
+//	@version					1.0
+//	@securityDefinitions.apikey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+//	@host						localhost:7773
 func main() {
 
 	pgconfig := dbconnection.GetConfigs()

@@ -38,14 +38,14 @@ func typeOf(objectKey string) (string, error) {
 	return contentType, nil
 }
 
-// @Summary List all S3 buckets
-// @Description Get a list of all available S3 buckets
-// @Tags Storage
-// @Produce json
-// @Success 200 {object} map[string]interface{} "Returns list of buckets"
-// @Failure 401 {string} string "Access denied"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /buckets [get]
+//	@Summary		List all S3 buckets
+//	@Description	Get a list of all available S3 buckets
+//	@Tags			Storage
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}	"Returns list of buckets"
+//	@Failure		401	{string}	string					"Access denied"
+//	@Failure		500	{object}	map[string]interface{}	"Internal server error"
+//	@Router			/buckets [get]
 func GetBuckets (ctx *fiber.Ctx) error {
 	storage := dbconnection.S3Connect()
 
@@ -71,14 +71,14 @@ func GetBuckets (ctx *fiber.Ctx) error {
 		})
 }
 
-// @Summary List objects in a bucket  
-// @Description Get a list of objects from the specified S3 bucket  
-// @Tags Storage  
-// @Produce json  
-// @Param bucket path string true "Bucket name"  
-// @Success 200 {object} map[string]interface{} "Returns list of objects"  
-// @Failure 400 {object} map[string]interface{} "Bad request"  
-// @Router /getObjectsFromBucket/{bucket} [get]  
+//	@Summary		List objects in a bucket  
+//	@Description	Get a list of objects from the specified S3 bucket  
+//	@Tags			Storage  
+//	@Produce		json  
+//	@Param			bucket	path		string					true						"Bucket name"	
+//	@Success		200		{object}	map[string]interface{}	"Returns list of objects"	
+//	@Failure		400		{object}	map[string]interface{}	"Bad request"				
+//	@Router			/getObjectsFromBucket/{bucket} [get]  
 func GetObjectsFromBucket(ctx *fiber.Ctx) error {
 	bucket := ctx.Params("bucket")
 	storage := dbconnection.S3Connect()
@@ -98,14 +98,14 @@ func GetObjectsFromBucket(ctx *fiber.Ctx) error {
 			"objects": objects.Contents})
 }
 
-// @Summary List objects in a bucket  
-// @Description Get a list of objects from the specified S3 bucket  
-// @Tags Storage  
-// @Produce json  
-// @Param bucket path string true "Bucket name"  
-// @Success 200 {object} map[string]interface{} "Returns list of objects"  
-// @Failure 400 {object} map[string]interface{} "Bad request"  
-// @Router /ObjectsFromBucket/{bucket} [get] 
+//	@Summary		List objects in a bucket  
+//	@Description	Get a list of objects from the specified S3 bucket  
+//	@Tags			Storage  
+//	@Produce		json  
+//	@Param			bucket	path		string					true						"Bucket name"	
+//	@Success		200		{object}	map[string]interface{}	"Returns list of objects"	
+//	@Failure		400		{object}	map[string]interface{}	"Bad request"				
+//	@Router			/ObjectsFromBucket/{bucket} [get] 
 func GetHeadObject(ctx *fiber.Ctx) error {
 	bucket := ctx.Params("bucket")
 	key := ctx.Params("key")
@@ -127,16 +127,16 @@ func GetHeadObject(ctx *fiber.Ctx) error {
 			"content type": head.ContentType})
 }
 
-// @Summary Generate presigned GET URL
-// @Description Create a presigned URL to download an object
-// @Tags Presigned
-// @Accept json
-// @Produce json
-// @Param bucket path string true "Bucket name"
-// @Param request body request true "Object details"
-// @Success 200 {object} map[string]interface{} "Presigned URL generated"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Router /presigned/getPresignedGetRequest/{bucket} [post]
+//	@Summary		Generate presigned GET URL
+//	@Description	Create a presigned URL to download an object
+//	@Tags			Presigned
+//	@Accept			json
+//	@Produce		json
+//	@Param			bucket	path		string					true	"Bucket name"
+//	@Param			request	body		request					true	"Object details"
+//	@Success		200		{object}	map[string]interface{}	"Presigned URL generated"
+//	@Failure		400		{object}	map[string]interface{}	"Bad request"
+//	@Router			/presigned/getPresignedGetRequest/{bucket} [post]
 func GetObject (ctx *fiber.Ctx) error {
 	storage := dbconnection.S3Connect()
 	presigner := beat.S3ConnectPresign(storage)
@@ -192,17 +192,17 @@ func GetObject (ctx *fiber.Ctx) error {
 		"data": presignedRequest})
 }
 
-// @Summary Generate presigned PUT URL
-// @Description Create a presigned URL to upload an object
-// @Tags Presigned
-// @Accept json
-// @Produce json
-// @Param bucket path string true "Bucket name"
-// @Param request body request true "Object details"
-// @Success 200 {object} map[string]interface{} "Presigned URL generated"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /presigned/getPresignedPostRequest/{bucket} [post]
+//	@Summary		Generate presigned PUT URL
+//	@Description	Create a presigned URL to upload an object
+//	@Tags			Presigned
+//	@Accept			json
+//	@Produce		json
+//	@Param			bucket	path		string					true	"Bucket name"
+//	@Param			request	body		request					true	"Object details"
+//	@Success		200		{object}	map[string]interface{}	"Presigned URL generated"
+//	@Failure		400		{object}	map[string]interface{}	"Bad request"
+//	@Failure		500		{object}	map[string]interface{}	"Internal server error"
+//	@Router			/presigned/getPresignedPostRequest/{bucket} [post]
 func PutObject(ctx *fiber.Ctx) error {
 	storage := dbconnection.S3Connect()
 	presigner := beat.S3ConnectPresign(storage)
@@ -264,16 +264,16 @@ func PutObject(ctx *fiber.Ctx) error {
 	return nil
 }
 
-// @Summary Generate presigned DELETE URL
-// @Description Create a presigned URL to delete an object
-// @Tags Presigned
-// @Accept json
-// @Produce json
-// @Param bucket path string true "Bucket name"
-// @Param request body request true "Object details"
-// @Success 200 {object} map[string]interface{} "Presigned URL generated"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Router /presigned/getPresignedDeleteRequest/{bucket} [post]
+//	@Summary		Generate presigned DELETE URL
+//	@Description	Create a presigned URL to delete an object
+//	@Tags			Presigned
+//	@Accept			json
+//	@Produce		json
+//	@Param			bucket	path		string					true	"Bucket name"
+//	@Param			request	body		request					true	"Object details"
+//	@Success		200		{object}	map[string]interface{}	"Presigned URL generated"
+//	@Failure		400		{object}	map[string]interface{}	"Bad request"
+//	@Router			/presigned/getPresignedDeleteRequest/{bucket} [post]
 func DeleteObject(ctx *fiber.Ctx) error {
 	storage := dbconnection.S3Connect()
 	presigner := beat.S3ConnectPresign(storage)

@@ -36,19 +36,14 @@ func NewService(r Repository) Service {
 }
 
 func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat []float64) (entities.Beat, error) {
-	uuid, err := uuid.NewV7()
-	if err != nil {
-		log.Println(err)
-	}
-
 	mfcc := entities.MFCC{}
-	mfcc, err = fillDataFromArray(mfccfloat, &mfcc)
+	mfcc, err := fillDataFromArray(mfccfloat, &mfcc)
 	if err != nil {
 		log.Println(err)
 	}
 
 	beat := entities.Beat{
-		ID:             uuid,
+		ID:             unpublishedBeat.ID,
 		Name:           unpublishedBeat.Name,
 		Picture:        unpublishedBeat.Picture,
 		BeatmakerID:    unpublishedBeat.BeatmakerID,
@@ -56,11 +51,11 @@ func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat
 		AvailableFiles: unpublishedBeat.AvailableFiles,
 		URL:            unpublishedBeat.AvailableFiles.MP3Url,
 		Price:          unpublishedBeat.Price,
-		Tags:           unpublishedBeat.Tags,
 		BPM:            unpublishedBeat.BPM,
 		Description:    unpublishedBeat.Description,
 		Genres:         unpublishedBeat.Genres,
 		Moods:          unpublishedBeat.Moods,
+		Tags:           unpublishedBeat.Tags,
 		KeynoteID:      unpublishedBeat.KeynoteID,
 		Timestamps:     unpublishedBeat.Timestamps,
 		Instruments:    unpublishedBeat.Instruments,

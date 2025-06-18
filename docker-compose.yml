@@ -181,6 +181,23 @@ services:
       - "8003:8003"
     restart: unless-stopped
 
+  cart:
+    build:
+      context: ./cart
+      dockerfile: Dockerfile
+    container_name: cart
+    ports:
+      - "7775:7775"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5433
+      - DB_USER=postgres
+      - DB_PASSWORD=i_love_tuesdays123
+      - DB_NAME=cart
+
   postgres:
     image: postgres
     container_name: postgres
@@ -190,7 +207,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=i_love_tuesdays123
       - POSTGRES_PORT=5433
-      - POSTGRES_MULTIPLE_DATABASES=beats,unpublishedbeats,users
+      - POSTGRES_MULTIPLE_DATABASES=beats,unpublishedbeats,users,cart
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -208,7 +225,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      # - beat
+      - beat
       - beatsupload
       - user
       - unpbeats

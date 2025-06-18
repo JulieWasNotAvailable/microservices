@@ -16,7 +16,6 @@ type MetadataRepository interface {
 	UpdateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error)
 	UpdateAvailableFilesByBeatId(beatId uuid.UUID, updateData *entities.AvailableFiles) (*entities.AvailableFiles, error)
 	DeleteFileById(id uuid.UUID, fileType string) error 
-	
 
 	CreateInstrument(instrument *entities.Instrument) (*entities.Instrument, error)
 	ReadAllInstruments() (*[]entities.Instrument, error)
@@ -35,6 +34,7 @@ type MetadataRepository interface {
 	DeleteTagById(id uint) error
 
 	CreateMood(mood *entities.Mood) (*entities.Mood, error)
+	ReadMoodByName(name string) (*entities.Mood, error)
 	ReadAllMoods() (*[]entities.Mood, error)
 
 	CreateKeynote(keynote *entities.Keynote) (*entities.Keynote, error)
@@ -279,6 +279,15 @@ func (r *repository) CreateMood(mood *entities.Mood) (*entities.Mood, error) {
 		return nil, result.Error
 	}
 	return mood, nil
+}
+
+func (r *repository) ReadMoodByName(name string) (*entities.Mood, error) {
+	mood := entities.Mood{}
+	err := r.DB.Where("name LIKE ?", name+"%").First(&mood).Error
+	if err != nil{
+		return nil, err
+	}
+	return &mood, nil
 }
 
 func (r *repository) ReadAllMoods() (*[]entities.Mood, error) {

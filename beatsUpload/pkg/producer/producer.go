@@ -62,6 +62,7 @@ func pushMessageToQueue(topic string, key []byte, message []byte) error {
 	case success := <-producer.Successes():
 		// An offset is a unique identifier assigned to each message in a Kafka partition. Used to track the position of a consumer within a partition.
 		fmt.Println("Message produced:", success.Offset)
+		fmt.Println("To brokerURL: ", brokerUrl[0])
 		fmt.Printf("Message is stored in the topic (%s)/partition(%d)/offset(%d)\n", success.Topic, success.Partition, success.Offset)
 	case err := <-producer.Errors():
 		fmt.Println("Failed to produce message:", err)
@@ -72,7 +73,6 @@ func pushMessageToQueue(topic string, key []byte, message []byte) error {
 }
 
 func CreateMessage(message KafkaMessage, key string, topic string) error {
-
 	messageInBytes, err := json.Marshal(message)
 	if err != nil {
 		log.Fatal(messageInBytes)

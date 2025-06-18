@@ -28,7 +28,8 @@ type Repository interface {
 	FindBeatsWithAllMoods(moodIDs []uint) ([]presenters.Beat, error)
 
 	//for service
-	DeleteBeatById(id uuid.UUID) error 
+	DeleteBeatById(id uuid.UUID) error
+	CheckTagExists(name string) (*entities.Tag, error)
 }
 
 type repository struct {
@@ -55,11 +56,11 @@ func (r *repository) ReadBeats() (*[]entities.Beat, error) {
 	var beatModels []entities.Beat
 
 	result := r.DB.Model(beatModels).
-	Preload("AvailableFiles").
-	Preload("Tags").Preload("Genres").
-	Preload("Moods").Preload("Timestamps").
-	Preload("Instruments").Preload("MFCC").
-	Find(&beatModels)
+		Preload("AvailableFiles").
+		Preload("Tags").Preload("Genres").
+		Preload("Moods").Preload("Timestamps").
+		Preload("Instruments").Preload("MFCC").
+		Find(&beatModels)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -84,7 +85,7 @@ func (r *repository) ReadBeatsByBeatmakerId(id uuid.UUID) (*[]presenters.Beat, e
 	var beatModels []presenters.Beat
 
 	result := r.DB.Model(beatModels).Preload("Tags").Preload("Genres").
-		Preload("Moods").Preload("Timestamps").Preload("Instruments").
+		Preload("AvailableFiles").Preload("Moods").Preload("Timestamps").Preload("Instruments").
 		Where("beatmaker_id = ?", id).Find(&beatModels)
 	if result.Error != nil {
 		return nil, result.Error
@@ -93,13 +94,13 @@ func (r *repository) ReadBeatsByBeatmakerId(id uuid.UUID) (*[]presenters.Beat, e
 	return &beatModels, nil
 }
 
-func (r *repository)ReadBeatsByMoodId(moodId uint) (*[]presenters.Beat, error){
+func (r *repository) ReadBeatsByMoodId(moodId uint) (*[]presenters.Beat, error) {
 	var beatModels []presenters.Beat
 
 	err := r.DB.Table("beats").Joins("JOIN beat_moods ON beat_moods.beat_id = beats.id").
-	Where("mood_id = ?", moodId).
-	Scopes(WithBasicPreloads()).
-	Find(&beatModels).Error
+		Where("mood_id = ?", moodId).
+		Scopes(WithBasicPreloads()).
+		Find(&beatModels).Error
 	if err != nil {
 		return nil, err
 	}
@@ -107,12 +108,12 @@ func (r *repository)ReadBeatsByMoodId(moodId uint) (*[]presenters.Beat, error){
 	return &beatModels, nil
 }
 
-func (r *repository)ReadBeatsByDate(from int64, to int64) (*[]presenters.Beat, error){
+func (r *repository) ReadBeatsByDate(from int64, to int64) (*[]presenters.Beat, error) {
 	var beatModels []presenters.Beat
 	err := r.DB.
-	Where("created_at BETWEEN ? AND ?", from, to).
-	Find(&beatModels).Error
-	if err != nil{
+		Where("created_at BETWEEN ? AND ?", from, to).
+		Find(&beatModels).Error
+	if err != nil {
 		return nil, err
 	}
 	return &beatModels, nil
@@ -133,7 +134,7 @@ func (r *repository) DeleteBeatById(id uuid.UUID) error {
 }
 
 func (r *repository) FindBeatsWithAllMoods(moodIDs []uint) ([]presenters.Beat, error) {
-    var beats []presenters.Beat
+	var beats []presenters.Beat
 	// err := r.DB.Scopes(WithAllMoods(moodIDs)).Find(&beats).Error
 	// if err != nil{
 	// 	return nil, err
@@ -141,64 +142,64 @@ func (r *repository) FindBeatsWithAllMoods(moodIDs []uint) ([]presenters.Beat, e
 	return beats, nil
 }
 
-func (r *repository) ReadFilteredBeats(filters presenters.Filters) (*[]presenters.Beat, error){
+func (r *repository) ReadFilteredBeats(filters presenters.Filters) (*[]presenters.Beat, error) {
 	var beats []presenters.Beat
 	err := r.DB.Scopes(WithAllMoodsGenres(filters.Moods, filters.Genres, filters.Tags)).Find(&beats).Error
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
-	
+
 	result, err := FilterBeatsByNumericFields(beats, filters)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return result, nil
 }
 
 func FilterBeatsByNumericFields(beats []presenters.Beat, filters presenters.Filters) (*[]presenters.Beat, error) {
-    var filteredBeats []presenters.Beat
+	var filteredBeats []presenters.Beat
 
-    for _, beat := range beats {
-        match := true
+	for _, beat := range beats {
+		match := true
 
 		if filters.Keynote != 0 && beat.KeynoteID != filters.Keynote {
-            match = false
-        }
+			match = false
+		}
 
-        if filters.MinPrice != 0 && beat.Price < filters.MinPrice {
-            match = false
-        }
+		if filters.MinPrice != 0 && beat.Price < filters.MinPrice {
+			match = false
+		}
 
-        if filters.MaxPrice != 0 && beat.Price > filters.MaxPrice {
-            match = false
-        }
+		if filters.MaxPrice != 0 && beat.Price > filters.MaxPrice {
+			match = false
+		}
 
-        if filters.MinBPM != 0 && beat.BPM < filters.MinBPM {
-            match = false
-        }
+		if filters.MinBPM != 0 && beat.BPM < filters.MinBPM {
+			match = false
+		}
 
-        if filters.MaxBPM != 0 && beat.BPM > filters.MaxBPM {
-            match = false
-        }
+		if filters.MaxBPM != 0 && beat.BPM > filters.MaxBPM {
+			match = false
+		}
 
-        if match {
-            filteredBeats = append(filteredBeats, beat)
-        }
-    }
+		if match {
+			filteredBeats = append(filteredBeats, beat)
+		}
+	}
 
-    if len(filteredBeats) == 0 {
-        return nil, errors.New("no beats match the specified numeric filters")
-    }
+	if len(filteredBeats) == 0 {
+		return nil, errors.New("no beats match the specified numeric filters")
+	}
 
-    return &filteredBeats, nil
+	return &filteredBeats, nil
 }
 
 //scopes
 
 func WithAllMoodsGenres(moodIDs []uint, genreIDs []uint, tagIDs []uint) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		if len(moodIDs) == 0 && len(genreIDs) == 0 && len(tagIDs) == 0{
+		if len(moodIDs) == 0 && len(genreIDs) == 0 && len(tagIDs) == 0 {
 			return db.Where("1 = 1")
 		}
 
@@ -210,43 +211,43 @@ func WithAllMoodsGenres(moodIDs []uint, genreIDs []uint, tagIDs []uint) func(db 
 		}
 
 		var builder strings.Builder
-		
+
 		builder.Write([]byte("WITH "))
 		isFirst := true
-		if len(moodIDs) != 0{
+		if len(moodIDs) != 0 {
 			builder = *moodBuilder(&builder, moodIDs)
 			isFirst = false
 		}
-		if len(genreIDs) != 0{
-			if !isFirst{
+		if len(genreIDs) != 0 {
+			if !isFirst {
 				builder.Write([]byte(")), "))
 			}
 			builder = *genreBuilder(&builder, genreIDs)
 		}
-		if len(tagIDs) != 0{
-			if !isFirst{
+		if len(tagIDs) != 0 {
+			if !isFirst {
 				builder.Write([]byte(")), "))
 			}
 			builder = *tagBuilder(&builder, tagIDs)
 		}
 		builder.Write([]byte(")) "))
-		
+
 		isFirst = true
 		builder.Write([]byte("SELECT * FROM beats b WHERE "))
-		if len(moodIDs) != 0{
+		if len(moodIDs) != 0 {
 			builder.Write([]byte("b.id in (SELECT id FROM moods_CTE)"))
 			isFirst = false
 		}
 		if len(genreIDs) != 0 {
-			if isFirst{
-				builder.Write([]byte("b.id in (SELECT id FROM genres_CTE)"))	
+			if isFirst {
+				builder.Write([]byte("b.id in (SELECT id FROM genres_CTE)"))
 			} else {
 				builder.Write([]byte(" AND b.id IN (SELECT id FROM genres_CTE)"))
 			}
 			isFirst = false
 		}
 		if len(tagIDs) != 0 {
-			if isFirst{
+			if isFirst {
 				builder.Write([]byte("b.id IN (SELECT id FROM tags_CTE)"))
 			} else {
 				builder.Write([]byte(" AND b.id IN (SELECT id FROM tags_CTE)"))
@@ -261,33 +262,33 @@ func WithAllMoodsGenres(moodIDs []uint, genreIDs []uint, tagIDs []uint) func(db 
 func moodBuilder(builder *strings.Builder, moodIDs []uint) *strings.Builder {
 	builder.Write([]byte("moods_CTE AS (SELECT b.* FROM beats b WHERE b.id IN ("))
 	for n := range moodIDs {
-		if n == 0{
-			builder.Write([]byte("SELECT beat_id FROM beat_moods WHERE mood_id in (?) "))		
+		if n == 0 {
+			builder.Write([]byte("SELECT beat_id FROM beat_moods WHERE mood_id in (?) "))
 		} else {
 			builder.Write([]byte("INTERSECT SELECT beat_id FROM beat_moods WHERE mood_id in (?) "))
 		}
 	}
-	
-	return builder	
+
+	return builder
 }
 
 func genreBuilder(builder *strings.Builder, genreIDs []uint) *strings.Builder {
 	builder.Write([]byte("genres_CTE as (select beats.id from beats where beats.id in ("))
-		for n := range genreIDs{
-			if n == 0{
-				builder.Write([]byte("SELECT beat_id FROM beat_genres WHERE genre_id in (?) "))		
-			} else {
-				builder.Write([]byte("INTERSECT SELECT beat_id FROM beat_genres WHERE genre_id in (?) "))
-			}
+	for n := range genreIDs {
+		if n == 0 {
+			builder.Write([]byte("SELECT beat_id FROM beat_genres WHERE genre_id in (?) "))
+		} else {
+			builder.Write([]byte("INTERSECT SELECT beat_id FROM beat_genres WHERE genre_id in (?) "))
 		}
+	}
 	return builder
 }
 
-func tagBuilder (builder *strings.Builder, tagIDs []uint) *strings.Builder {
+func tagBuilder(builder *strings.Builder, tagIDs []uint) *strings.Builder {
 	builder.Write([]byte("tags_CTE as (select beats.id from beats where beats.id in ("))
-	for n := range tagIDs{
-		if n == 0{
-			builder.Write([]byte("SELECT beat_id FROM beat_tags WHERE tag_id in (?) "))		
+	for n := range tagIDs {
+		if n == 0 {
+			builder.Write([]byte("SELECT beat_id FROM beat_tags WHERE tag_id in (?) "))
 		} else {
 			builder.Write([]byte("INTERSECT SELECT beat_id FROM beat_tags WHERE tag_id in (?) "))
 		}
@@ -319,28 +320,40 @@ func WithAllGenres(genreIDs []uint) func(db *gorm.DB) *gorm.DB {
 }
 
 func WithPriceMax(max *int) func(db *gorm.DB) *gorm.DB {
-    return func(db *gorm.DB) *gorm.DB {
-        if max != nil {
-            return db.Where("price <= ?", *max)
-        }
-        return db
-    }
+	return func(db *gorm.DB) *gorm.DB {
+		if max != nil {
+			return db.Where("price <= ?", *max)
+		}
+		return db
+	}
 }
 
 func WithPriceMin(min *int) func(db *gorm.DB) *gorm.DB {
-    return func(db *gorm.DB) *gorm.DB {
-        if min != nil {
-            return db.Where("price >= ?", *min)
-        }
-        return db
-    }
+	return func(db *gorm.DB) *gorm.DB {
+		if min != nil {
+			return db.Where("price >= ?", *min)
+		}
+		return db
+	}
 }
 
 func WithBasicPreloads() func(db *gorm.DB) *gorm.DB {
-    return func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
 		return db.
 			Preload("Tags").Preload("Genres").
 			Preload("Moods").Preload("Timestamps").
 			Preload("Instruments")
 	}
+}
+
+func (r *repository) CheckTagExists(name string) (*entities.Tag, error) {
+	tag := entities.Tag{}
+	result := r.DB.Where("name = ?", name).First(&tag)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+	return &tag, nil
 }

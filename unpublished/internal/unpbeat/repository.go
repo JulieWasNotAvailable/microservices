@@ -22,6 +22,8 @@ type Repository interface {
 	DeleteUnpublishedById(id uuid.UUID) error
 
 	CheckTagExists(name string) (uint, error)
+	CreateTag(tag *entities.Tag) (*entities.Tag, error)
+	ReadMoodByName(name string) (*entities.Mood, error)
 }
 
 type repository struct {
@@ -142,14 +144,14 @@ func (r *repository) UpdateUnpublishedById(unpublished *entities.UnpublishedBeat
 	}
 	moods := unpublished.Moods
 	for _, mood := range(moods){
-		err := r.DB.Where("id = ?", mood.ID).First(&entities.Genre{}).Error
+		err := r.DB.Where("id = ?", mood.ID).First(&entities.Mood{}).Error
 		if err != nil {
 			return nil, fmt.Errorf("mood %d does not exist", mood.ID)
 		}
 	}
 	instruments := unpublished.Instruments
 	for _, instrument := range(instruments){
-		err := r.DB.Where("id = ?", instrument.ID).First(&entities.Genre{}).Error
+		err := r.DB.Where("id = ?", instrument.ID).First(&entities.Instrument{}).Error
 		if err != nil {
 			return nil, fmt.Errorf("instrument %d does not exist", instrument.ID)
 		}
@@ -255,4 +257,22 @@ func (r *repository) CheckTagExists(name string) (uint, error) {
 		return 0, result.Error
 	}
 	return tag.ID, nil
+}
+
+func (r *repository) CreateTag(tag *entities.Tag) (*entities.Tag, error) {
+	tag.CreatedAt = time.Now().Unix()
+	result := r.DB.Create(tag)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return tag, nil
+}
+
+func (r *repository) ReadMoodByName(name string) (*entities.Mood, error) {
+    mood := entities.Mood{}
+    err := r.DB.Where("LOWER(name) = LOWER(?)", name).First(&mood).Error
+    if err != nil {
+        return nil, err
+    }
+    return &mood, nil
 }

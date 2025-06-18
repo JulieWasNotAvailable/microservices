@@ -9,19 +9,18 @@ import (
 	"syscall"
 
 	"github.com/IBM/sarama"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/beatmetadata"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/unpbeat"
-	"github.com/google/uuid"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/producer"
 	// "github.com/JulieWasNotAvailable/microservices/user/api/presenters"
 	// "github.com/JulieWasNotAvailable/microservices/user/pkg/user"
 )
 
-func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice beatmetadata.MetadataService) {
+func StartConsumerLicense(topic string, service unpbeat.Service) {
 	brokerUrl := []string{"localhost:9092"}
 
 	fmt.Printf("starting consumer with brokerurl %s on topic: %s \n", brokerUrl[0], topic)
-	
+
 	worker, err := connectConsumer(brokerUrl)
 	if err != nil {
 		panic(err)
@@ -46,49 +45,34 @@ func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice bea
 				msgCount++
 				fmt.Printf("Received message Count %d: | Topic(%s) | Message(%s) \n", msgCount, string(msg.Topic), string(msg.Value))
 
-				message := KafkaMessageURLUpdate{}
-				err := json.Unmarshal(msg.Value, &message)
+				messageValue := KafkaMessageLicenseCreated{}
+				err := json.Unmarshal(msg.Value, &messageValue)
 				if err != nil {
-					log.Panic(err)
+					messageValue.Error = "couldn't unmarshal"
+					log.Println("cannot parse the message")
 				}
-				key, err := uuid.Parse(string(msg.Key))
-				if err != nil {
-					log.Panic(err)
+				if messageValue.Error != "" {
+					toUpdateErr := entities.UnpublishedBeat{
+						Status: entities.StatusDraft,
+						Err: messageValue.Error,
+					}
+					_, err = service.UpdateUnpublishedBeat(&toUpdateErr)
+					if err != nil {
+						log.Println("couldn't update the beat error after receving license error message")
+					}
+				} else {
+					beat, err := service.GetUnpublishedBeatByID(messageValue.BeatId)
+					if err != nil {
+						log.Println("couldn't update the beat error after receving license error message")
+					}
+					toMfccMsg := producer.KafkaMessageToMFCC{
+						ID : messageValue.BeatId.String(),
+						Filename: beat.AvailableFiles.MP3Url,
+					}
+					toMfccMsgBytes, _ := json.Marshal(toMfccMsg)
+					producer.CreateMessage(toMfccMsgBytes, "track_for_mfcc")
 				}
-
-				updateDataFiles := entities.AvailableFiles{}
-				updateDataBeat := entities.UnpublishedBeat{
-					ID: key,
-				}
-				switch message.FileType {
-				case "mp3":
-					updateDataFiles.MP3Url = message.URL
-					_, err := mservice.UpdateAvailableFilesByBeatId(key, &updateDataFiles)
-					if err != nil {
-						log.Println("couldn't update files in ConsumerFileUpdate", err)
-					}
-				case "wav":
-					updateDataFiles.WAVUrl = message.URL
-					_, err := mservice.UpdateAvailableFilesByBeatId(key, &updateDataFiles)
-					if err != nil {
-						log.Println("couldn't update files in ConsumerFileUpdate", err)
-					}
-				case "zip":
-					updateDataFiles.ZIPUrl = message.URL
-					_, err := mservice.UpdateAvailableFilesByBeatId(key, &updateDataFiles)
-					if err != nil {
-						log.Println("couldn't update files in ConsumerFileUpdate", err)
-					}
-				case "cover":
-					updateDataBeat.Picture = message.URL
-					_, err := service.UpdateUnpublishedBeat(&updateDataBeat)
-					if err != nil {
-						log.Println("couldn't update files in ConsumerFileUpdate", err)
-					}
-				default:
-					log.Println("error in ConsumerFileUpdate", err)
-				}
-
+				
 			case <-sigchan:
 				fmt.Println("Interrupt is detected")
 
@@ -105,4 +89,16 @@ func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice bea
 	}
 	//we're waiting for a response from this channel
 	fmt.Println("Processed", msgCount, "messages")
+}
+
+func connectConsumer(brokersUrl []string) (sarama.Consumer, error) {
+    config := sarama.NewConfig()
+    config.Consumer.Return.Errors = true
+
+    conn, err := sarama.NewConsumer(brokersUrl, config)
+    if err != nil {
+        return nil, err
+    }
+
+    return conn, nil
 }

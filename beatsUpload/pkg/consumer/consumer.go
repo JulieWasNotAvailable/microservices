@@ -13,7 +13,7 @@ import (
 )
 
 func StartConsumer(topic string, service beat.Service) {
-	brokerUrl := []string{"localhost:9092"}
+	brokerUrl := []string{"broker:29092"}
 
 	worker, err := connectConsumer(brokerUrl)
 
@@ -50,7 +50,7 @@ func StartConsumer(topic string, service beat.Service) {
 				}
 
 				err := service.DeleteAttachedToBeatFiles(message)
-				if err != nil{
+				if err != nil {
 					log.Println(err)
 				}
 
@@ -83,4 +83,3 @@ func connectConsumer(brokersUrl []string) (sarama.Consumer, error) {
 
 	return conn, nil
 }
-

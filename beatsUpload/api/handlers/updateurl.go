@@ -22,7 +22,7 @@ type UpdateRequest struct {
 func checkContentType(contentType string, bucketName string, objectKey string, ctx *fiber.Ctx) error {
 	client := dbconnection.S3Connect()
 
-	re := regexp.MustCompile(`audio/mpeg|audio/wav|application/zip|image/jpeg|image/jpg|image/png`)
+	re := regexp.MustCompile(`audio/mpeg|audio/wav|application/zip|image/jpeg|image/jpg|image/png|image/webp`)
 	if !re.MatchString(contentType) {
 		_, err := client.S3Client.DeleteObject(ctx.Context(), &s3.DeleteObjectInput{
 			Bucket : aws.String(bucketName),
@@ -70,7 +70,7 @@ func checkContentType(contentType string, bucketName string, objectKey string, c
 			}
 			return errors.New("wrong bucket. application/zip should be in zipbeats. i'm deleting that")
 		}
-	case "image/jpeg", "image/jpg", "image/png":
+	case "image/jpeg", "image/jpg", "image/png", "image/webp":
 		if bucketName != "imagesall"{
 			_, err := client.S3Client.DeleteObject(ctx.Context(), &s3.DeleteObjectInput{
 				Bucket : aws.String(bucketName),
@@ -88,19 +88,19 @@ func checkContentType(contentType string, bucketName string, objectKey string, c
 	return nil
 }
 
-// @Summary Validates the file, pushes to User or Beat Service.
-// @Description Verify if a file exists, file type in S3 and publish to Kafka
-// @Tags Update
-// @Accept json
-// @Produce json
-// @Param entity path string true "User or Beat"
-// @Param filetype path string false "fileType (mp3, wav, zip, cover or pfp)"
-// @Param UpdateRequest body UpdateRequest true "UpdateRequest"
-// @Success 200 {object} map[string]interface{} "Successfully processed"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Failure 422 {object} map[string]interface{} "Unprocessable entity"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /updateURL/{entity}/{filetype} [post]
+//	@Summary		Validates the file, pushes to User or Beat Service.
+//	@Description	Verify if a file exists, file type in S3 and publish to Kafka
+//	@Tags			Update
+//	@Accept			json
+//	@Produce		json
+//	@Param			entity			path		string					true	"User or Beat"
+//	@Param			filetype		path		string					false	"fileType (mp3, wav, zip, cover or pfp)"
+//	@Param			UpdateRequest	body		UpdateRequest			true	"UpdateRequest"
+//	@Success		200				{object}	map[string]interface{}	"Successfully processed"
+//	@Failure		400				{object}	map[string]interface{}	"Bad request"
+//	@Failure		422				{object}	map[string]interface{}	"Unprocessable entity"
+//	@Failure		500				{object}	map[string]interface{}	"Internal server error"
+//	@Router			/updateURL/{entity}/{filetype} [post]
 func UpdateFile(ctx *fiber.Ctx) error {
 	client := dbconnection.S3Connect()
 	

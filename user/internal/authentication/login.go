@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// @Description Login Input
+//	@Description	Login Input
 type LoginInput struct {
 	Email string `json:"email" example:"john_molly@example.com"`
 	Password string `json:"password" example:"securepassword123"`
@@ -19,17 +19,17 @@ type LoginInput struct {
 
 // Login get user and password
 // Login godoc
-// @Summary User login
-// @Description Authenticate user with email and password
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param credentials body LoginInput true "User credentials"
-// @Success 200 {object} presenters.UserSuccessResponse
-// @Failure 400 {object} presenters.UserErrorResponse
-// @Failure 401 {object} presenters.UserErrorResponse
-// @Failure 500 {object} presenters.UserErrorResponse
-// @Router /login [post]
+//	@Summary		User login
+//	@Description	Authenticate user with email and password
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			credentials	body		LoginInput	true	"User credentials"
+//	@Success		200			{object}	presenters.UserSuccessResponse
+//	@Failure		400			{object}	presenters.UserErrorResponse
+//	@Failure		401			{object}	presenters.UserErrorResponse
+//	@Failure		500			{object}	presenters.UserErrorResponse
+//	@Router			/login [post]
 func Login(service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 	input := LoginInput{}

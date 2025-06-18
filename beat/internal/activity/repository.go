@@ -74,7 +74,7 @@ func (r *repository) DeleteLike(userid uuid.UUID, beatid uuid.UUID) (*entities.L
 // ReadLikesByUserId implements LikesRepository.
 func (r *repository) ReadLikesByUserId(userid uuid.UUID) (*[]entities.Like, error) {
 	var likes []entities.Like
-    err := r.DB.Where("user_id = ?", userid).Find(&likes).Error
+    err := r.DB.Where("user_id = ?", userid).Preload("Beat").Find(&likes).Error
     if err != nil {
         return nil, err
     }

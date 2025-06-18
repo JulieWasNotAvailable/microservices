@@ -9,13 +9,13 @@ import (
 )
 
 // GetAllGenres retrieves all music genres
-// @Summary Get all genres
-// @Description Returns a list of all available music genres
-// @Tags Metadata
-// @Produce json
-// @Success 200 {object} presenters.MetadataListResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/genres [get]
+//	@Summary		Get all genres
+//	@Description	Returns a list of all available music genres
+//	@Tags			Metadata
+//	@Produce		json
+//	@Success		200	{object}	presenters.MetadataListResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/genres [get]
 func GetAllGenres(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		genres, err := service.ReadAllGenres()
@@ -28,13 +28,13 @@ func GetAllGenres(service metadata.Service) fiber.Handler {
 }
 
 // GetAllMoods retrieves all mood categories
-// @Summary Get all moods
-// @Description Returns a list of all available mood categories
-// @Tags Metadata
-// @Produce json
-// @Success 200 {object} presenters.MetadataListResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/moods [get]
+//	@Summary		Get all moods
+//	@Description	Returns a list of all available mood categories
+//	@Tags			Metadata
+//	@Produce		json
+//	@Success		200	{object}	presenters.MetadataListResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/moods [get]
 func GetAllMoods(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		moods, err := service.ReadAllMoods()
@@ -47,13 +47,13 @@ func GetAllMoods(service metadata.Service) fiber.Handler {
 }
 
 // GetAllKeys retrieves all musical keys
-// @Summary Get all keys
-// @Description Returns a list of all available musical keys
-// @Tags Metadata
-// @Produce json
-// @Success 200 {object} presenters.MetadataListResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/keys [get]
+//	@Summary		Get all keys
+//	@Description	Returns a list of all available musical keys
+//	@Tags			Metadata
+//	@Produce		json
+//	@Success		200	{object}	presenters.MetadataListResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/keys [get]
 func GetAllKeys(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		keys, err := service.ReadAllKeys()
@@ -66,13 +66,13 @@ func GetAllKeys(service metadata.Service) fiber.Handler {
 }
 
 // GetAllInstruments retrieves all instruments
-// @Summary Get all instruments
-// @Description Returns a list of all available instruments
-// @Tags Metadata
-// @Produce json
-// @Success 200 {object} presenters.MetadataListResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/instruments [get]
+//	@Summary		Get all instruments
+//	@Description	Returns a list of all available instruments
+//	@Tags			Metadata
+//	@Produce		json
+//	@Success		200	{object}	presenters.MetadataListResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/instruments [get]
 func GetAllInstruments(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		instruments, err := service.ReadAllInstruments()
@@ -85,13 +85,13 @@ func GetAllInstruments(service metadata.Service) fiber.Handler {
 }
 
 // GetAllTags retrieves all tags
-// @Summary Get all tags
-// @Description Returns a list of all available tags
-// @Tags Tags
-// @Produce json
-// @Success 200 {object} presenters.MetadataListResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/tags [get]
+//	@Summary		Get all tags
+//	@Description	Returns a list of all available tags
+//	@Tags			Tags
+//	@Produce		json
+//	@Success		200	{object}	presenters.MetadataListResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/tags [get]
 func GetAllTags(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		tags, err := service.ReadAllTags()
@@ -104,13 +104,13 @@ func GetAllTags(service metadata.Service) fiber.Handler {
 }
 
 // GetAllTimestamps retrieves all timestamps
-// @Summary Get all timestamps
-// @Description Returns a list of all available timestamps
-// @Tags Timestamp
-// @Produce json
-// @Success 200 {object} presenters.MetadataListResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/timestamps [get]
+//	@Summary		Get all timestamps
+//	@Description	Returns a list of all available timestamps
+//	@Tags			Timestamp
+//	@Produce		json
+//	@Success		200	{object}	presenters.MetadataListResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/timestamps [get]
 func GetAllTimestamps(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		timestamps, err := service.ReadAllTimestamps()
@@ -123,13 +123,13 @@ func GetAllTimestamps(service metadata.Service) fiber.Handler {
 }
 
 // GetAllMFCCs retrieves all MFCC data
-// @Summary Get all MFCCs
-// @Description Returns a list of all available MFCC data
-// @Tags Metadata
-// @Produce json
-// @Success 200 {object} presenters.MetadataListResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/mfccs [get]
+//	@Summary		Get all MFCCs
+//	@Description	Returns a list of all available MFCC data
+//	@Tags			Metadata
+//	@Produce		json
+//	@Success		200	{object}	presenters.MetadataListResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/mfccs [get]
 func GetAllMFCCs(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		mfccs, err := service.ReadAllMFCC()
@@ -142,13 +142,13 @@ func GetAllMFCCs(service metadata.Service) fiber.Handler {
 }
 
 // GetRandomTags retrieves random tags
-// @Summary Get random tags
-// @Description Returns a list of randomly selected tags
-// @Tags Tags
-// @Produce json
-// @Success 200 {object} presenters.MetadataListResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/tags/random [get]
+//	@Summary		Get random tags
+//	@Description	Returns a list of randomly selected tags
+//	@Tags			Tags
+//	@Produce		json
+//	@Success		200	{object}	presenters.MetadataListResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/tags/random [get]
 func GetRandomTags(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		tags, err := service.ReadRandomTags()
@@ -161,14 +161,14 @@ func GetRandomTags(service metadata.Service) fiber.Handler {
 }
 
 // GetTagByName retrieves tag by name
-// @Summary Get tag by name
-// @Description Returns tag details for the specified name (ONLY 1 TAG WITH SPECIFIC NAME)
-// @Tags Tags
-// @Produce json
-// @Param name path string true "Tag name"
-// @Success 200 {object} presenters.MetadataSuccessResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/tags/byName/{name} [get]
+//	@Summary		Get tag by name
+//	@Description	Returns tag details for the specified name (ONLY 1 TAG WITH SPECIFIC NAME)
+//	@Tags			Tags
+//	@Produce		json
+//	@Param			name	path		string	true	"Tag name"
+//	@Success		200		{object}	presenters.MetadataSuccessResponse
+//	@Failure		500		{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/tags/byName/{name} [get]
 func GetTagByName(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		name := c.Params("name")
@@ -181,14 +181,14 @@ func GetTagByName(service metadata.Service) fiber.Handler {
 	}
 }
 
-// @Summary Get MANY tags by name LIKE
-// @Description Returns all of the tags for the specified name like%
-// @Tags Tags
-// @Produce json
-// @Param name path string true "Tag name"
-// @Success 200 {object} presenters.MetadataSuccessResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/tags/byNameLike/{name} [get]
+//	@Summary		Get MANY tags by name LIKE
+//	@Description	Returns all of the tags for the specified name like%
+//	@Tags			Tags
+//	@Produce		json
+//	@Param			name	path		string	true	"Tag name"
+//	@Success		200		{object}	presenters.MetadataSuccessResponse
+//	@Failure		500		{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/tags/byNameLike/{name} [get]
 func GetTagsByNameLike(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		name := c.Params("name")
@@ -202,13 +202,13 @@ func GetTagsByNameLike(service metadata.Service) fiber.Handler {
 }
 
 // GetTagsInTrend retrieves trending tags
-// @Summary Get trending tags
-// @Description Returns a list of popular genres. Takes beats that were created this month (today minus 30 days), counts, how frequently were they used in beat_genres table.
-// @Tags Tags
-// @Produce json
-// @Success 200 {object} presenters.MetadataListResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/tags/in_trend [get]
+//	@Summary		Get trending tags
+//	@Description	Returns a list of popular genres. Takes beats that were created this month (today minus 30 days), counts, how frequently were they used in beat_genres table.
+//	@Tags			Tags
+//	@Produce		json
+//	@Success		200	{object}	presenters.MetadataListResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/tags/in_trend [get]
 func GetTagsInTrend(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		tags, err := service.ReadPopularTags()
@@ -221,13 +221,13 @@ func GetTagsInTrend(service metadata.Service) fiber.Handler {
 }
 
 // GetGenresInTrend retrieves trending genres
-// @Summary Get trending genres
-// @Description Returns a list of currently popular genres
-// @Tags Metadata
-// @Produce json
-// @Success 200 {object} presenters.MetadataListResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata/genres/popular [get]
+//	@Summary		Get trending genres
+//	@Description	Returns a list of currently popular genres
+//	@Tags			Metadata
+//	@Produce		json
+//	@Success		200	{object}	presenters.MetadataListResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/genres/popular [get]
 func GetGenresInTrend(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		tags, err := service.ReadPopularGenres()

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -12,8 +11,6 @@ import (
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/beatmetadata"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/unpbeat"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/consumer"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/producer"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -25,27 +22,27 @@ type BeatForPublishing struct {
 }
 
 // Hello godoc
-// @Summary Simple hello endpoint
-// @Description Returns a hello message
-// @Tags utils
-// @Produce json
-// @Success 200 {string} string "hello!"
-// @Router / [get]
+//	@Summary		Simple hello endpoint
+//	@Description	Returns a hello message
+//	@Tags			utils
+//	@Produce		json
+//	@Success		200	{string}	string	"hello!"
+//	@Router			/ [get]
 func Hello(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON("hello!")
 }
 
 // SaveBeatDraft godoc
-// @Summary Save a beat draft
-// @Description Save an unpublished beat with draft status
-// @Tags beats
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {object} presenters.UnpublishedBeatSuccessResponse
-// @Failure 422 {object} presenters.UnpublishedBeatErrorResponse
-// @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
-// @Router /unpbeats/makeEmptyBeat [post]
+//	@Summary		Save a beat draft
+//	@Description	Save an unpublished beat with draft status
+//	@Tags			beats
+//	@Accept			json
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	presenters.UnpublishedBeatSuccessResponse
+//	@Failure		422	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Failure		500	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Router			/unpbeats/makeEmptyBeat [post]
 func SaveBeatDraft(service unpbeat.Service, metaservice beatmetadata.MetadataService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var emptyBeat entities.UnpublishedBeat
@@ -80,16 +77,16 @@ func SaveBeatDraft(service unpbeat.Service, metaservice beatmetadata.MetadataSer
 }
 
 // UpdateBeat godoc
-// @Summary Update an unpublished beat
-// @Description Update an existing unpublished beat entry
-// @Tags beats
-// @Accept json
-// @Produce json
-// @Param beat body entities.UnpublishedBeat true "Beat data to update"
-// @Success 200 {object} object "Successfully updated beat"
-// @Failure 422 {object} object "Unprocessable entity - invalid request body"
-// @Failure 500 {object} object "Internal server error"
-// @Router /unpbeats/saveDraft [patch]
+//	@Summary		Update an unpublished beat
+//	@Description	Update an existing unpublished beat entry
+//	@Tags			beats
+//	@Accept			json
+//	@Produce		json
+//	@Param			beat	body		entities.UnpublishedBeat	true	"Beat data to update"
+//	@Success		200		{object}	object						"Successfully updated beat"
+//	@Failure		422		{object}	object						"Unprocessable entity - invalid request body"
+//	@Failure		500		{object}	object						"Internal server error"
+//	@Router			/unpbeats/saveDraft [patch]
 func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var requestBody entities.UnpublishedBeat
@@ -109,29 +106,24 @@ func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) 
 }
 
 // PostPublishBeat godoc
-// @Summary Publish a beat. Deletes it from the current service, and posts to beat service.
-// @Description Publish an existing beat (mock implementation)
-// @Tags beats
-// @Produce json
-// @Security ApiKeyAuth
-// @Param id path string true "Beat ID to publish"
-// @Success 200 {object} map[string]string
-// @Failure 422 {object} presenters.UnpublishedBeatErrorResponse
-// @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
-// @Router /unpbeats/publishBeat/{id} [get]
-func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.KafkaMessageValue, delete_approve_channel <-chan consumer.KafkaMessageValue) fiber.Handler {
+//	@Summary		Publish a beat. Deletes it from the current service, and posts to beat service.
+//	@Description	Publish an existing beat (mock implementation)
+//	@Tags			beats
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Param			id	path		string	true	"Beat ID to publish"
+//	@Success		200	{object}	map[string]string
+//	@Failure		422	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Failure		500	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Router			/unpbeats/publishBeat/{id} [get] //UPDATE SWAGGER
+func PostPublishBeat(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		beatId := c.Params("id")
-		beatuuid, err := uuid.Parse(beatId)
+		requestBody := unpbeat.BeatPublishOptions{}
+		err := c.BodyParser(&requestBody)
 		if err != nil {
-			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(errors.New("wrong id format")))
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(err))
 		}
-
-		beat, err := service.GetUnpublishedBeatByID(beatuuid)
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
-		}
-
+		log.Println(requestBody)
 		beatmakerid, err := getIdFromJWT(c)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
@@ -140,98 +132,26 @@ func PostPublishBeat(service unpbeat.Service, mfcc_channel <-chan consumer.Kafka
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
-		if beat.BeatmakerID != beatmakerid {
-			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("the beat you tried to publish does not belong to you")))
-		}
 
-		filename := beat.AvailableFiles.MP3Url
-		if filename == "" {
-			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(errors.New("mp3 file path is required to publish the beat")))
-		}
-
-		beatModel := entities.UnpublishedBeat{
-			ID:     beatuuid,
-			Status: entities.StatusInModeration,
-		}
-		_, err = service.UpdateUnpublishedBeat(&beatModel)
+		beat, err := service.PublishBeat(beatmakerid, requestBody, beatmakerName)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
-		//send to kafka to Dmitry topic track_for_mfcc
-		message := consumer.KafkaMessageToMFCC{
-			ID:       beatId,
-			Filename: filename,
-		}
-
-		messageBytes, err := json.Marshal(message)
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
-		}
-
-		err = producer.CreateMessage(messageBytes, "track_for_mfcc")
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
-		}
-
-		mfcc := <-mfcc_channel
-		if mfcc.Err != "" {
-			errMessage := entities.UnpublishedBeat{
-				ID:     beatuuid,
-				Err:    mfcc.Err,
-				Status: entities.StatusDraft,
-			}
-			_, err = service.UpdateUnpublishedBeat(&errMessage)
-			if err != nil {
-				return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(errors.New("couldn't update the error status of the beat")))
-			}
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-				"kafka message": mfcc,
-				"status":        false,
-				"error":         mfcc.Err})
-		}
-
-		// log.Println("message receiver in handler: ", mfcc)
-		beat.BeatmakerName = beatmakerName
-		beatForPublishing := BeatForPublishing{
-			Beat: *beat,
-			MFCC: mfcc.Features,
-		}
-
-		beatForPublishingBytes, err := json.Marshal(beatForPublishing)
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
-		}
-
-		err = producer.CreateMessage(beatForPublishingBytes, "publish_beat_main")
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
-		}
-
-		delete_approve := <-delete_approve_channel
-		if delete_approve.Err != "" {
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-				"kafka message": delete_approve,
-				"status":        false,
-				"error":         delete_approve.Err})
-		}
-
-		log.Println("deleting beat with this id: ", beatuuid)
-		_ = service.DeleteUnpublishedBeat(beatuuid)
-		return c.Status(http.StatusOK).JSON(fiber.Map{"message": "updated successfully"})
+		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse2(*beat))
 	}
 }
 
 // SendToModeration godoc
-// @Summary Send beat to moderation
-// @Description Update beat status to 'in_moderation' and set moderation timestamp
-// @Tags admin
-// @Produce json
-// @Param id path string true "Beat ID to send to moderation"
-// @Success 200 {object} presenters.UnpublishedBeatSuccessResponse
-// @Failure 400 {object} presenters.UnpublishedBeatErrorResponse
-// @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
-// @Router /unpbeats/sendToModeration/{id} [get]
+//	@Summary		Send beat to moderation
+//	@Description	Update beat status to 'in_moderation' and set moderation timestamp
+//	@Tags			admin
+//	@Produce		json
+//	@Param			id	path		string	true	"Beat ID to send to moderation"
+//	@Success		200	{object}	presenters.UnpublishedBeatSuccessResponse
+//	@Failure		400	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Failure		500	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Router			/unpbeats/sendToModeration/{id} [get]
 func SendToModeration(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		beatId := c.Params("id")
@@ -243,8 +163,8 @@ func SendToModeration(service unpbeat.Service) fiber.Handler {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 		requestBody := entities.UnpublishedBeat{
-			ID : uuid,
-			Status: entities.StatusInModeration,
+			ID:                 uuid,
+			Status:             entities.StatusInModeration,
 			SentToModerationAt: time.Now().Unix(),
 		}
 		beat, err := service.UpdateUnpublishedBeat(&requestBody)
@@ -257,14 +177,14 @@ func SendToModeration(service unpbeat.Service) fiber.Handler {
 }
 
 // GetUnpublishedBeatsByBeatmakerId godoc
-// @Summary Get user's unpublished beats
-// @Description Get all unpublished beats for the authenticated beatmaker
-// @Tags beats
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {object} presenters.UnpublishedBeatListResponse
-// @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
-// @Router /unpbeats/unpublishedBeatsByBeatmakerJWT [get]
+//	@Summary		Get user's unpublished beats
+//	@Description	Get all unpublished beats for the authenticated beatmaker
+//	@Tags			beats
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	presenters.UnpublishedBeatListResponse
+//	@Failure		500	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Router			/unpbeats/unpublishedBeatsByBeatmakerJWT [get]
 func GetUnpublishedBeatsByBeatmakerId(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		uuid, err := getIdFromJWT(c)
@@ -282,15 +202,15 @@ func GetUnpublishedBeatsByBeatmakerId(service unpbeat.Service) fiber.Handler {
 }
 
 // GetBeatsSortByStatusAndJWT godoc
-// @Summary Get beats by status for current user
-// @Description Get unpublished beats filtered by status for the authenticated beatmaker
-// @Tags beats
-// @Produce json
-// @Security ApiKeyAuth
-// @Param status path string true "Status to filter by"
-// @Success 200 {object} presenters.UnpublishedBeatListResponse
-// @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
-// @Router /unpbeats/sortByStatus/{status} [get]
+//	@Summary		Get beats by status for current user
+//	@Description	Get unpublished beats filtered by status for the authenticated beatmaker
+//	@Tags			beats
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Param			status	path		string	true	"Status to filter by"
+//	@Success		200		{object}	presenters.UnpublishedBeatListResponse
+//	@Failure		500		{object}	presenters.UnpublishedBeatErrorResponse
+//	@Router			/unpbeats/sortByStatus/{status} [get]
 func GetBeatsSortByStatusAndJWT(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		status := c.Params("status")
@@ -310,16 +230,16 @@ func GetBeatsSortByStatusAndJWT(service unpbeat.Service) fiber.Handler {
 }
 
 // GetBeatsInModeration godoc
-// @Summary Get beats in moderation by date range. Warning: uses unix data.
-// @Description Get beats in moderation status within specified date range
-// @Tags admin
-// @Produce json
-// @Param from path int true "Start timestamp"
-// @Param to path int true "End timestamp"
-// @Success 200 {object} presenters.UnpublishedBeatListResponse
-// @Failure 400 {object} presenters.UnpublishedBeatErrorResponse
-// @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
-// @Router /unpbeats/beatsForModerationByDate/{from}/{to} [get]
+//	@Summary		Get beats in moderation by date range. Warning: uses unix data.
+//	@Description	Get beats in moderation status within specified date range
+//	@Tags			admin
+//	@Produce		json
+//	@Param			from	path		int	true	"Start timestamp"
+//	@Param			to		path		int	true	"End timestamp"
+//	@Success		200		{object}	presenters.UnpublishedBeatListResponse
+//	@Failure		400		{object}	presenters.UnpublishedBeatErrorResponse
+//	@Failure		500		{object}	presenters.UnpublishedBeatErrorResponse
+//	@Router			/unpbeats/beatsForModerationByDate/{from}/{to} [get]
 func GetBeatsInModeration(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		fromInt, err := c.ParamsInt("from")
@@ -341,13 +261,13 @@ func GetBeatsInModeration(service unpbeat.Service) fiber.Handler {
 }
 
 // GetAllUnpublishedBeats godoc
-// @Summary Get all unpublished beats
-// @Description Get all unpublished beats in the system
-// @Tags admin
-// @Produce json
-// @Success 200 {object} presenters.UnpublishedBeatListResponse
-// @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
-// @Router /unpbeats/allUnpublishedBeats [get]
+//	@Summary		Get all unpublished beats
+//	@Description	Get all unpublished beats in the system
+//	@Tags			admin
+//	@Produce		json
+//	@Success		200	{object}	presenters.UnpublishedBeatListResponse
+//	@Failure		500	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Router			/unpbeats/allUnpublishedBeats [get]
 func GetAllUnpublishedBeats(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 
@@ -361,16 +281,16 @@ func GetAllUnpublishedBeats(service unpbeat.Service) fiber.Handler {
 }
 
 // GetUnpublishedBeatById godoc
-// @Summary Get an unpublished beat by ID
-// @Description Retrieves an unpublished beat with the specified ID
-// @Tags Beats
-// @Accept json
-// @Produce json
-// @Param id path string true "Beat ID (UUID format)"
-// @Success 200 {object} presenters.UnpublishedBeatSuccessResponse
-// @Failure 422 {object} presenters.UnpublishedBeatErrorResponse
-// @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
-// @Router /unpbeats/unpublishedBeatById/{id} [get]
+//	@Summary		Get an unpublished beat by ID
+//	@Description	Retrieves an unpublished beat with the specified ID
+//	@Tags			Beats
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Beat ID (UUID format)"
+//	@Success		200	{object}	presenters.UnpublishedBeatSuccessResponse
+//	@Failure		422	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Failure		500	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Router			/unpbeats/unpublishedBeatById/{id} [get]
 func GetUnpublishedBeatById(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 
@@ -390,16 +310,16 @@ func GetUnpublishedBeatById(service unpbeat.Service) fiber.Handler {
 }
 
 // DeleteUnpublishedBeatById godoc
-// @Summary Delete an unpublished beat by ID
-// @Description Deletes an unpublished beat with the specified ID
-// @Tags Beats
-// @Accept json
-// @Produce json
-// @Param id path string true "Beat ID (UUID format)"
-// @Success 200 {object} presenters.UnpublishedBeatSuccessResponse
-// @Failure 422 {object} presenters.UnpublishedBeatErrorResponse
-// @Failure 500 {object} presenters.UnpublishedBeatErrorResponse
-// @Router /unpbeats/deleteUnpublishedBeatById/{id} [delete]
+//	@Summary		Delete an unpublished beat by ID
+//	@Description	Deletes an unpublished beat with the specified ID
+//	@Tags			Beats
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Beat ID (UUID format)"
+//	@Success		200	{object}	presenters.UnpublishedBeatSuccessResponse
+//	@Failure		422	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Failure		500	{object}	presenters.UnpublishedBeatErrorResponse
+//	@Router			/unpbeats/deleteUnpublishedBeatById/{id} [delete]
 func DeleteUnpublishedBeatById(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		beatId := c.Params("id")

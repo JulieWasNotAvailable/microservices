@@ -5,9 +5,9 @@ import (
 
 	"github.com/JulieWasNotAvailable/microservices/beat/api/routers"
 	_ "github.com/JulieWasNotAvailable/microservices/beat/docs"
+	"github.com/JulieWasNotAvailable/microservices/beat/internal/activity"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/beat"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/entities"
-	"github.com/JulieWasNotAvailable/microservices/beat/internal/activity"
 	"github.com/JulieWasNotAvailable/microservices/beat/internal/metadata"
 	"github.com/JulieWasNotAvailable/microservices/beat/pkg/consumer"
 	"github.com/JulieWasNotAvailable/microservices/beat/pkg/dbconnection"
@@ -16,17 +16,16 @@ import (
 	"github.com/gofiber/swagger"
 )
 
-// @BasePath /api
-// @title Fiber Beat Service
-// @version 1.0
-// @description Deals Beats, Beat_Listened, filtering
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
-// @host localhost:7771
+//	@BasePath					/api
+//	@title						Fiber Beat Service
+//	@version					1.0
+//	@description				Deals Beats, Beat_Listened, filtering
+//	@securityDefinitions.apikey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+//	@host						localhost:7771
 func main() {
 	app := fiber.New()
-
 
 	pgconfig := dbconnection.GetConfigs()
 	db, err := dbconnection.NewConnection(pgconfig)
@@ -50,8 +49,6 @@ func main() {
 	api := app.Group("/api")
 	app.Use(cors.New())
 
-	app.Use(cors.New())
-
 	routers.SetupMetadataBeatRoutes(api, metaService)
 	routers.SetupBeatRoutes(api, beatService)
 	routers.SetupActivityRoutes(api, activityService)
@@ -61,4 +58,3 @@ func main() {
 
 	app.Listen(":7771")
 }
-

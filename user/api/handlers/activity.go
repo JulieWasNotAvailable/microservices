@@ -11,18 +11,18 @@ import (
 )
 
 // PostSubscribeToBeatmaker godoc
-// @Summary Subscribe to a beatmaker
-// @Description Subscribe the authenticated user to a beatmaker
-// @Tags activity
-// @Accept json
-// @Produce json
-// @Param beatmakerId path string true "Beatmaker ID to subscribe to"
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "Subscription details"
-// @Failure 400 {object} map[string]interface{} "Invalid beatmaker ID or self-subscription attempt"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /activity/subscribeTo/{beatmakerId} [post]
+//	@Summary		Subscribe to a beatmaker
+//	@Description	Subscribe the authenticated user to a beatmaker
+//	@Tags			activity
+//	@Accept			json
+//	@Produce		json
+//	@Param			beatmakerId	path	string	true	"Beatmaker ID to subscribe to"
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	map[string]interface{}	"Subscription details"
+//	@Failure		400	{object}	map[string]interface{}	"Invalid beatmaker ID or self-subscription attempt"
+//	@Failure		401	{object}	map[string]interface{}	"Unauthorized"
+//	@Failure		500	{object}	map[string]interface{}	"Internal server error"
+//	@Router			/activity/subscribeTo/{beatmakerId} [post]
 func PostSubscribeToBeatmaker(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userId, err := getIdFromJWT(c)
@@ -49,16 +49,16 @@ func PostSubscribeToBeatmaker(service activity.Service) fiber.Handler {
 }
 
 // GetMySubscriptions godoc
-// @Summary Get user's subscriptions
-// @Description Get all beatmakers the authenticated user is subscribed to
-// @Tags activity
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "List of subscriptions"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /activity/viewMySubscriptions [get]
+//	@Summary		Get user's subscriptions
+//	@Description	Get all beatmakers the authenticated user is subscribed to
+//	@Tags			activity
+//	@Accept			json
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	map[string]interface{}	"List of subscriptions"
+//	@Failure		401	{object}	map[string]interface{}	"Unauthorized"
+//	@Failure		500	{object}	map[string]interface{}	"Internal server error"
+//	@Router			/activity/viewMySubscriptions [get]
 func GetMySubscriptions(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userId, err := getIdFromJWT(c)
@@ -76,16 +76,16 @@ func GetMySubscriptions(service activity.Service) fiber.Handler {
 }
 
 // GetFollowersCountByBeatmakerId godoc
-// @Summary Get beatmaker's followers count
-// @Description Get the number of followers for a specific beatmaker
-// @Tags activity
-// @Accept json
-// @Produce json
-// @Param beatmakerId path string true "Beatmaker ID"
-// @Success 200 {object} map[string]interface{} "Followers count"
-// @Failure 400 {object} map[string]interface{} "Invalid beatmaker ID"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /activity/followersNumberByBeatmakerId/{beatmakerId} [get]
+//	@Summary		Get beatmaker's followers count
+//	@Description	Get the number of followers for a specific beatmaker
+//	@Tags			activity
+//	@Accept			json
+//	@Produce		json
+//	@Param			beatmakerId	path		string					true	"Beatmaker ID"
+//	@Success		200			{object}	map[string]interface{}	"Followers count"
+//	@Failure		400			{object}	map[string]interface{}	"Invalid beatmaker ID"
+//	@Failure		500			{object}	map[string]interface{}	"Internal server error"
+//	@Router			/activity/followersNumberByBeatmakerId/{beatmakerId} [get]
 func GetFollowersCountByBeatmakerId(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		beatmakerID, err := uuid.Parse(c.Params("beatmakerId"))
@@ -103,18 +103,18 @@ func GetFollowersCountByBeatmakerId(service activity.Service) fiber.Handler {
 }
 
 // DeleteSub godoc
-// @Summary Unsubscribe from a beatmaker
-// @Description Unsubscribe the authenticated user from a beatmaker
-// @Tags activity
-// @Accept json
-// @Produce json
-// @Param beatmakerId path string true "Beatmaker ID to unsubscribe from"
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "Unsubscription confirmation"
-// @Failure 400 {object} map[string]interface{} "Invalid beatmaker ID"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /activity/unsubscribe/{beatmakerId} [delete]
+//	@Summary		Unsubscribe from a beatmaker
+//	@Description	Unsubscribe the authenticated user from a beatmaker
+//	@Tags			activity
+//	@Accept			json
+//	@Produce		json
+//	@Param			beatmakerId	path	string	true	"Beatmaker ID to unsubscribe from"
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	map[string]interface{}	"Unsubscription confirmation"
+//	@Failure		400	{object}	map[string]interface{}	"Invalid beatmaker ID"
+//	@Failure		401	{object}	map[string]interface{}	"Unauthorized"
+//	@Failure		500	{object}	map[string]interface{}	"Internal server error"
+//	@Router			/activity/unsubscribe/{beatmakerId} [delete]
 func DeleteSub(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userId, err := getIdFromJWT(c)

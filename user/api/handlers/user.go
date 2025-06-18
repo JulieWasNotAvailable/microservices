@@ -28,17 +28,17 @@ type Username struct {
 
 
 // AddUser godoc
-// @Summary Create a new user
-// @Description Create a new user with default role (1)
-// @Tags users
-// @Accept json
-// @Produce json
-// @Param user body entities.User true "User data"
-// @Success 200 {object} presenters.UserSuccessResponse
-// @Failure 400 {object} presenters.UserErrorResponse
-// @Failure 422 {object} presenters.UserErrorResponse
-// @Failure 500 {object} presenters.UserErrorResponse
-// @Router /user [post]
+//	@Summary		Create a new user
+//	@Description	Create a new user with default role (1)
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		entities.User	true	"User data"
+//	@Success		200		{object}	presenters.UserSuccessResponse
+//	@Failure		400		{object}	presenters.UserErrorResponse
+//	@Failure		422		{object}	presenters.UserErrorResponse
+//	@Failure		500		{object}	presenters.UserErrorResponse
+//	@Router			/user [post]
 func AddUser(service user.Service) fiber.Handler {
 	return func (c *fiber.Ctx) error {
 		var requestBody entities.User
@@ -66,14 +66,14 @@ func AddUser(service user.Service) fiber.Handler {
 }
 
 // GetUsers godoc
-// @Summary Get all users
-// @Description Retrieve a list of all users
-// @Tags users
-// @Accept json
-// @Produce json
-// @Success 200 {object} presenters.UserSuccessResponse
-// @Failure 500 {object} presenters.UserErrorResponse
-// @Router /users [get]
+//	@Summary		Get all users
+//	@Description	Retrieve a list of all users
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	presenters.UserSuccessResponse
+//	@Failure		500	{object}	presenters.UserErrorResponse
+//	@Router			/users [get]
 func GetUsers(service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		result, err := service.FetchUsers()
@@ -87,16 +87,16 @@ func GetUsers(service user.Service) fiber.Handler {
 }
 
 // GetUserById godoc
-// @Summary Get user by ID
-// @Description Retrieve a single user by their ID
-// @Tags users
-// @Accept json
-// @Produce json
-// @Param id path string true "User ID"
-// @Success 200 {object} presenters.UserSuccessResponse
-// @Failure 400 {object} presenters.UserErrorResponse
-// @Failure 500 {object} presenters.UserErrorResponse
-// @Router /userById/{id} [get]
+//	@Summary		Get user by ID
+//	@Description	Retrieve a single user by their ID
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"User ID"
+//	@Success		200	{object}	presenters.UserSuccessResponse
+//	@Failure		400	{object}	presenters.UserErrorResponse
+//	@Failure		500	{object}	presenters.UserErrorResponse
+//	@Router			/userById/{id} [get]
 func GetUserById(service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id := c.Params("id")
@@ -117,17 +117,17 @@ func GetUserById(service user.Service) fiber.Handler {
 }
 
 // GetUserByEmail godoc
-// @Summary Get user by email.
-// @Description Retrieve a single user by their email. Requires authorization. Requires admin role.
-// @Tags users
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Param email query string true "User Email"
-// @Success 200 {object} presenters.UserSuccessResponse
-// @Failure 400 {object} presenters.UserErrorResponse
-// @Failure 500 {object} presenters.UserErrorResponse
-// @Router /userByEmail/ [get]
+//	@Summary		Get user by email.
+//	@Description	Retrieve a single user by their email. Requires authorization. Requires admin role.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Param			email	query		string	true	"User Email"
+//	@Success		200		{object}	presenters.UserSuccessResponse
+//	@Failure		400		{object}	presenters.UserErrorResponse
+//	@Failure		500		{object}	presenters.UserErrorResponse
+//	@Router			/userByEmail/ [get]
 func GetUserByEmail(service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		email := c.Query("email")
@@ -150,16 +150,16 @@ func GetUserByEmail(service user.Service) fiber.Handler {
 }
 
 // GetBeatmakerByJWT godoc
-// @Summary Get current user by JWT
-// @Description Retrieve current user details from JWT token
-// @Tags users
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {object} presenters.UserSuccessResponse
-// @Failure 401 {object} presenters.UserErrorResponse
-// @Failure 500 {object} presenters.UserErrorResponse
-// @Router /user/me [get]
+//	@Summary		Get current user by JWT
+//	@Description	Retrieve current user details from JWT token
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	presenters.UserSuccessResponse
+//	@Failure		401	{object}	presenters.UserErrorResponse
+//	@Failure		500	{object}	presenters.UserErrorResponse
+//	@Router			/user/me [get]
 func GetUserByJWT(service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		auth := c.GetReqHeaders()
@@ -193,18 +193,18 @@ func GetUserByJWT(service user.Service) fiber.Handler {
 }
 
 // UpdateUser godoc
-// @Summary Update user with metadata. Beatmaker role required. If user has no metadata, new is created with update data.
-// @Description Update user details (requires authentication). Updates profile by jwt.
-// @Tags users
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Param user body presenters.User true "Updated user data"
-// @Success 200 {object} presenters.UserSuccessResponse
-// @Failure 400 {object} presenters.UserErrorResponse
-// @Failure 401 {object} presenters.UserErrorResponse
-// @Failure 500 {object} presenters.UserErrorResponse
-// @Router /user/me/withmeta [patch]
+//	@Summary		Update user with metadata. Beatmaker role required. If user has no metadata, new is created with update data.
+//	@Description	Update user details (requires authentication). Updates profile by jwt.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Param			user	body		presenters.User	true	"Updated user data"
+//	@Success		200		{object}	presenters.UserSuccessResponse
+//	@Failure		400		{object}	presenters.UserErrorResponse
+//	@Failure		401		{object}	presenters.UserErrorResponse
+//	@Failure		500		{object}	presenters.UserErrorResponse
+//	@Router			/user/me/withmeta [patch]
 func UpdateBeatmaker(uservice user.Service, bmservice bmmetadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var requestBody presenters.User
@@ -260,16 +260,16 @@ func UpdateBeatmaker(uservice user.Service, bmservice bmmetadata.Service) fiber.
 }
 
 // UserIsBeatmaker godoc
-// @Summary Upgrade user to beatmaker
-// @Description Change user role to beatmaker (role 2). Requires jwt. Updates the role of the user based on given jwt.
-// @Tags users
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} presenters.UserErrorResponse
-// @Failure 500 {object} presenters.UserErrorResponse
-// @Router /users/me/upgrade [get]
+//	@Summary		Upgrade user to beatmaker
+//	@Description	Change user role to beatmaker (role 2). Requires jwt. Updates the role of the user based on given jwt.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	map[string]interface{}
+//	@Failure		401	{object}	presenters.UserErrorResponse
+//	@Failure		500	{object}	presenters.UserErrorResponse
+//	@Router			/users/me/upgrade [get]
 func UserIsBeatmaker (service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		token := c.Locals("user").(*jwt.Token)
@@ -303,18 +303,18 @@ func UserIsBeatmaker (service user.Service) fiber.Handler {
 }
 
 // UpdateUser godoc
-// @Summary Update user WITHOUGHT METADATA.
-// @Description Update user details (requires authentication). Updates profile by jwt.
-// @Tags users
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Param user body presenters.User true "Updated user data"
-// @Success 200 {object} presenters.UserSuccessResponse
-// @Failure 400 {object} presenters.UserErrorResponse
-// @Failure 401 {object} presenters.UserErrorResponse
-// @Failure 500 {object} presenters.UserErrorResponse
-// @Router /user/me [patch]
+//	@Summary		Update user WITHOUGHT METADATA.
+//	@Description	Update user details (requires authentication). Updates profile by jwt.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Param			user	body		presenters.User	true	"Updated user data"
+//	@Success		200		{object}	presenters.UserSuccessResponse
+//	@Failure		400		{object}	presenters.UserErrorResponse
+//	@Failure		401		{object}	presenters.UserErrorResponse
+//	@Failure		500		{object}	presenters.UserErrorResponse
+//	@Router			/user/me [patch]
 func UpdateUser(service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		requestBody := presenters.User{}
@@ -343,16 +343,16 @@ func UpdateUser(service user.Service) fiber.Handler {
 }
 
 // RemoveUser godoc
-// @Summary Delete user
-// @Description Delete the current user account by jwt.
-// @Tags users
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} presenters.UserErrorResponse
-// @Failure 500 {object} presenters.UserErrorResponse
-// @Router /users/me [delete]
+//	@Summary		Delete user
+//	@Description	Delete the current user account by jwt.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	map[string]interface{}
+//	@Failure		401	{object}	presenters.UserErrorResponse
+//	@Failure		500	{object}	presenters.UserErrorResponse
+//	@Router			/users/me [delete]
 func RemoveUser(service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		token := c.Locals("user").(*jwt.Token)

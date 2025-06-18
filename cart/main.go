@@ -8,20 +8,21 @@ import (
 	"github.com/JulieWasNotAvailable/microservices/cart/internal/cart"
 	"github.com/JulieWasNotAvailable/microservices/cart/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/cart/internal/license"
+	"github.com/JulieWasNotAvailable/microservices/cart/pkg/consumer"
 	"github.com/JulieWasNotAvailable/microservices/cart/pkg/dbconnection"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
 )
 
-// @BasePath /api
-// @title Fiber Cart Service
-// @version 1.0
-// @description Deals with Cart, Licenses and License Template
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
-// @host localhost:7000
+//	@BasePath					/api
+//	@title						Fiber Cart Service
+//	@version					1.0
+//	@description				Deals with Cart, Licenses and License Template
+//	@securityDefinitions.apikey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+//	@host						localhost:7000
 func main() {
 	app := fiber.New()
 
@@ -50,5 +51,7 @@ func main() {
 
 	app.Use(cors.New())
 
-	app.Listen(":7000")
+	go consumer.StartConsumer("create_license", licenseService)
+
+	app.Listen(":7775")
 }

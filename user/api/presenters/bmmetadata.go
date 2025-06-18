@@ -6,7 +6,7 @@ import (
 )
 
 // Metadata represents metadata information
-// @Description Metadata entity containing social links and description
+//	@Description	Metadata entity containing social links and description
 type Metadata struct {
     ID               uuid.UUID `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
     VkUrl           string    `json:"vkUrl,omitempty" example:"https://vk.com/username"`
@@ -18,7 +18,7 @@ type Metadata struct {
 }
 
 // MetadataResponse represents a successful metadata response
-// @Description Standard response for single metadata operation
+//	@Description	Standard response for single metadata operation
 type MetadataSuccessResponse struct {
     Status bool     `json:"status" example:"true"`
     Data   Metadata `json:"data"`
@@ -26,7 +26,7 @@ type MetadataSuccessResponse struct {
 }
 
 // MetadataListResponse represents a successful metadata list response
-// @Description Standard response for multiple metadata items
+//	@Description	Standard response for multiple metadata items
 type MetadataListResponse struct {
     Status bool       `json:"status" example:"true"`
     Data   []Metadata `json:"data"`
@@ -34,7 +34,7 @@ type MetadataListResponse struct {
 }
 
 // MetadataErrorResponse represents an error response
-// @Description Error response for metadata operations
+//	@Description	Error response for metadata operations
 type MetadataErrorResponse struct {
     Status bool    `json:"status" example:"false"`
     Data   *string `json:"data" example:"null"`
@@ -42,8 +42,8 @@ type MetadataErrorResponse struct {
 }
 
 // CreateMetadataSuccessResponse creates a success response from entities.Metadata
-// @Summary Creates success response
-// @Description Converts entities.Metadata to API success response
+//	@Summary		Creates success response
+//	@Description	Converts entities.Metadata to API success response
 func CreateMetadataSuccessResponse(data *entities.Metadata) *MetadataSuccessResponse {
     metadata := Metadata{
         ID: data.ID,
@@ -63,8 +63,8 @@ func CreateMetadataSuccessResponse(data *entities.Metadata) *MetadataSuccessResp
 }
 
 // CreateMetadataResponse creates a success response from Metadata
-// @Summary Creates metadata response
-// @Description Converts Metadata to API success response
+//	@Summary		Creates metadata response
+//	@Description	Converts Metadata to API success response
 func CreateMetadataSuccessResponse2(data *Metadata) *MetadataSuccessResponse {
     return &MetadataSuccessResponse{
         Status: true,
@@ -74,8 +74,8 @@ func CreateMetadataSuccessResponse2(data *Metadata) *MetadataSuccessResponse {
 }
 
 // CreateMetadataListResponse creates a success response for metadata list
-// @Summary Creates metadata list response
-// @Description Converts []Metadata to API success response
+//	@Summary		Creates metadata list response
+//	@Description	Converts []Metadata to API success response
 func CreateMetadataListResponse(data *[]Metadata) *MetadataListResponse {
     return &MetadataListResponse{
         Status: true,
@@ -85,8 +85,8 @@ func CreateMetadataListResponse(data *[]Metadata) *MetadataListResponse {
 }
 
 // CreateMetadataErrorResponse creates an error response
-// @Summary Creates error response
-// @Description Converts error to standard error response
+//	@Summary		Creates error response
+//	@Description	Converts error to standard error response
 func CreateMetadataErrorResponse(err error) *MetadataErrorResponse {
     return &MetadataErrorResponse{
         Status: false,

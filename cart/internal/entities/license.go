@@ -7,6 +7,12 @@ import (
 	"gorm.io/gorm"
 )
 
+type CreateLicense struct {
+	BeatId      uuid.UUID
+	UserId      uuid.UUID
+	LicenseList []License
+}
+
 type License struct {
 	ID                uint            `json:"id"`
 	BeatID            uuid.UUID       `json:"beatId"`

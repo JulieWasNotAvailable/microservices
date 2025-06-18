@@ -17,10 +17,11 @@ type Beat struct {
 	Price          int            `json:"price" validate:"required, gte=1" example:"2999"`
 	Tags           []Tag          `json:"tags" validate:"required" gorm:"many2many:beat_tags;constraint:OnDelete:CASCADE"` //many to many
 	BPM            int            `json:"bpm" validate:"required,gte=20,lte=400" example:"120"`
-	Description    string         `json:"description" validate:"min=2,max=500" example:"Chill summer beat with tropical influences"`
+	Description    string         `json:"description" validate:"min=2,max=5000" example:"Chill summer beat with tropical influences" gorm:"type:text;size:5000"`
 	Genres         []Genre        `json:"genres" validate:"required" gorm:"many2many:beat_genres;joinForeignKey:BeatID;joinReferences:GenreID;constraint:OnDelete:CASCADE"`
 	Moods          []Mood         `json:"moods" validate:"required" gorm:"many2many:beat_moods;constraint:OnDelete:CASCADE"`   //many to many
 	KeynoteID      uint           `json:"keynoteId" validate:"required" example:"11"`                                          //keynote has many beats, but each beat has only one keynote`
+	Keynote Keynote 
 	Timestamps     []Timestamp    `json:"timestamps" validate:"required" gorm:"foreignKey:BeatID;constraint:OnDelete:CASCADE"` //a beat has many timestamps, but each timestamp has only one beat
 	Instruments    []Instrument   `json:"instruments" gorm:"many2many:beat_instruments;constraint:OnDelete:CASCADE"`           //many to many
 	MFCC           MFCC           `json:"-" gorm:"foreignKey:BeatID;constraint:OnDelete:CASCADE;" validate:"required" `

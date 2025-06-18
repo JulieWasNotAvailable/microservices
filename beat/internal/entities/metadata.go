@@ -6,10 +6,11 @@ import (
 )
 
 type Genre struct {
-	ID        uint    `json:"id" swaggerignore:"true"`
-	Beat      []*Beat `gorm:"many2many:beat_genres;joinForeignKey:GenreID;joinReferences:BeatID"`
-	Name      string  `json:"name" example:"Jerk"`
-	CreatedAt int64   `json:"createdAt"`
+	ID         uint    `json:"id" swaggerignore:"true"`
+	Beat       []*Beat `gorm:"many2many:beat_genres;joinForeignKey:GenreID;joinReferences:BeatID"`
+	Name       string  `json:"name" example:"Jerk"`
+	PictureUrl string  `json:"picture_url"`
+	CreatedAt  int64   `json:"createdAt"`
 }
 
 type BeatGenre struct {
@@ -20,9 +21,9 @@ type BeatGenre struct {
 type Timestamp struct {
 	ID        uint      `json:"id" swaggerignore:"true"`
 	BeatID    uuid.UUID `json:"beatId" example:"01963e01-e46c-7996-996a-42ad3df115ac"`
-	Name      string    `json:"name"`
-	TimeStart int64     `json:"timeStart" validate:"required,gte=1,lte=299"`
-	TimeEnd   int64     `json:"timeEnd" validate:"required,gte=2,lte=300"`
+	Name      string    `json:"title"`
+	TimeStart int64     `json:"start_time" validate:"required,gte=1,lte=299"`
+	TimeEnd   int64     `json:"end_time" validate:"required,gte=2,lte=300"`
 }
 
 type Tag struct {

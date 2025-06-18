@@ -14,17 +14,18 @@ type AvailableFiles struct {
 
 // @Description entities.Genre
 type Genre struct {
-	ID   uint    `json:"id" swaggerignore:"true"`
-	Beat []*Beat `json:"-" gorm:"many2many:beat_genres;" swaggerignore:"true"`
-	Name string  `json:"name" example:"Jerk"`
+	ID         uint    `json:"id" swaggerignore:"true"`
+	Beat       []*Beat `json:"-" gorm:"many2many:beat_genres;" swaggerignore:"true"`
+	PictureUrl string  `json:"picture_url"`
+	Name       string  `json:"name" example:"Jerk"`
 }
 
 type Timestamp struct {
 	ID        uint      `json:"id" swaggerignore:"true"`
 	BeatId    uuid.UUID `json:"beatId" example:"01963e01-e46c-7996-996a-42ad3df115ac"`
-	Name      string    `json:"name"`
-	TimeStart int64     `validate:"required,gte=1,lte=299"`
-	TimeEnd   int64     `validate:"required,gte=2,lte=300"`
+	Name      string    `json:"title"`
+	TimeStart int64     `json:"start_time" validate:"required,gte=1,lte=299"`
+	TimeEnd   int64     `json:"end_time" validate:"required,gte=2,lte=300"`
 }
 
 type Tag struct {

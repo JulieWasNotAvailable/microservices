@@ -21,6 +21,7 @@ type KafkaMessageBeatForPublishing struct {
 func StartConsumerPublisher(topic string, service beat.Service) {
 	brokerUrl := []string{"localhost:9092"}
 
+	fmt.Printf("starting consumer with brokerurl %s on topic: %s \n", brokerUrl[0], topic)
 	worker, err := connectConsumer(brokerUrl)
 
 	if err != nil {
@@ -32,7 +33,6 @@ func StartConsumerPublisher(topic string, service beat.Service) {
 		panic(err)
 	}
 
-	fmt.Println(("consumer started"))
 	sigchan := make(chan os.Signal, 1)
 
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
@@ -47,17 +47,18 @@ func StartConsumerPublisher(topic string, service beat.Service) {
 				fmt.Println(err)
 			case msg := <-consumer.Messages():
 				msgCount++
-				fmt.Printf("Received message Count %d: | Topic(%s) | Message(%s) \n", msgCount, string(msg.Topic), string(msg.Value))
+				fmt.Printf("Received message Count %d: | Topic(%s) | Message(written below) \n", msgCount, string(msg.Topic))
 
 				message := KafkaMessageBeatForPublishing{}
 				err = json.Unmarshal(msg.Value, &message)
 				if err != nil {
 					log.Println(err)
-				}
-
-				_, err := service.CreateBeat(message.Beat, message.MFCC)
-				if err != nil {
-					log.Println(err)
+				} else {
+					log.Println("Message (mfcc excluded): ", message.Beat)
+					_, err := service.CreateBeat(message.Beat, message.MFCC)
+					if err != nil {
+						log.Println(err)
+					}
 				}
 
 			case <-sigchan:

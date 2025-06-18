@@ -13,6 +13,7 @@ func SetupBeatRoutes(app fiber.Router, service beat.Service) {
 	beat.Get("/all", handlers.GetAllBeats(service))
 
 	beat.Get("/byBeatmakerId/:beatmakerId", handlers.GetBeatsByBeatmakerId(service))
+	beat.Get("/byBeatmakerByJWT", handlers.GetBeatsByJWT(service))
 	beat.Get("/byBeatId/:beatId", handlers.GetBeatById(service))
 
 	beat.Get("/filteredBeats", handlers.GetFilteredBeats(service))

@@ -18,17 +18,17 @@ type requestBodyList struct {
 }
 
 // PostLike godoc
-// @Summary Like a beat
-// @Description Add a like to a beat by the authenticated user
-// @Tags likes
-// @Accept json
-// @Produce json
-// @Param beatId body requestBody true "Beat id data"
-// @Security ApiKeyAuth
-// @Success 201 {object} map[string]interface{} "Like created successfully"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /activity/postNewLike [post]
+//	@Summary		Like a beat
+//	@Description	Add a like to a beat by the authenticated user
+//	@Tags			likes
+//	@Accept			json
+//	@Produce		json
+//	@Param			beatId	body	requestBody	true	"Beat id data"
+//	@Security		ApiKeyAuth
+//	@Success		201	{object}	map[string]interface{}	"Like created successfully"
+//	@Failure		401	{object}	map[string]interface{}	"Unauthorized"
+//	@Failure		500	{object}	map[string]interface{}	"Internal server error"
+//	@Router			/activity/postNewLike [post]
 func PostLike(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userId, err := getIdFromJWT(c)
@@ -55,17 +55,17 @@ func PostLike(service activity.Service) fiber.Handler {
 }
 
 // DeleteLike godoc
-// @Summary Remove a like
-// @Description Remove a like from a beat by the authenticated user
-// @Tags likes
-// @Accept json
-// @Produce json
-// @Param beatId path string true "Beat ID"
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "Like removed successfully"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /activity/{beatId} [delete]
+//	@Summary		Remove a like
+//	@Description	Remove a like from a beat by the authenticated user
+//	@Tags			likes
+//	@Accept			json
+//	@Produce		json
+//	@Param			beatId	path	string	true	"Beat ID"
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	map[string]interface{}	"Like removed successfully"
+//	@Failure		401	{object}	map[string]interface{}	"Unauthorized"
+//	@Failure		500	{object}	map[string]interface{}	"Internal server error"
+//	@Router			/activity/{beatId} [delete]
 func DeleteLike(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userId, err := getIdFromJWT(c)
@@ -88,16 +88,16 @@ func DeleteLike(service activity.Service) fiber.Handler {
 }
 
 // GetLikesByUserId godoc
-// @Summary Get user's likes
-// @Description Get all likes by the authenticated user
-// @Tags likes
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "List of likes"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /activity/viewMyLikes [get]
+//	@Summary		Get user's likes
+//	@Description	Get all likes by the authenticated user
+//	@Tags			likes
+//	@Accept			json
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	map[string]interface{}	"List of likes"
+//	@Failure		401	{object}	map[string]interface{}	"Unauthorized"
+//	@Failure		500	{object}	map[string]interface{}	"Internal server error"
+//	@Router			/activity/viewMyLikes [get]
 func GetLikesByUserId(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userId, err := getIdFromJWT(c)
@@ -115,16 +115,16 @@ func GetLikesByUserId(service activity.Service) fiber.Handler {
 }
 
 // GetLikesCountByBeatId godoc
-// @Summary Get like count for a beat
-// @Description Get the number of likes for a specific beat
-// @Tags likes
-// @Accept json
-// @Produce json
-// @Param beatId path string true "Beat ID"
-// @Success 200 {object} map[string]interface{} "Like count"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /activity/viewLikesCountByBeatId/{beatId} [get]
+//	@Summary		Get like count for a beat
+//	@Description	Get the number of likes for a specific beat
+//	@Tags			likes
+//	@Accept			json
+//	@Produce		json
+//	@Param			beatId	path		string					true	"Beat ID"
+//	@Success		200		{object}	map[string]interface{}	"Like count"
+//	@Failure		400		{object}	map[string]interface{}	"Bad request"
+//	@Failure		500		{object}	map[string]interface{}	"Internal server error"
+//	@Router			/activity/viewLikesCountByBeatId/{beatId} [get]
 func GetLikesCountByBeatId(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		beatID, err := uuid.Parse(c.Params("beatId"))
@@ -146,16 +146,16 @@ func GetLikesCountByBeatId(service activity.Service) fiber.Handler {
 }
 
 // GetLikesCountByUserId godoc
-// @Summary Get like count for a user
-// @Description Get the number of likes given by a specific user
-// @Tags likes
-// @Accept json
-// @Produce json
-// @Param userId path string true "User ID"
-// @Success 200 {object} map[string]interface{} "Like count"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /activity/viewLikesCountByUserId/{userId} [get]
+//	@Summary		Get like count for a user
+//	@Description	Get the number of likes given by a specific user
+//	@Tags			likes
+//	@Accept			json
+//	@Produce		json
+//	@Param			userId	path		string					true	"User ID"
+//	@Success		200		{object}	map[string]interface{}	"Like count"
+//	@Failure		400		{object}	map[string]interface{}	"Bad request"
+//	@Failure		500		{object}	map[string]interface{}	"Internal server error"
+//	@Router			/activity/viewLikesCountByUserId/{userId} [get]
 func GetLikesCountByUserId(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userId, err := uuid.Parse(c.Params("userId"))
@@ -177,16 +177,16 @@ func GetLikesCountByUserId(service activity.Service) fiber.Handler {
 }
 
 // GetTotalLikesOfBeats godoc
-// @Summary Get total likes for multiple beats
-// @Description Get the total number of likes for a list of beats
-// @Tags likes
-// @Accept json
-// @Produce json
-// @Param requestBodyList body requestBodyList true "List of beat IDs"
-// @Success 200 {object} map[string]interface{} "Total likes count"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /activity/totalLikesCountForBeats [post]
+//	@Summary		Get total likes for multiple beats
+//	@Description	Get the total number of likes for a list of beats
+//	@Tags			likes
+//	@Accept			json
+//	@Produce		json
+//	@Param			requestBodyList	body		requestBodyList			true	"List of beat IDs"
+//	@Success		200				{object}	map[string]interface{}	"Total likes count"
+//	@Failure		400				{object}	map[string]interface{}	"Bad request"
+//	@Failure		500				{object}	map[string]interface{}	"Internal server error"
+//	@Router			/activity/totalLikesCountForBeats [post]
 func GetTotalLikesOfBeats(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var req requestBodyList
@@ -217,18 +217,18 @@ func GetTotalLikesOfBeats(service activity.Service) fiber.Handler {
 }
 
 // PostListened godoc
-// @Summary Record a listen
-// @Description Record that a user listened to a beat
-// @Tags listen
-// @Accept json
-// @Produce json
-// @Param request body requestBody true "Listen data"
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "Listen recorded"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /activity/listened [post]
+//	@Summary		Record a listen
+//	@Description	Record that a user listened to a beat
+//	@Tags			listen
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	requestBody	true	"Listen data"
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	map[string]interface{}	"Listen recorded"
+//	@Failure		400	{object}	map[string]interface{}	"Bad request"
+//	@Failure		401	{object}	map[string]interface{}	"Unauthorized"
+//	@Failure		500	{object}	map[string]interface{}	"Internal server error"
+//	@Router			/activity/listened [post]
 func PostListened(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userId, err := getIdFromJWT(c)

@@ -14,17 +14,17 @@ import (
 )
 
 // AddMetadata godoc
-// @Summary Add new metadata
-// @Description Add new metadata entry to the system. In request "id" should be eliminated.
-// @Tags metadata
-// @Accept json
-// @Produce json
-// @Param metadata body entities.Metadata true "Metadata to add"
-// @Success 200 {object} presenters.MetadataSuccessResponse
-// @Failure 400 {object} presenters.MetadataErrorResponse
-// @Failure 422 {object} presenters.MetadataErrorResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadata [post]
+//	@Summary		Add new metadata
+//	@Description	Add new metadata entry to the system. In request "id" should be eliminated.
+//	@Tags			metadata
+//	@Accept			json
+//	@Produce		json
+//	@Param			metadata	body		entities.Metadata	true	"Metadata to add"
+//	@Success		200			{object}	presenters.MetadataSuccessResponse
+//	@Failure		400			{object}	presenters.MetadataErrorResponse
+//	@Failure		422			{object}	presenters.MetadataErrorResponse
+//	@Failure		500			{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata [post]
 func AddMetadata(bmservice bmmetadata.Service, uservice user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		requestBody := entities.Metadata{}
@@ -53,11 +53,11 @@ func AddMetadata(bmservice bmmetadata.Service, uservice user.Service) fiber.Hand
 	}
 }
 
-// @Tags metadata
-// @Produce json
-// @Success 200 {object} presenters.MetadataSuccessResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadatas [get]
+//	@Tags		metadata
+//	@Produce	json
+//	@Success	200	{object}	presenters.MetadataSuccessResponse
+//	@Failure	500	{object}	presenters.MetadataErrorResponse
+//	@Router		/metadatas [get]
 func GetMetadatas(service bmmetadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 
@@ -72,16 +72,16 @@ func GetMetadatas(service bmmetadata.Service) fiber.Handler {
 }
 
 // GetMetadataById godoc
-// @Summary Get metadata by ID
-// @Description Get metadata entry by its ID
-// @Tags metadata
-// @Accept json
-// @Produce json
-// @Param id path string true "Metadata ID"
-// @Success 200 {object} presenters.MetadataSuccessResponse
-// @Failure 400 {object} presenters.MetadataErrorResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadataById/{id} [get]
+//	@Summary		Get metadata by ID
+//	@Description	Get metadata entry by its ID
+//	@Tags			metadata
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Metadata ID"
+//	@Success		200	{object}	presenters.MetadataSuccessResponse
+//	@Failure		400	{object}	presenters.MetadataErrorResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadataById/{id} [get]
 func GetMetadataById(service bmmetadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id := c.Params("id")
@@ -129,17 +129,17 @@ func UpdateMetadataById(service bmmetadata.Service) fiber.Handler{
 	}
 }
 // RemoveMetadata godoc
-// @Summary Delete metadata
-// @Description Delete metadata entry by its ID. You need to be loged in. You can delete anybody's metadata.
-// @Tags metadata
-// @Accept json
-// @Produce json
-// @Param id path string true "Metadata ID"
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "Successful deletion response"
-// @Failure 400 {object} presenters.MetadataErrorResponse
-// @Failure 500 {object} presenters.MetadataErrorResponse
-// @Router /metadataById/{id} [delete]
+//	@Summary		Delete metadata
+//	@Description	Delete metadata entry by its ID. You need to be loged in. You can delete anybody's metadata.
+//	@Tags			metadata
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	string	true	"Metadata ID"
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	map[string]interface{}	"Successful deletion response"
+//	@Failure		400	{object}	presenters.MetadataErrorResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadataById/{id} [delete]
 func RemoveMetadata(service bmmetadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id := c.Params("id")

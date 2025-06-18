@@ -19,18 +19,18 @@ import (
 )
 
 // HandleGoogleAuth godoc
-// @Summary Authenticate with Google
-// @Description Authenticate user using Google OAuth token and return JWT
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param request body presenters.Data true "Google OAuth token"
-// @Success 200 {object} map[string]interface{} "Returns JWT token and user info"
-// @Success 201 {object} map[string]interface{} "Returns JWT token and user info (new user)"
-// @Failure 400 {object} map[string]interface{} "Invalid request format"
-// @Failure 401 {object} map[string]interface{} "Invalid Google token"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /auth/google/getjwt [post]
+//	@Summary		Authenticate with Google
+//	@Description	Authenticate user using Google OAuth token and return JWT
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		presenters.Data			true	"Google OAuth token"
+//	@Success		200		{object}	map[string]interface{}	"Returns JWT token and user info"
+//	@Success		201		{object}	map[string]interface{}	"Returns JWT token and user info (new user)"
+//	@Failure		400		{object}	map[string]interface{}	"Invalid request format"
+//	@Failure		401		{object}	map[string]interface{}	"Invalid Google token"
+//	@Failure		500		{object}	map[string]interface{}	"Internal server error"
+//	@Router			/auth/google/getjwt [post]
 func HandleGoogleAuth(service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 
@@ -74,6 +74,7 @@ func HandleGoogleAuth(service user.Service) fiber.Handler {
 			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 				"id":   result.ID,
 				"role": result.RoleID,
+				"username": result.Username,
 				"iat":  time.Now().Unix(),
 				"exp":  time.Now().Add(time.Hour * 72).Unix(),
 			})

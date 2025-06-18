@@ -22,17 +22,17 @@ type RegisterInput struct {
 }
 
 // Register godoc
-// @Summary User Register
-// @Description Authenticate user with email and password
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param credentials body RegisterInput true "User credentials"
-// @Success 200 {object} presenters.UserSuccessResponse
-// @Failure 400 {object} presenters.UserErrorResponse
-// @Failure 401 {object} presenters.UserErrorResponse
-// @Failure 500 {object} presenters.UserErrorResponse
-// @Router /register [post]
+//	@Summary		User Register
+//	@Description	Authenticate user with email and password
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			credentials	body		RegisterInput	true	"User credentials"
+//	@Success		200			{object}	presenters.UserSuccessResponse
+//	@Failure		400			{object}	presenters.UserErrorResponse
+//	@Failure		401			{object}	presenters.UserErrorResponse
+//	@Failure		500			{object}	presenters.UserErrorResponse
+//	@Router			/register [post]
 func Register(service user.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		input := RegisterInput{}
