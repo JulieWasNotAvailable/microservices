@@ -1,6 +1,8 @@
 package license
 
 import (
+	"fmt"
+
 	"github.com/JulieWasNotAvailable/microservices/cart/api/presenters"
 	"github.com/JulieWasNotAvailable/microservices/cart/internal/entities"
 	"github.com/google/uuid"
@@ -43,23 +45,33 @@ func (r *repository) CreateNewLicense(license entities.License) (entities.Licens
 }
 
 func (r *repository) CreateNewLicenseList(beatId uuid.UUID, userId uuid.UUID, licenses []entities.License) ([]entities.License, error) {
+	// Создаем копию для хранения результатов
+	createdLicenses := make([]entities.License, len(licenses))
+
 	err := r.DB.Transaction(func(tx *gorm.DB) error {
-		for _, license := range licenses {
+		for i, license := range licenses {
+			license.ID = 0
+
+			// Устанавливаем обязательные поля
 			license.UserID = userId
 			license.BeatID = beatId
-			err := r.DB.Create(&license).Error
-			if err != nil {
-				return err
+
+			// Используем tx (а не r.DB) внутри транзакции
+			if err := tx.Create(&license).Error; err != nil {
+				return fmt.Errorf("failed to create license: %w", err)
 			}
+
+			// Сохраняем созданную лицензию с новым ID
+			createdLicenses[i] = license
 		}
 		return nil
 	})
 
 	if err != nil {
-		return []entities.License{}, err
+		return nil, fmt.Errorf("failed to create licenses: %w", err)
 	}
 
-	return licenses, nil
+	return createdLicenses, nil
 }
 
 func (r *repository) CreateNewLicenseTemplate(userId uuid.UUID, data entities.LicenseTemplate) (entities.LicenseTemplate, error) {

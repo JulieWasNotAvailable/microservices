@@ -14,7 +14,7 @@ type CreateLicense struct {
 }
 
 type License struct {
-	ID                uint            `json:"id"`
+	ID                uint            `json:"id gorm:"primaryKey;autoIncrement"`
 	BeatID            uuid.UUID       `json:"beatId"`
 	Cart              []*Cart         `json:"-" gorm:"many2many:cart_licenses;"`
 	LicenseTemplateID uint            `json:"licenseTemplateId"`
@@ -24,7 +24,7 @@ type License struct {
 }
 
 type LicenseTemplate struct {
-	ID                uint       `json:"id"`
+	ID                uint       `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name              string     `json:"name"`
 	MP3               bool       `json:"mp3"`
 	WAV               bool       `json:"wav"`
