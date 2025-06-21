@@ -16,14 +16,14 @@ import (
 	"github.com/gofiber/swagger"
 )
 
-//	@BasePath					/api
-//	@title						Fiber Beat Service
-//	@version					1.0
-//	@description				Deals Beats, Beat_Listened, filtering
-//	@securityDefinitions.apikey	ApiKeyAuth
-//	@in							header
-//	@name						Authorization
-//	@host						localhost:7771
+// @BasePath					/api
+// @title						Fiber Beat Service
+// @version					1.0
+// @description				Deals Beats, Beat_Listened, filtering
+// @securityDefinitions.apikey	ApiKeyAuth
+// @in							header
+// @name						Authorization
+// @host						localhost:7771
 func main() {
 	app := fiber.New()
 

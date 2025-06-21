@@ -44,7 +44,7 @@ func (r *repository) CreateNewLicense(license entities.License) (entities.Licens
 
 func (r *repository) CreateNewLicenseList(beatId uuid.UUID, userId uuid.UUID, licenses []entities.License) ([]entities.License, error) {
 	err := r.DB.Transaction(func(tx *gorm.DB) error {
-		for _, license := range(licenses) {
+		for _, license := range licenses {
 			license.UserID = userId
 			license.BeatID = beatId
 			err := r.DB.Create(&license).Error
@@ -52,10 +52,10 @@ func (r *repository) CreateNewLicenseList(beatId uuid.UUID, userId uuid.UUID, li
 				return err
 			}
 		}
-		return nil	
+		return nil
 	})
 
-	if err != nil{
+	if err != nil {
 		return []entities.License{}, err
 	}
 
@@ -123,7 +123,7 @@ func (r *repository) ReadLicenseById(id uint) (*presenters.License, error) {
 func (r *repository) UpdateLicenseTemplate(data presenters.LicenseTemplate) error {
 	result := r.DB.Model(&entities.LicenseTemplate{}).
 		Where("id = ?", data.ID).
-		Updates(data)
+		Updates(&data)
 
 	if result.Error != nil {
 		return result.Error
@@ -135,7 +135,6 @@ func (r *repository) UpdateLicenseTemplate(data presenters.LicenseTemplate) erro
 
 	return nil
 }
-
 
 func (r *repository) ReadAllLicenseTemplate() (*[]presenters.LicenseTemplate, error) {
 	var licenseTemplates []presenters.LicenseTemplate
@@ -154,4 +153,3 @@ func (r *repository) ReadAllLicense() (*[]presenters.License, error) {
 	}
 	return &licenses, nil
 }
-

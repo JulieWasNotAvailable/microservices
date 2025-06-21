@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/JulieWasNotAvailable/microservices/user/api/routers"
+	routes "github.com/JulieWasNotAvailable/microservices/user/api/routers"
 	_ "github.com/JulieWasNotAvailable/microservices/user/docs"
 
 	// "github.com/JulieWasNotAvailable/microservices/user/pkg/consumer"

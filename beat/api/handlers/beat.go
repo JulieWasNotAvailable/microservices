@@ -138,6 +138,7 @@ func GetBeatsByBeatmakerId(service beat.Service) fiber.Handler {
 }
 
 // GetBeatsByJWT retrieves beats by JWT
+//
 //	@Summary		Get beats by JWT
 //	@Description	Returns all beats
 //	@Tags			Admin

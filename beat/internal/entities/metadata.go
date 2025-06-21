@@ -50,18 +50,18 @@ type BeatMood struct {
 }
 
 type Keynote struct {
-	ID    uint   `json:"id"`
+	ID    uint   `json:"id" gorm:"primaryKey"`
 	Beats []Beat `json:"beats" gorm:"foreignKey:KeynoteID" swaggerignore:"true"`
 	Name  string `json:"name"`
 }
 
-type Instrument struct {
-	ID   uint    `json:"id"`
-	Beat []*Beat `json:"beat" gorm:"many2many:beat_instruments;" swaggerignore:"true"`
-	Name string  `json:"name"`
-}
+// type Instrument struct {
+// 	ID   uint    `json:"id" gorm:"unique"`
+// 	Beat []*Beat `json:"beat" gorm:"many2many:beat_instruments;" swaggerignore:"true"`
+// 	Name string  `json:"name"`
+// }
 
-type BeatInstrument struct {
-	BeatID       uuid.UUID `json:"beatId" gorm:"primaryKey;constraint:OnDelete:CASCADE"`
-	InstrumentID uint      `json:"instrumentId" gorm:"primaryKey"`
-}
+// type BeatInstrument struct {
+// 	BeatID       uuid.UUID `json:"beatId" gorm:"primaryKey;unique;constraint:OnDelete:CASCADE"`
+// 	InstrumentID uint      `json:"instrumentId" gorm:"primaryKey;unique"`
+// }

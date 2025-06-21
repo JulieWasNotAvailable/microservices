@@ -44,11 +44,11 @@ func HandleGoogleAuth(service user.Service) fiber.Handler {
 			log.Fatal(err)
 		}
 
-	// Verify Google token
-	payload, err := idtoken.Validate(context.Background(), json.Token, os.Getenv("Google_Client"))
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid Google token"})
-	}
+		// Verify Google token
+		payload, err := idtoken.Validate(context.Background(), json.Token, "81758102489-595rl6k8eiq65p06tipflgjk96llo7go.apps.googleusercontent.com")
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid Google token"})
+		}
 
 		// Extract user data
 		email, _ := payload.Claims["email"].(string)

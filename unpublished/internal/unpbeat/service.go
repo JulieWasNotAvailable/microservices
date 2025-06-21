@@ -106,9 +106,9 @@ func (s *service) UpdateUnpublishedBeatMass (beat *entities.UnpublishedBeat) (*p
 		Description: beat.Description,
 		Timestamps:  beat.Timestamps,
 		Price:       beat.Price,
-		Status:      beat.Status,
 		Genres:      beat.Genres,
 		Moods:       beat.Moods,
+		Status:      beat.Status,
 	}
 
 	excludedWords := []string{

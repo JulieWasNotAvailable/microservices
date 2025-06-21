@@ -1,0 +1,11 @@
+flask
+flasgger
+kafka-python
+pandas
+flask_jwt_extended
+numpy
+flask_cors
+dotenv
+sqlalchemy
+scikit-learn
+psycopg2-binary>=2.9.0

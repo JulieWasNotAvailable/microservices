@@ -19,7 +19,7 @@ type KafkaMessageBeatForPublishing struct {
 }
 
 func StartConsumerPublisher(topic string, service beat.Service) {
-	brokerUrl := []string{"localhost:9092"}
+	brokerUrl := []string{"broker:29092"}
 
 	fmt.Printf("starting consumer with brokerurl %s on topic: %s \n", brokerUrl[0], topic)
 	worker, err := connectConsumer(brokerUrl)

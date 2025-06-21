@@ -36,7 +36,6 @@ func (s *service) ReadAllLicenseTemplate() (*[]presenters.LicenseTemplate, error
 	return s.repository.ReadAllLicenseTemplate()
 }
 
-
 func NewService(r Repository) Service {
 	return &service{repository: r}
 }
@@ -63,7 +62,7 @@ func (s *service) InsertNewLicense(license entities.License) (entities.License, 
 
 func (s *service) InsertNewLicenseList(beatId uuid.UUID, userId uuid.UUID, licenses []entities.License) ([]entities.License, error) {
 	templateIds := []uint{}
-	for _, license := range(licenses){
+	for _, license := range licenses {
 		if contains(templateIds, license.LicenseTemplateID) {
 			return []entities.License{}, errors.New("license template was already used in this beat")
 		}
@@ -73,7 +72,7 @@ func (s *service) InsertNewLicenseList(beatId uuid.UUID, userId uuid.UUID, licen
 		if template.UserID != userId {
 			return []entities.License{}, errors.New("user does not own the template")
 		}
-		if err != nil{
+		if err != nil {
 			return []entities.License{}, err
 		}
 	}
@@ -94,10 +93,10 @@ func (s *service) UpdateLicenseTemplate(data presenters.LicenseTemplate) error {
 }
 
 func contains(slice []uint, item uint) bool {
-    for _, v := range slice {
-        if v == item {
-            return true
-        }
-    }
-    return false
+	for _, v := range slice {
+		if v == item {
+			return true
+		}
+	}
+	return false
 }

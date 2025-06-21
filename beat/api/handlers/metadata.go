@@ -3,12 +3,13 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/JulieWasNotAvailable/microservices/beat/internal/metadata"
 	"github.com/JulieWasNotAvailable/microservices/beat/api/presenters"
+	"github.com/JulieWasNotAvailable/microservices/beat/internal/metadata"
+	"github.com/gofiber/fiber/v2"
 )
 
 // GetAllGenres retrieves all music genres
+//
 //	@Summary		Get all genres
 //	@Description	Returns a list of all available music genres
 //	@Tags			Metadata
@@ -28,6 +29,7 @@ func GetAllGenres(service metadata.Service) fiber.Handler {
 }
 
 // GetAllMoods retrieves all mood categories
+//
 //	@Summary		Get all moods
 //	@Description	Returns a list of all available mood categories
 //	@Tags			Metadata
@@ -47,6 +49,7 @@ func GetAllMoods(service metadata.Service) fiber.Handler {
 }
 
 // GetAllKeys retrieves all musical keys
+//
 //	@Summary		Get all keys
 //	@Description	Returns a list of all available musical keys
 //	@Tags			Metadata
@@ -73,18 +76,19 @@ func GetAllKeys(service metadata.Service) fiber.Handler {
 //	@Success		200	{object}	presenters.MetadataListResponse
 //	@Failure		500	{object}	presenters.MetadataErrorResponse
 //	@Router			/metadata/instruments [get]
-func GetAllInstruments(service metadata.Service) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		instruments, err := service.ReadAllInstruments()
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
-		}
+// func GetAllInstruments(service metadata.Service) fiber.Handler {
+// 	return func(c *fiber.Ctx) error {
+// 		instruments, err := service.ReadAllInstruments()
+// 		if err != nil {
+// 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
+// 		}
 
-		return c.Status(http.StatusOK).JSON(presenters.CreateMetadataListResponse(instruments))
-	}
-}
+// 		return c.Status(http.StatusOK).JSON(presenters.CreateMetadataListResponse(instruments))
+// 	}
+// }
 
 // GetAllTags retrieves all tags
+//
 //	@Summary		Get all tags
 //	@Description	Returns a list of all available tags
 //	@Tags			Tags
@@ -104,6 +108,7 @@ func GetAllTags(service metadata.Service) fiber.Handler {
 }
 
 // GetAllTimestamps retrieves all timestamps
+//
 //	@Summary		Get all timestamps
 //	@Description	Returns a list of all available timestamps
 //	@Tags			Timestamp
@@ -123,6 +128,7 @@ func GetAllTimestamps(service metadata.Service) fiber.Handler {
 }
 
 // GetAllMFCCs retrieves all MFCC data
+//
 //	@Summary		Get all MFCCs
 //	@Description	Returns a list of all available MFCC data
 //	@Tags			Metadata
@@ -142,6 +148,7 @@ func GetAllMFCCs(service metadata.Service) fiber.Handler {
 }
 
 // GetRandomTags retrieves random tags
+//
 //	@Summary		Get random tags
 //	@Description	Returns a list of randomly selected tags
 //	@Tags			Tags
@@ -161,6 +168,7 @@ func GetRandomTags(service metadata.Service) fiber.Handler {
 }
 
 // GetTagByName retrieves tag by name
+//
 //	@Summary		Get tag by name
 //	@Description	Returns tag details for the specified name (ONLY 1 TAG WITH SPECIFIC NAME)
 //	@Tags			Tags
@@ -202,6 +210,7 @@ func GetTagsByNameLike(service metadata.Service) fiber.Handler {
 }
 
 // GetTagsInTrend retrieves trending tags
+//
 //	@Summary		Get trending tags
 //	@Description	Returns a list of popular genres. Takes beats that were created this month (today minus 30 days), counts, how frequently were they used in beat_genres table.
 //	@Tags			Tags
@@ -221,6 +230,7 @@ func GetTagsInTrend(service metadata.Service) fiber.Handler {
 }
 
 // GetGenresInTrend retrieves trending genres
+//
 //	@Summary		Get trending genres
 //	@Description	Returns a list of currently popular genres
 //	@Tags			Metadata

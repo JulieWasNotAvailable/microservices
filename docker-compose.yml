@@ -37,19 +37,41 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+  
+  schema-registry:
+    image: confluentinc/cp-schema-registry:6.1.1
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - broker
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
-  # schema-registry:
-  #   image: confluentinc/cp-schema-registry:6.1.1
-  #   hostname: schema-registry
-  #   container_name: schema-registry
-  #   depends_on:
-  #     - broker
-  #   ports:
-  #     - "8081:8081"
-  #   environment:
-  #     SCHEMA_REGISTRY_HOST_NAME: schema-registry
-  #     SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
-  #     SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:6.1.1
+    hostname: control-center
+    container_name: control-center
+    depends_on:
+      - broker
+      - schema-registry
+      - connect
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29092'
+      CONTROL_CENTER_CONNECT_CLUSTER: 'connect:8083'
+      CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
+      CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8088"
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021
 
   connect:
     image: cnfldemos/cp-server-connect-datagen:0.4.0-6.1.0
@@ -57,7 +79,7 @@ services:
     container_name: connect
     depends_on:
       - broker
-      # - schema-registry
+      - schema-registry
     ports:
       - "8083:8083"
     environment:
@@ -75,34 +97,30 @@ services:
       CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-      # CLASSPATH required due to CC-2422
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-6.1.1.jar
       CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
 
-  # control-center:
-  #   image: confluentinc/cp-enterprise-control-center:6.1.1
-  #   hostname: control-center
-  #   container_name: control-center
-  #   depends_on:
-  #     - broker
-  #     - schema-registry
-  #     - connect
-  #   ports:
-  #     - "9021:9021"
-  #   environment:
-  #     CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29092'
-  #     CONTROL_CENTER_CONNECT_CLUSTER: 'connect:8083'
-  #     CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
-  #     CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8088"
-  #     CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
-  #     CONTROL_CENTER_REPLICATION_FACTOR: 1
-  #     CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
-  #     CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
-  #     CONFLUENT_METRICS_TOPIC_REPLICATION: 1
-  #     PORT: 9021
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    ports:
+      - "5433:5433"
+    environment:
+      - POSTGRES_PASSWORD=i_love_tuesdays123
+      - POSTGRES_PORT=5433
+      - POSTGRES_MULTIPLE_DATABASES=beats,unpublishedbeats,users,cart
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: -p 5433
 
   beat:
     build:
@@ -132,7 +150,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - DB_HOST=host.docker.internal
+      - DB_HOST=postgres
       - DB_PORT=5433
       - DB_USER=postgres
       - DB_PASSWORD=i_love_tuesdays123
@@ -149,7 +167,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - DB_HOST=host.docker.internal
+      - DB_HOST=postgres
       - DB_PORT=5433
       - DB_USER=postgres
       - DB_PASSWORD=i_love_tuesdays123
@@ -166,7 +184,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - DB_HOST=host.docker.internal
+      - DB_HOST=postgres
       - DB_PORT=5433
       - DB_USER=postgres
       - DB_PASSWORD=i_love_tuesdays123
@@ -174,12 +192,15 @@ services:
 
   mfcc:
     build:
-        context: ./mfcc_app
-        dockerfile: Dockerfile
+      context: ./mfcc_app
+      dockerfile: Dockerfile
     container_name: mfcc
     ports:
       - "8003:8003"
     restart: unless-stopped
+    depends_on:
+      broker:
+        condition: service_started
 
   cart:
     build:
@@ -198,25 +219,6 @@ services:
       - DB_PASSWORD=i_love_tuesdays123
       - DB_NAME=cart
 
-  postgres:
-    image: postgres
-    container_name: postgres
-    restart: always
-    ports:
-      - "5433:5433"
-    environment:
-      - POSTGRES_PASSWORD=i_love_tuesdays123
-      - POSTGRES_PORT=5433
-      - POSTGRES_MULTIPLE_DATABASES=beats,unpublishedbeats,users,cart
-    volumes:
-      - ./pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    command: -p 5433
-
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -229,6 +231,8 @@ services:
       - beatsupload
       - user
       - unpbeats
+      - cart
+      - mfcc
 
 volumes:
   postgres_data:
