@@ -20,7 +20,7 @@ type Service interface {
 	GetUnpublishedBeatsByUser(userID uuid.UUID) ([]presenters.UnpublishedBeat, error)
 	GetUnpublishedInModeration(from int64, to int64) (*[]presenters.UnpublishedBeat, error)
 	GetUnpublishedByBeatmakerandStatus(userId uuid.UUID, status string) (*[]presenters.UnpublishedBeat, error)
-	UpdateUnpublishedBeat(unpublished *entities.UnpublishedBeat) (*presenters.UnpublishedBeat, error)
+	UpdateUnpublishedBeat(unpublished *entities.UnpublishedBeat, beatmakerId uuid.UUID) (*presenters.UnpublishedBeat, error)
 	DeleteUnpublishedBeat(id uuid.UUID) error
 
 	PublishBeat(userId uuid.UUID, beatOptions BeatPublishOptions, beatmakerName string) (*presenters.UnpublishedBeat, error)
@@ -80,7 +80,24 @@ func (s *service) GetUnpublishedByBeatmakerandStatus(userId uuid.UUID, status st
 	return beats, err
 }
 
-func (s *service) UpdateUnpublishedBeat(beat *entities.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
+func (s *service) UpdateUnpublishedBeat (beat *entities.UnpublishedBeat, beatmakerId uuid.UUID) (*presenters.UnpublishedBeat, error) {
+	beatInitial, err := s.repository.ReadUnpublishedById(beat.ID)
+	if err != nil {
+		return &presenters.UnpublishedBeat{}, err
+	}
+	if beat.Status == entities.StatusInModeration {
+		return &presenters.UnpublishedBeat{}, errors.New("tried to manually update beat status, prohibited")
+	}
+	if beatInitial.Status == string(entities.StatusInModeration) {
+		return &presenters.UnpublishedBeat{}, errors.New("cannot update beat with status in process")
+	}
+	if beatInitial.BeatmakerID != beatmakerId {
+		
+	}
+	return s.repository.UpdateUnpublishedById(beat)
+}
+
+func (s *service) UpdateUnpublishedBeatMass (beat *entities.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
 	toSave := entities.UnpublishedBeat{
 		ID:          beat.ID,
 		Name:        beat.Name,
@@ -185,7 +202,7 @@ func (s *service) DeleteUnpublishedBeat(id uuid.UUID) error {
 	return s.repository.DeleteUnpublishedById(id)
 }
 
-func (s *service) PublishBeat(userId uuid.UUID, beatOptions BeatPublishOptions, beatmakerName string) (*presenters.UnpublishedBeat, error) {
+func (s *service) PublishBeat(beatmakerId uuid.UUID, beatOptions BeatPublishOptions, beatmakerName string) (*presenters.UnpublishedBeat, error) {
 	beatuuid, err := uuid.Parse(beatOptions.BeatId)
 	if err != nil {
 		return nil, err
@@ -193,9 +210,6 @@ func (s *service) PublishBeat(userId uuid.UUID, beatOptions BeatPublishOptions, 
 	beat, err := s.GetUnpublishedBeatByID(beatuuid)
 	if err != nil {
 		return nil, err
-	}
-	if beat.BeatmakerID != userId {
-		return nil, errors.New("unauthorized")
 	}
 	filename := beat.AvailableFiles.MP3Url
 	if filename == "" {
@@ -213,7 +227,7 @@ func (s *service) PublishBeat(userId uuid.UUID, beatOptions BeatPublishOptions, 
 
 	message := CreateLicense{
 		BeatId:      beat.ID,
-		UserId:      userId,
+		UserId:      beatmakerId,
 		LicenseList: beatOptions.LicenseList,
 	}
 
@@ -226,12 +240,12 @@ func (s *service) PublishBeat(userId uuid.UUID, beatOptions BeatPublishOptions, 
 		return nil, err
 	}
 
-	beat.Status = "processing"
 	beatStatusUpdate := entities.UnpublishedBeat{
 		ID:     beat.ID,
 		Status: entities.StatusInModeration,
 	}
-	_, err = s.UpdateUnpublishedBeat(&beatStatusUpdate)
+	
+	_, err = s.UpdateUnpublishedBeat(&beatStatusUpdate, beatmakerId)
 	if err != nil {
 		return nil, err
 	}

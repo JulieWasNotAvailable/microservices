@@ -8,7 +8,7 @@ import (
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/dbconnection"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/unpbeat"
-	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/consumer"
+	// "github.com/JulieWasNotAvailable/microservices/unpublished/pkg/consumer"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
@@ -52,10 +52,10 @@ func main() {
 		return c.JSON("Welcome to unpublished beats service")
 	})
 
-	go consumer.StartConsumerLicense("license_was_created", unpBeatService)
-	go consumer.StartConsumerMFCC("publish_beatv3", unpBeatService)
-	go consumer.StartConsumerDeleteApprove("delete_approve", unpBeatService) //дописать
-	go consumer.StartConsumerFileUpdate("beat_files_updates", unpBeatService, metadataBeatService)
+	// go consumer.StartConsumerLicense("license_was_created", unpBeatService)
+	// go consumer.StartConsumerMFCC("publish_beatv3", unpBeatService)
+	// go consumer.StartConsumerDeleteApprove("delete_approve", unpBeatService) //дописать
+	// go consumer.StartConsumerFileUpdate("beat_files_updates", unpBeatService, metadataBeatService)
 
 	app.Listen(":7772")
 }

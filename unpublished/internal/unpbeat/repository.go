@@ -203,7 +203,7 @@ func (r *repository) UpdateUnpublishedById(unpublished *entities.UnpublishedBeat
 				return err
 			}
 		}
-		unpublished.Status = beatInitial.Status
+		
 		err := r.DB.Updates(unpublished).Error	
 		if err != nil {
 			return err

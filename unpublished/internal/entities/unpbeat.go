@@ -1,7 +1,6 @@
 package entities
 
 import (
-	"errors"
 	_ "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -41,17 +40,17 @@ type UnpublishedBeat struct {
 }
 
 // Validate - кастомная валидация
-func (beat *UnpublishedBeat) Validate() error {
-	if beat.Status != "draft" {
-		return errors.New("you tried to edit beat with a status, different from draft, prohibited")
-	}
-	return nil
-}
+// func (beat *UnpublishedBeat) Validate() error {
+// 	if beat.Status != "draft" {
+// 		return errors.New("you tried to edit beat with a status, different from draft, prohibited")
+// 	}
+// 	return nil
+// }
 
 // BeforeSave - хуки GORM для автоматической валидации
-func (beat *UnpublishedBeat) BeforeSave(tx *gorm.DB) error {
-	return beat.Validate()
-}
+// func (beat *UnpublishedBeat) BeforeSave(tx *gorm.DB) error {
+// 	return beat.Validate()
+// }
 
 func MigrateAll(db *gorm.DB) error {
 	err := db.AutoMigrate(

@@ -56,7 +56,8 @@ func StartConsumerLicense(topic string, service unpbeat.Service) {
 						Status: entities.StatusDraft,
 						Err: messageValue.Error,
 					}
-					_, err = service.UpdateUnpublishedBeat(&toUpdateErr)
+					beatInitial, _ := service.GetUnpublishedBeatByID(messageValue.BeatId)
+					_, err = service.UpdateUnpublishedBeat(&toUpdateErr, beatInitial.BeatmakerID)
 					if err != nil {
 						log.Println("couldn't update the beat error after receving license error message")
 					}

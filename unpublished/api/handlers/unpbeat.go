@@ -56,14 +56,14 @@ func SaveBeatDraft(service unpbeat.Service, metaservice beatmetadata.MetadataSer
 
 		createdBeat, err := service.CreateUnpublishedBeat(emptyBeat)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
+			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		var emptyAvailablefiles entities.AvailableFiles
 		emptyAvailablefiles.UnpublishedBeatID = createdBeat.ID
 		createdAvailbableFiles, err := metaservice.CreateAvailableFiles(&emptyAvailablefiles)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
+			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		beatReponse := presenters.UnpublishedBeat{
@@ -91,14 +91,16 @@ func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) 
 	return func(c *fiber.Ctx) error {
 		var requestBody entities.UnpublishedBeat
 		err := c.BodyParser(&requestBody)
-
 		if err != nil {
 			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(err))
 		}
-
-		beat, err := service.UpdateUnpublishedBeat(&requestBody)
+		beatmakerid, err := getIdFromJWT(c)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
+			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(err))
+		}
+		beat, err := service.UpdateUnpublishedBeat(&requestBody, beatmakerid)
+		if err != nil {
+			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateBeatSuccessResponse2(*beat))
@@ -115,7 +117,7 @@ func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) 
 //	@Success		200	{object}	map[string]string
 //	@Failure		422	{object}	presenters.UnpublishedBeatErrorResponse
 //	@Failure		500	{object}	presenters.UnpublishedBeatErrorResponse
-//	@Router			/unpbeats/publishBeat/{id} [get] //UPDATE SWAGGER
+//	@Router			/unpbeats/publishBeat [get] //UPDATE SWAGGER
 func PostPublishBeat(service unpbeat.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		requestBody := unpbeat.BeatPublishOptions{}
@@ -167,7 +169,11 @@ func SendToModeration(service unpbeat.Service) fiber.Handler {
 			Status:             entities.StatusInModeration,
 			SentToModerationAt: time.Now().Unix(),
 		}
-		beat, err := service.UpdateUnpublishedBeat(&requestBody)
+		beatmakerId, err := getIdFromJWT(c)
+		if err != nil {
+			return c.Status(http.StatusUnauthorized).JSON(presenters.CreateBeatErrorResponse(err))
+		}
+		beat, err := service.UpdateUnpublishedBeat(&requestBody, beatmakerId)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateBeatErrorResponse(err))
 		}

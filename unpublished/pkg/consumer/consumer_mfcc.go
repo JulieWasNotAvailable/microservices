@@ -53,7 +53,8 @@ func StartConsumerMFCC(topic string, service unpbeat.Service) {
 						Status: entities.StatusDraft,
 						Err: messageValue.Error,
 					}
-					_, err = service.UpdateUnpublishedBeat(&toUpdateErr)
+					beatInitial, _ := service.GetUnpublishedBeatByID(messageValue.ID)
+					_, err = service.UpdateUnpublishedBeat(&toUpdateErr, beatInitial.BeatmakerID)
 					if err != nil {
 						log.Println("couldn't update the beat error after receving mfcc error message")
 					}

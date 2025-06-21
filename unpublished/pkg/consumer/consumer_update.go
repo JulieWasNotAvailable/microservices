@@ -81,7 +81,8 @@ func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice bea
 					}
 				case "cover":
 					updateDataBeat.Picture = message.URL
-					_, err := service.UpdateUnpublishedBeat(&updateDataBeat)
+					beatInitial, _ := service.GetUnpublishedBeatByID(key)
+					_, err = service.UpdateUnpublishedBeat(&updateDataBeat, beatInitial.BeatmakerID)
 					if err != nil {
 						log.Println("couldn't update files in ConsumerFileUpdate", err)
 					}
