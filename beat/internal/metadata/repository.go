@@ -16,7 +16,7 @@ type Repository interface {
 
 	ReadAllMoods() (*[]entities.Mood, error)
 	ReadAllKeys() (*[]entities.Keynote, error)
-	ReadAllInstruments() (*[]entities.Instrument, error)
+	// ReadAllInstruments() (*[]entities.Instrument, error)
 
 	ReadRandomTags() (*[]entities.Tag, error)
 	ReadTagByName(name string) (*entities.Tag, error)
@@ -67,14 +67,14 @@ func (r *repository) ReadAllKeys() (*[]entities.Keynote, error) {
 	return &keys, nil
 }
 
-func (r *repository) ReadAllInstruments() (*[]entities.Instrument, error) {
-	var instruments []entities.Instrument
-	err := r.DB.Find(&instruments).Error
-	if err != nil {
-		return nil, err
-	}
-	return &instruments, nil
-}
+// func (r *repository) ReadAllInstruments() (*[]entities.Instrument, error) {
+// 	var instruments []entities.Instrument
+// 	err := r.DB.Find(&instruments).Error
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &instruments, nil
+// }
 
 func (r *repository) ReadAllTags() (*[]entities.Tag, error) {
 	var tags []entities.Tag

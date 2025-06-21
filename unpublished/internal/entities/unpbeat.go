@@ -2,6 +2,7 @@ package entities
 
 import (
 	"errors"
+
 	_ "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -24,7 +25,7 @@ type UnpublishedBeat struct {
 	BeatmakerName      string         `json:"-" validate:"required"`
 	AvailableFiles     AvailableFiles `json:"-" gorm:"foreignKey:UnpublishedBeatID;constraint:OnDelete:CASCADE;" validate:"required"`
 	Price              int            `json:"price" validate:"required, gte=1" example:"2999"`
-	Tags               []Tag          `json:"tags" validate:"required" gorm:"many2many:beat_tags;constraint:OnDelete:CASCADE;"` //many to many
+	Tags               []Tag          `json:"tags" validate:"required" gorm:"many2many:beat_tags;constraint:OnDelete:CASCADE"` //many to many
 	BPM                int            `json:"bpm" validate:"required,gte=20,lte=400" example:"120"`
 	Description        string         `json:"description" validate:"min=2,max=500" example:"Chill summer beat with tropical influences"`
 	Genres             []Genre        `json:"genres" validate:"required" gorm:"many2many:beat_genres;joinForeignKey:UnpublishedBeatID;joinReferences:GenreID;constraint:OnDelete:CASCADE"`

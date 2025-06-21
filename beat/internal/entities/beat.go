@@ -19,16 +19,16 @@ type Beat struct {
 	BPM            int            `json:"bpm" validate:"required,gte=20,lte=400" example:"120"`
 	Description    string         `json:"description" validate:"min=2,max=5000" example:"Chill summer beat with tropical influences" gorm:"type:text;size:5000"`
 	Genres         []Genre        `json:"genres" validate:"required" gorm:"many2many:beat_genres;joinForeignKey:BeatID;joinReferences:GenreID;constraint:OnDelete:CASCADE"`
-	Moods          []Mood         `json:"moods" validate:"required" gorm:"many2many:beat_moods;constraint:OnDelete:CASCADE"`   //many to many
-	KeynoteID      uint           `json:"keynoteId" validate:"required" example:"11"`                                          //keynote has many beats, but each beat has only one keynote`
-	Keynote Keynote 
+	Moods          []Mood         `json:"moods" validate:"required" gorm:"many2many:beat_moods;constraint:OnDelete:CASCADE"` //many to many
+	KeynoteID      uint           `json:"keynoteId" validate:"required" example:"11"`
+	Keynote        Keynote        `json:"keynote" gorm:"foreignKey:KeynoteID"`                                                 //gorm:"foreignKey:UnpublishedBeatID;constraint:OnDelete:CASCADE;" validate:"required"                                       //keynote has many beats, but each beat has only one keynote`
 	Timestamps     []Timestamp    `json:"timestamps" validate:"required" gorm:"foreignKey:BeatID;constraint:OnDelete:CASCADE"` //a beat has many timestamps, but each timestamp has only one beat
-	Instruments    []Instrument   `json:"instruments" gorm:"many2many:beat_instruments;constraint:OnDelete:CASCADE"`           //many to many
-	MFCC           MFCC           `json:"-" gorm:"foreignKey:BeatID;constraint:OnDelete:CASCADE;" validate:"required" `
-	Likes          []*Like        `json:"likes" gorm:"foreignKey:BeatID;constraint:OnDelete:CASCADE;"`
-	Listen         []*Listen      `json:"-" gorm:"foreignKey:BeatID;constraint:OnDelete:CASCADE;"`
-	Plays          int64          `json:"plays" example:"105"`
-	CreatedAt      int64          `json:"created_at"`
+	// Instruments    []Instrument   `json:"instruments" gorm:"many2many:beat_instruments;constraint:OnDelete:CASCADE"`           //many to many
+	MFCC      MFCC      `json:"-" gorm:"foreignKey:BeatID;constraint:OnDelete:CASCADE;" validate:"required" `
+	Likes     []*Like   `json:"likes" gorm:"foreignKey:BeatID;constraint:OnDelete:CASCADE;"`
+	Listen    []*Listen `json:"-" gorm:"foreignKey:BeatID;constraint:OnDelete:CASCADE;"`
+	Plays     int64     `json:"plays" example:"105"`
+	CreatedAt int64     `json:"created_at"`
 }
 
 type AvailableFiles struct {
@@ -41,8 +41,8 @@ type AvailableFiles struct {
 
 func MigrateAll(db *gorm.DB) error {
 	err := db.AutoMigrate(
-		&Instrument{},
-		&BeatInstrument{},
+		// &Instrument{},
+		// &BeatInstrument{},
 		&Like{},
 		&Listen{},
 		&MFCC{},

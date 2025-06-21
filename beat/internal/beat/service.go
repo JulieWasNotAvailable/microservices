@@ -23,7 +23,7 @@ type Service interface {
 
 	ReadFilteredBeats(filters presenters.Filters) (*[]presenters.Beat, error)
 	ReadBeatsByMoodId(moodId uint) (*[]presenters.Beat, error)
-	ReadBeatsByDate(from int64, to int64) (*[]presenters.Beat, error)
+	ReadBeatsByDate(from int64, to int64) (*[100]presenters.Beat, error)
 	FindBeatsWithAllMoods(moodIDs []uint) ([]presenters.Beat, error)
 }
 
@@ -58,9 +58,9 @@ func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat
 		Tags:           unpublishedBeat.Tags,
 		KeynoteID:      unpublishedBeat.KeynoteID,
 		Timestamps:     unpublishedBeat.Timestamps,
-		Instruments:    unpublishedBeat.Instruments,
-		MFCC:           mfcc,
-		CreatedAt:      time.Now().Unix(), // или unpublishedBeat.CreatedAt, если нужно сохранить оригинальное значение
+		// Instruments:    unpublishedBeat.Instruments,
+		MFCC:      mfcc,
+		CreatedAt: time.Now().Unix(), // или unpublishedBeat.CreatedAt, если нужно сохранить оригинальное значение
 	}
 
 	beat, err = s.repository.CreateBeat(beat)
@@ -115,7 +115,7 @@ func (s *service) ReadBeatsByMoodId(moodId uint) (*[]presenters.Beat, error) {
 	return s.repository.ReadBeatsByMoodId(moodId)
 }
 
-func (s *service) ReadBeatsByDate(from int64, to int64) (*[]presenters.Beat, error) {
+func (s *service) ReadBeatsByDate(from int64, to int64) (*[100]presenters.Beat, error) {
 	return s.repository.ReadBeatsByDate(from, to)
 }
 

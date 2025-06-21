@@ -18,6 +18,7 @@ type LicenseList struct {
 }
 
 // GetLicensesForBeat retrieves all licenses for a specific beat
+//
 //	@Summary		Get licenses by beat ID
 //	@Description	Returns all available licenses for a specific beat
 //	@Tags			License
@@ -45,6 +46,7 @@ func GetLicensesForBeat(service license.Service) fiber.Handler {
 }
 
 // PostNewLicense creates a new license for a beat
+//
 //	@Summary		Create new license
 //	@Description	Creates a new license for a beat (beatmaker only)
 //	@Tags			License
@@ -89,6 +91,7 @@ func PostNewLicense(service license.Service) fiber.Handler {
 }
 
 // PostNewLicense creates several new licenses for a beat
+//
 //	@Summary		Create licenses
 //	@Description	Creates a new license for a beat (beatmaker only)
 //	@Tags			License
@@ -126,6 +129,7 @@ func PostNewLicenseList(service license.Service) fiber.Handler {
 }
 
 // GetAllLicense retrieves all licenses (admin only)
+//
 //	@Summary		Get all licenses
 //	@Description	Returns all licenses in the system (admin only)
 //	@Tags			Admin

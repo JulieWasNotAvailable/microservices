@@ -15,14 +15,14 @@ import (
 	"github.com/gofiber/swagger"
 )
 
-//	@BasePath					/api
-//	@title						Fiber Cart Service
-//	@version					1.0
-//	@description				Deals with Cart, Licenses and License Template
-//	@securityDefinitions.apikey	ApiKeyAuth
-//	@in							header
-//	@name						Authorization
-//	@host						localhost:7000
+// @BasePath					/api
+// @title						Fiber Cart Service
+// @version					1.0
+// @description				Deals with Cart, Licenses and License Template
+// @securityDefinitions.apikey	ApiKeyAuth
+// @in							header
+// @name						Authorization
+// @host						localhost:7000
 func main() {
 	app := fiber.New()
 

@@ -89,9 +89,9 @@ func (s *service) UpdateUnpublishedBeat(beat *entities.UnpublishedBeat) (*presen
 		Description: beat.Description,
 		Timestamps:  beat.Timestamps,
 		Price:       beat.Price,
-		Status:      beat.Status,
 		Genres:      beat.Genres,
 		Moods:       beat.Moods,
+		Status:      beat.Status,
 	}
 
 	excludedWords := []string{

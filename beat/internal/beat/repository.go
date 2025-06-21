@@ -24,7 +24,7 @@ type Repository interface {
 	//filters
 	ReadFilteredBeats(filters presenters.Filters) (*[]presenters.Beat, error)
 	ReadBeatsByMoodId(moodId uint) (*[]presenters.Beat, error)
-	ReadBeatsByDate(from int64, to int64) (*[]presenters.Beat, error)
+	ReadBeatsByDate(from int64, to int64) (*[100]presenters.Beat, error)
 	FindBeatsWithAllMoods(moodIDs []uint) ([]presenters.Beat, error)
 
 	//for service
@@ -59,7 +59,8 @@ func (r *repository) ReadBeats() (*[]entities.Beat, error) {
 		Preload("AvailableFiles").
 		Preload("Tags").Preload("Genres").
 		Preload("Moods").Preload("Timestamps").
-		Preload("Instruments").Preload("MFCC").
+		Preload("MFCC").
+		Preload("Keynote").
 		Find(&beatModels)
 	if result.Error != nil {
 		return nil, result.Error
@@ -72,7 +73,7 @@ func (r *repository) ReadBeatById(id uuid.UUID) (*presenters.Beat, error) {
 	var beatModel presenters.Beat
 
 	result := r.DB.Model(&beatModel).Preload("Tags").Preload("Genres").
-		Preload("Moods").Preload("Timestamps").Preload("Instruments").
+		Preload("Moods").Preload("Timestamps").
 		Where("id = ?", id).First(&beatModel)
 	if result.Error != nil {
 		return nil, result.Error
@@ -85,7 +86,9 @@ func (r *repository) ReadBeatsByBeatmakerId(id uuid.UUID) (*[]presenters.Beat, e
 	var beatModels []presenters.Beat
 
 	result := r.DB.Model(beatModels).Preload("Tags").Preload("Genres").
-		Preload("AvailableFiles").Preload("Moods").Preload("Timestamps").Preload("Instruments").
+		Preload("AvailableFiles").Preload("Moods").
+		Preload("Timestamps").
+		Preload("Keynote").
 		Where("beatmaker_id = ?", id).Find(&beatModels)
 	if result.Error != nil {
 		return nil, result.Error
@@ -108,8 +111,8 @@ func (r *repository) ReadBeatsByMoodId(moodId uint) (*[]presenters.Beat, error) 
 	return &beatModels, nil
 }
 
-func (r *repository) ReadBeatsByDate(from int64, to int64) (*[]presenters.Beat, error) {
-	var beatModels []presenters.Beat
+func (r *repository) ReadBeatsByDate(from int64, to int64) (*[100]presenters.Beat, error) {
+	var beatModels [100]presenters.Beat
 	err := r.DB.
 		Where("created_at BETWEEN ? AND ?", from, to).
 		Find(&beatModels).Error
@@ -341,8 +344,7 @@ func WithBasicPreloads() func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.
 			Preload("Tags").Preload("Genres").
-			Preload("Moods").Preload("Timestamps").
-			Preload("Instruments")
+			Preload("Moods").Preload("Timestamps")
 	}
 }
 

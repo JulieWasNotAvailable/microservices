@@ -47,7 +47,7 @@ func PostLike(service activity.Service) fiber.Handler {
 
 		like, err := service.InsertLike(userId, beatuuid)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
+			return c.Status(http.StatusResetContent).JSON(presenters.CreateMetadataErrorResponse(err))
 		}
 
 		return c.Status(http.StatusCreated).JSON(presenters.CreateMetadataListResponse(like))
@@ -80,7 +80,7 @@ func DeleteLike(service activity.Service) fiber.Handler {
 
 		like, err := service.DeleteLike(userId, beatId)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
+			return c.Status(http.StatusResetContent).JSON(presenters.CreateMetadataErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateMetadataSuccessResponse(like))

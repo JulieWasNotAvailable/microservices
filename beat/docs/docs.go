@@ -542,6 +542,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/beat/byBeatmakerByJWT": {
+            "get": {
+                "description": "Returns all beats",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get beats by JWT",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Beatmaker ID in UUID format",
+                        "name": "beatmakerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of beats",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.BeatListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID format",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.BeatErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.BeatErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/beat/byBeatmakerId/{beatmakerId}": {
             "get": {
                 "description": "Returns all beats for a specific beatmaker",
@@ -579,6 +623,50 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.BeatErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/beat/deleteBeatById/{id}": {
+            "delete": {
+                "description": "Deletes beat with the specified ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Beats"
+                ],
+                "summary": "Delete beat by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Beat ID (UUID format)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.BeatSuccessResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.BeatErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/presenters.BeatErrorResponse"
                         }
@@ -760,32 +848,6 @@ const docTemplate = `{
                     "Metadata"
                 ],
                 "summary": "Get trending genres",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presenters.MetadataListResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/presenters.MetadataErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/metadata/instruments": {
-            "get": {
-                "description": "Returns a list of all available instruments",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Metadata"
-                ],
-                "summary": "Get all instruments",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1059,13 +1121,13 @@ const docTemplate = `{
         "entities.AvailableFiles": {
             "type": "object",
             "properties": {
-                "beatID": {
+                "beatId": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "mp3Url": {
+                "mp3url": {
                     "type": "string"
                 },
                 "wavurl": {
@@ -1099,6 +1161,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "019628ef-cd76-7d2d-bf80-48b8011fad40"
                 },
+                "beatmakerName": {
+                    "type": "string"
+                },
                 "bpm": {
                     "type": "integer",
                     "maximum": 400,
@@ -1110,7 +1175,7 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string",
-                    "maxLength": 500,
+                    "maxLength": 5000,
                     "minLength": 2,
                     "example": "Chill summer beat with tropical influences"
                 },
@@ -1124,15 +1189,15 @@ const docTemplate = `{
                     "type": "string",
                     "example": "019628ef-cd76-7d2d-bf80-48b8011fad40"
                 },
-                "instruments": {
-                    "description": "many to many",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Instrument"
-                    }
+                "keynote": {
+                    "description": "gorm:\"foreignKey:UnpublishedBeatID;constraint:OnDelete:CASCADE;\" validate:\"required\"                                       //keynote has many beats, but each beat has only one keynote` + "`" + `",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entities.Keynote"
+                        }
+                    ]
                 },
                 "keynoteId": {
-                    "description": "keynote has many beats, but each beat has only one keynote` + "`" + `",
                     "type": "integer",
                     "example": 11
                 },
@@ -1202,10 +1267,13 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Jerk"
+                },
+                "picture_url": {
+                    "type": "string"
                 }
             }
         },
-        "entities.Instrument": {
+        "entities.Keynote": {
             "type": "object",
             "properties": {
                 "id": {
@@ -1219,6 +1287,9 @@ const docTemplate = `{
         "entities.Like": {
             "type": "object",
             "properties": {
+                "beat": {
+                    "$ref": "#/definitions/entities.Beat"
+                },
                 "beatID": {
                     "type": "string"
                 },
@@ -1255,26 +1326,26 @@ const docTemplate = `{
         "entities.Timestamp": {
             "type": "object",
             "required": [
-                "timeEnd",
-                "timeStart"
+                "end_time",
+                "start_time"
             ],
             "properties": {
                 "beatId": {
                     "type": "string",
                     "example": "01963e01-e46c-7996-996a-42ad3df115ac"
                 },
-                "name": {
-                    "type": "string"
-                },
-                "timeEnd": {
+                "end_time": {
                     "type": "integer",
                     "maximum": 300,
                     "minimum": 2
                 },
-                "timeStart": {
+                "start_time": {
                     "type": "integer",
                     "maximum": 299,
                     "minimum": 1
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -1299,6 +1370,9 @@ const docTemplate = `{
                 "beatmakerId": {
                     "type": "string",
                     "example": "019628ef-cd76-7d2d-bf80-48b8011fad40"
+                },
+                "beatmakerName": {
+                    "type": "string"
                 },
                 "bpm": {
                     "type": "integer",
@@ -1328,13 +1402,6 @@ const docTemplate = `{
                 "id": {
                     "type": "string",
                     "example": "019628ef-cd76-7d2d-bf80-48b8011fad40"
-                },
-                "instruments": {
-                    "description": "many to many",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Instrument"
-                    }
                 },
                 "keynoteId": {
                     "description": "keynote has many beats, but each beat has only one keynote` + "`" + `",
@@ -1366,6 +1433,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
+                    "description": "Instruments        []Instrument   ` + "`" + `json:\"instruments\" gorm:\"many2many:instrument_beats\"` + "`" + `            //many to many",
                     "type": "string",
                     "example": "draft"
                 },

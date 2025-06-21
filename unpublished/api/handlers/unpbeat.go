@@ -22,6 +22,7 @@ type BeatForPublishing struct {
 }
 
 // Hello godoc
+//
 //	@Summary		Simple hello endpoint
 //	@Description	Returns a hello message
 //	@Tags			utils
@@ -33,6 +34,7 @@ func Hello(c *fiber.Ctx) error {
 }
 
 // SaveBeatDraft godoc
+//
 //	@Summary		Save a beat draft
 //	@Description	Save an unpublished beat with draft status
 //	@Tags			beats
@@ -77,6 +79,7 @@ func SaveBeatDraft(service unpbeat.Service, metaservice beatmetadata.MetadataSer
 }
 
 // UpdateBeat godoc
+//
 //	@Summary		Update an unpublished beat
 //	@Description	Update an existing unpublished beat entry
 //	@Tags			beats
@@ -106,6 +109,7 @@ func UpdateBeat(service unpbeat.Service, mservice beatmetadata.MetadataService) 
 }
 
 // PostPublishBeat godoc
+//
 //	@Summary		Publish a beat. Deletes it from the current service, and posts to beat service.
 //	@Description	Publish an existing beat (mock implementation)
 //	@Tags			beats
@@ -143,6 +147,7 @@ func PostPublishBeat(service unpbeat.Service) fiber.Handler {
 }
 
 // SendToModeration godoc
+//
 //	@Summary		Send beat to moderation
 //	@Description	Update beat status to 'in_moderation' and set moderation timestamp
 //	@Tags			admin
@@ -177,6 +182,7 @@ func SendToModeration(service unpbeat.Service) fiber.Handler {
 }
 
 // GetUnpublishedBeatsByBeatmakerId godoc
+//
 //	@Summary		Get user's unpublished beats
 //	@Description	Get all unpublished beats for the authenticated beatmaker
 //	@Tags			beats
@@ -202,6 +208,7 @@ func GetUnpublishedBeatsByBeatmakerId(service unpbeat.Service) fiber.Handler {
 }
 
 // GetBeatsSortByStatusAndJWT godoc
+//
 //	@Summary		Get beats by status for current user
 //	@Description	Get unpublished beats filtered by status for the authenticated beatmaker
 //	@Tags			beats
@@ -230,6 +237,7 @@ func GetBeatsSortByStatusAndJWT(service unpbeat.Service) fiber.Handler {
 }
 
 // GetBeatsInModeration godoc
+//
 //	@Summary		Get beats in moderation by date range. Warning: uses unix data.
 //	@Description	Get beats in moderation status within specified date range
 //	@Tags			admin
@@ -261,6 +269,7 @@ func GetBeatsInModeration(service unpbeat.Service) fiber.Handler {
 }
 
 // GetAllUnpublishedBeats godoc
+//
 //	@Summary		Get all unpublished beats
 //	@Description	Get all unpublished beats in the system
 //	@Tags			admin
@@ -281,6 +290,7 @@ func GetAllUnpublishedBeats(service unpbeat.Service) fiber.Handler {
 }
 
 // GetUnpublishedBeatById godoc
+//
 //	@Summary		Get an unpublished beat by ID
 //	@Description	Retrieves an unpublished beat with the specified ID
 //	@Tags			Beats
@@ -310,6 +320,7 @@ func GetUnpublishedBeatById(service unpbeat.Service) fiber.Handler {
 }
 
 // DeleteUnpublishedBeatById godoc
+//
 //	@Summary		Delete an unpublished beat by ID
 //	@Description	Deletes an unpublished beat with the specified ID
 //	@Tags			Beats
