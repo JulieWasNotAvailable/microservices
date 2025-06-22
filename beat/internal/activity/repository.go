@@ -55,7 +55,7 @@ func (r *repository) CreateLike(userid uuid.UUID, beatid uuid.UUID) (*entities.L
 
 		return nil, err
 	}
-	
+
 	return &like, nil
 }
 
