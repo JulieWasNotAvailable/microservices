@@ -9,11 +9,12 @@ import (
 	"syscall"
 
 	"github.com/IBM/sarama"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/unpbeat"
 )
 
-func StartConsumerDeleteApprove(topic string, service unpbeat.Service) {
-	brokerUrl := []string{"broker:29092"}
+func StartConsumerDeleteApprove(topic string, service unpbeat.Service, appQuit chan bool) {
+	brokerUrl := []string{"localhost:9092"}
 
 	fmt.Printf("starting consumer with brokerurl %s on topic: %s \n", brokerUrl[0], topic)
 
@@ -37,6 +38,7 @@ func StartConsumerDeleteApprove(topic string, service unpbeat.Service) {
 			select {
 			case err := <-consumer.Errors():
 				fmt.Println(err)
+				appQuit <- true
 			case msg := <-consumer.Messages():
 				msgCount++
 				fmt.Printf("Received message Count %d: | Topic(%s) | Message(%s) \n", msgCount, string(msg.Topic), string(msg.Value))
@@ -46,7 +48,16 @@ func StartConsumerDeleteApprove(topic string, service unpbeat.Service) {
 				if err != nil {
 					log.Println("cannot parse the delete_approve message ")
 				} else if messageValue.Error != "" {
-					log.Println("couldnt create the beat in publish service")
+					beat, _ := service.GetUnpublishedBeatByID(messageValue.BeatId)
+					toUpdateStatus := entities.UnpublishedBeat{
+						ID: messageValue.BeatId,
+						Status: entities.StatusDraft,
+					}
+					_, err := service.UpdateUnpublishedBeat(&toUpdateStatus, beat.BeatmakerID)
+					if err != nil {
+						log.Println("update beat status error in consumer_delete")	
+					}
+					log.Println("error in consumer_delete, beat was not deleted")
 				} else {
 					log.Println("deleting the beat with id", messageValue.BeatId)
 					err := service.DeleteUnpublishedBeat(messageValue.BeatId)
@@ -59,12 +70,11 @@ func StartConsumerDeleteApprove(topic string, service unpbeat.Service) {
 			case <-sigchan:
 				fmt.Println("Interrupt is detected")
 
-				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
 				doneCh <- struct{}{}
+				appQuit <- true
 			}
 		}
 	}()
-
 	<-doneCh
 
 	if err := worker.Close(); err != nil {

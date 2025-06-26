@@ -3,6 +3,7 @@ package consumer
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,8 +15,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func StartConsumer(topic string, service license.Service) {
-	brokerUrl := []string{"broker:29092"}
+func StartConsumer(topic string, service license.Service, appQuit chan bool) {
+	brokerUrl := []string{"localhost:9092"}
 
 	fmt.Printf("starting consumer with brokerurl %s on topic: %s \n", brokerUrl[0], topic)
 
@@ -53,7 +54,8 @@ func StartConsumer(topic string, service license.Service) {
 					errMsgBytes, _ := json.Marshal(errMessage)
 					producer.CreateMessage(errMsgBytes, "license_was_created")
 				} else {
-					_, err = service.InsertNewLicenseList(messageValue.BeatId, messageValue.UserId, messageValue.LicenseList)
+					log.Println(messageValue)
+					_, err = service.InsertNewLicenseList(messageValue.BeatId, messageValue.UserId, messageValue.TemplateAndPrice)
 					if err != nil {
 						errMessage := producer.KafkaMessageCreateLicense{
 							BeatId: messageValue.BeatId,
@@ -76,6 +78,7 @@ func StartConsumer(topic string, service license.Service) {
 
 				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
 				doneCh <- struct{}{}
+				appQuit <- true
 			}
 		}
 	}()
@@ -92,6 +95,8 @@ func StartConsumer(topic string, service license.Service) {
 func connectConsumer(brokersUrl []string) (sarama.Consumer, error) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
+	config.Consumer.Offsets.AutoCommit.Enable = false
+	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 
 	conn, err := sarama.NewConsumer(brokersUrl, config)
 	if err != nil {

@@ -8,9 +8,14 @@ import (
 )
 
 type CreateLicense struct {
-	BeatId      uuid.UUID
-	UserId      uuid.UUID
-	LicenseList []License
+	BeatId           uuid.UUID          `json:"beatId"`
+	UserId           uuid.UUID          `json:"userId"`
+	TemplateAndPrice []TemplateAndPrice `json:"licenseList"`
+}
+
+type TemplateAndPrice struct {
+	TemplateId uint `json:"id"`
+	Price      int  `json:"price"`
 }
 
 type License struct {

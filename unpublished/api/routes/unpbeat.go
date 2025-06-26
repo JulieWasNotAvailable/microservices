@@ -10,7 +10,7 @@ import (
 
 func SetupUnpublishedBeatRoutes(app fiber.Router, service unpbeat.Service, mservice beatmetadata.MetadataService){
 	unp := app.Group("/unpbeats")
-	unp.Post("/makeEmptyBeat", guards.ProtectedRequiresBeatmaker(), handlers.SaveBeatDraft(service, mservice))
+	unp.Post("/makeEmptyBeat", guards.ProtectedRequiresBeatmaker(), handlers.MakeEmpty(service, mservice))
 	unp.Get("/sortByStatus/:status", guards.ProtectedRequiresBeatmaker(), handlers.GetBeatsSortByStatusAndJWT(service))
 	unp.Get("/unpublishedBeatsByBeatmakerJWT", guards.ProtectedRequiresBeatmaker(), handlers.GetUnpublishedBeatsByBeatmakerId(service))
 	unp.Get("/unpublishedBeatById/:id", handlers.GetUnpublishedBeatById(service))

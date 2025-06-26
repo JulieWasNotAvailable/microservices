@@ -19,8 +19,8 @@ type KafkaMessageURLUpdate struct {
 	URL      string
 }
 
-func StartConsumer(topic string, uservice user.Service) {
-	brokerUrl := []string{"broker:29092"}
+func StartConsumer(topic string, uservice user.Service, appQuit chan bool) {
+	brokerUrl := []string{"localhost:9092"}
 
 	worker, err := connectConsumer(brokerUrl)
 
@@ -81,6 +81,7 @@ func StartConsumer(topic string, uservice user.Service) {
 				fmt.Println("Interrupt is detected")
 				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
 				doneCh <- struct{}{}
+				appQuit <- true
 			}
 		}
 	}()

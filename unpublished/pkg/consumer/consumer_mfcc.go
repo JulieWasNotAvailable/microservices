@@ -14,8 +14,8 @@ import (
 	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/producer"
 )
 
-func StartConsumerMFCC(topic string, service unpbeat.Service) {
-	brokerUrl := []string{"broker:29092"}
+func StartConsumerMFCC(topic string, service unpbeat.Service, appQuit chan bool) {
+	brokerUrl := []string{"localhost:9092"}
 
 	fmt.Printf("starting consumer with brokerurl %s on topic: %s \n", brokerUrl[0], topic)
 
@@ -24,7 +24,7 @@ func StartConsumerMFCC(topic string, service unpbeat.Service) {
 		panic(err)
 	}
 
-	consumer, err := worker.ConsumePartition(topic, 0, sarama.OffsetNewest)
+	consumer, err := worker.ConsumePartition(topic, 0, sarama.OffsetOldest)
 	if err != nil {
 		panic(err)
 	}
@@ -39,6 +39,7 @@ func StartConsumerMFCC(topic string, service unpbeat.Service) {
 			select {
 			case err := <-consumer.Errors():
 				fmt.Println(err)
+				appQuit <- true
 			case msg := <-consumer.Messages():
 				msgCount++
 				fmt.Printf("Received message Count %d: | Topic(%s) | Message(%s) \n", msgCount, string(msg.Topic), string(msg.Value))
@@ -48,34 +49,37 @@ func StartConsumerMFCC(topic string, service unpbeat.Service) {
 				if err != nil {
 					log.Println("couldn't process the kafka message in consumer_Mfcc")
 				}
+				log.Println(msg.Offset)
+
 				if messageValue.Error != "" {
 					toUpdateErr := entities.UnpublishedBeat{
 						Status: entities.StatusDraft,
-						Err: messageValue.Error,
+						Err:    messageValue.Error,
 					}
 					beatInitial, _ := service.GetUnpublishedBeatByID(messageValue.ID)
 					_, err = service.UpdateUnpublishedBeat(&toUpdateErr, beatInitial.BeatmakerID)
 					if err != nil {
 						log.Println("couldn't update the beat error after receving mfcc error message")
 					}
+				} else {
+					beat, err := service.GetUnpublishedBeatByID(messageValue.ID)
+					if err != nil {
+						log.Println("couldn't get the beat while trying to sent the message to publish_beat_main")
+					} else {
+						toBeatMsg := producer.KafkaMessageBeatForPublishing{
+							Beat: *beat,
+							MFCC: messageValue.Features,
+						}
+						toBeatMsgBytes, _ := json.Marshal(toBeatMsg)
+						producer.CreateMessage(toBeatMsgBytes, "publish_beat_main")
+					}
 				}
-				
-				beat, err := service.GetUnpublishedBeatByID(messageValue.ID)
-				if err != nil {
-					log.Println("couldn't update the beat error after receving license error message")
-				}
-				toBeatMsg := producer.KafkaMessageBeatForPublishing{
-					Beat: *beat,
-					MFCC: messageValue.Features,
-				}
-				toBeatMsgBytes, _ := json.Marshal(toBeatMsg)
-				producer.CreateMessage(toBeatMsgBytes,"publish_beat_main")
-	
+
 			case <-sigchan:
 				fmt.Println("Interrupt is detected")
 
-				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
 				doneCh <- struct{}{}
+				appQuit <- true
 			}
 		}
 	}()

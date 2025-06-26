@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/JulieWasNotAvailable/microservices/beat/api/routers"
@@ -54,7 +55,15 @@ func main() {
 	routers.SetupActivityRoutes(api, activityService)
 	api.Get("/swagger/*", swagger.New(swagger.Config{}))
 
-	go consumer.StartConsumerPublisher("publish_beat_main", beatService)
+	appQuit := make(chan bool)
+	go consumer.StartConsumerPublisher("publish_beat_main", beatService, appQuit)
 
-	app.Listen(":7771")
+	go func() {
+		if err := app.Listen(":7771"); err != nil {
+			fmt.Printf("Server crashed :%v", err)
+		}
+	}()
+	
+	<-appQuit
+	app.Server().Shutdown()
 }

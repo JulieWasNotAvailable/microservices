@@ -12,8 +12,8 @@ import (
 	"github.com/JulieWasNotAvailable/microservices/beatsUpload/internal/beat"
 )
 
-func StartConsumer(topic string, service beat.Service) {
-	brokerUrl := []string{"broker:29092"}
+func StartConsumer(topic string, service beat.Service, appQuit chan bool) {
+	brokerUrl := []string{"localhost:9092"}
 
 	worker, err := connectConsumer(brokerUrl)
 
@@ -58,6 +58,7 @@ func StartConsumer(topic string, service beat.Service) {
 				fmt.Println("Interrupt is detected")
 				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
 				doneCh <- struct{}{}
+				appQuit <- true
 			}
 		}
 	}()

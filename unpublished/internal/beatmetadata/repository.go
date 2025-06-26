@@ -52,14 +52,6 @@ func NewRepo(db *gorm.DB) MetadataRepository {
 }
 
 func (r *repository) CreateAvailableFiles(availableFiles *entities.AvailableFiles) (entities.AvailableFiles, error) {
-	var availFiles entities.AvailableFiles
-	err := r.DB.Where("unpublished_beat_id = ?", availableFiles.UnpublishedBeatID).First(availFiles).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return entities.AvailableFiles{}, err
-	} else if err == nil{
-		return availFiles, errors.New("unpublished entity for this beat aldready exists")
-	}
-	
 	uuid, err := uuid.NewV7()
 	if err != nil {
 		return entities.AvailableFiles{}, err

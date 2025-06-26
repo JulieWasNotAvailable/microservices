@@ -69,7 +69,15 @@ func main() {
 	routes.WelcomeRouter(api)
 	routes.ActivityRoutes(api, activityService)
 
-	// go consumer.StartConsumer("profilepic_url_updates", userService)
+	// appQuit := make(chan bool)
+	// go consumer.StartConsumer("profilepic_url_updates", userService, appQuit)
 
-	app.Listen(":7773")
+	go func() {
+		if err := app.Listen(":7773"); err != nil {
+			log.Printf("Server crashed: %v", err) // Don't use Fatalf (avoids os.Exit)
+		}
+	}()
+
+	// <- appQuit
+	app.Server().Shutdown()
 }

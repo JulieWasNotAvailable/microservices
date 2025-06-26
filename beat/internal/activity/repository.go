@@ -19,6 +19,7 @@ type Repository interface {
 	ReadLikesCountOfBeats(beatids []uuid.UUID) (int, error) //likes number of the group of beats
 
 	CreateListened(userId uuid.UUID, beatId uuid.UUID) (entities.Listen, error)
+	ReadListenedByUserAndBeatId(userId uuid.UUID, beatId uuid.UUID) (entities.Listen, error)
 	//view my listened
 	BeatExists(beatId uuid.UUID) (bool, error)
 }
@@ -55,7 +56,7 @@ func (r *repository) CreateLike(userid uuid.UUID, beatid uuid.UUID) (*entities.L
 
 		return nil, err
 	}
-	
+
 	return &like, nil
 }
 
@@ -155,6 +156,23 @@ func (r *repository) CreateListened(userId uuid.UUID, beatId uuid.UUID) (entitie
 	err = r.DB.Updates(&beat).Error
 	if err != nil {
 		return entities.Listen{}, errors.New("listen record added, but faced an error while trying to increase the number of plays")
+	}
+
+	return record, nil
+}
+
+func (r *repository) ReadListenedByUserAndBeatId(userId uuid.UUID, beatId uuid.UUID) (entities.Listen, error) {
+	record := entities.Listen{
+		UserID: userId,
+		BeatID: beatId,
+	}
+	err := r.DB.First(&record).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return record, errors.New("you have already listened this beat")
+		} else {
+			return entities.Listen{}, err
+		}
 	}
 
 	return record, nil

@@ -28,7 +28,7 @@ type Timestamp struct {
 
 type Tag struct {
 	ID   uint   `json:"id" example:"1"`
-	UnpublishedBeat []*UnpublishedBeat `json:"-"` //gorm:"many2many:beat_tags;"
+	UnpublishedBeat []*UnpublishedBeatResponse `json:"-"` //gorm:"many2many:beat_tags;"
 	Name string `json:"name" example:"Chill"`
 }
 

@@ -13,12 +13,10 @@ import (
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/unpbeat"
 	"github.com/google/uuid"
-	// "github.com/JulieWasNotAvailable/microservices/user/api/presenters"
-	// "github.com/JulieWasNotAvailable/microservices/user/pkg/user"
 )
 
-func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice beatmetadata.MetadataService) {
-	brokerUrl := []string{"broker:29092"}
+func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice beatmetadata.MetadataService, appQuit chan bool) {
+	brokerUrl := []string{"localhost:9092"}
 
 	fmt.Printf("starting consumer with brokerurl %s on topic: %s \n", brokerUrl[0], topic)
 
@@ -42,6 +40,7 @@ func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice bea
 			select {
 			case err := <-consumer.Errors():
 				fmt.Println(err)
+				appQuit <- true
 			case msg := <-consumer.Messages():
 				msgCount++
 				fmt.Printf("Received message Count %d: | Topic(%s) | Message(%s) \n", msgCount, string(msg.Topic), string(msg.Value))
@@ -95,6 +94,7 @@ func StartConsumerFileUpdate(topic string, service unpbeat.Service, mservice bea
 
 				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
 				doneCh <- struct{}{}
+				appQuit <- true
 			}
 		}
 	}()

@@ -104,29 +104,29 @@ func PostNewLicense(service license.Service) fiber.Handler {
 //	@Failure		401		{object}	presenters.ErrorResponse	"Unauthorized or template ownership mismatch"
 //	@Failure		500		{object}	presenters.ErrorResponse	"Internal server error"
 //	@Router			/license/newLisenseList [post]
-func PostNewLicenseList(service license.Service) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		var requestBody LicenseList
-		if err := c.BodyParser(&requestBody); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(presenters.CreateErrorResponse(err))
-		}
+// func PostNewLicenseList(service license.Service) fiber.Handler {
+// 	return func(c *fiber.Ctx) error {
+// 		var requestBody LicenseList
+// 		if err := c.BodyParser(&requestBody); err != nil {
+// 			return c.Status(fiber.StatusBadRequest).JSON(presenters.CreateErrorResponse(err))
+// 		}
 
-		beatmakerId, err := getIdFromJWT(c)
-		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(presenters.CreateErrorResponse(err))
-		}
+// 		beatmakerId, err := getIdFromJWT(c)
+// 		if err != nil {
+// 			return c.Status(fiber.StatusUnauthorized).JSON(presenters.CreateErrorResponse(err))
+// 		}
 
-		newLicenses, err := service.InsertNewLicenseList(requestBody.BeatId, beatmakerId, requestBody.Licenses)
-		if err != nil {
-			if errors.Is(err, ErrUserNotOwner) {
-				return c.Status(fiber.StatusUnauthorized).JSON(presenters.CreateErrorResponse(err))
-			}
-			return err
-		}
+// 		newLicenses, err := service.InsertNewLicenseList(requestBody.BeatId, beatmakerId, requestBody.Licenses)
+// 		if err != nil {
+// 			if errors.Is(err, ErrUserNotOwner) {
+// 				return c.Status(fiber.StatusUnauthorized).JSON(presenters.CreateErrorResponse(err))
+// 			}
+// 			return err
+// 		}
 
-		return c.Status(fiber.StatusOK).JSON(presenters.CreateSuccessResponse(newLicenses))
-	}
-}
+// 		return c.Status(fiber.StatusOK).JSON(presenters.CreateSuccessResponse(newLicenses))
+// 	}
+// }
 
 // GetAllLicense retrieves all licenses (admin only)
 //

@@ -51,7 +51,15 @@ func main() {
 
 	app.Use(cors.New())
 
-	go consumer.StartConsumer("create_license", licenseService)
+	appQuit := make(chan bool)
+	go consumer.StartConsumer("create_license", licenseService, appQuit)
 
-	app.Listen(":7775")
+	go func() {
+		if err := app.Listen(":7775"); err != nil {
+			log.Printf("Server crashed: %v", err) // Don't use Fatalf (avoids os.Exit)
+		}
+	}()
+
+	<-appQuit
+	app.Server().Shutdown()
 }

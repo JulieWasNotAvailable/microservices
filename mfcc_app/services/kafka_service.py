@@ -9,7 +9,7 @@ import uuid
 from botocore.exceptions import ClientError
 from kafka import KafkaProducer
 
-KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'broker:29092').split(',')
+KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092').split(',')
 KAFKA_PUBLISH_TOPIC = os.getenv('KAFKA_PUBLISH_TOPIC', "publish_beatv3")
 KAFKA_TRACK_TOPIC = os.getenv('KAFKA_TRACK_TOPIC', 'track_for_mfcc')
 

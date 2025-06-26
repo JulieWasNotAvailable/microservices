@@ -16,8 +16,8 @@ import (
 	// "github.com/JulieWasNotAvailable/microservices/user/pkg/user"
 )
 
-func StartConsumerLicense(topic string, service unpbeat.Service) {
-	brokerUrl := []string{"broker:29092"}
+func StartConsumerLicense(topic string, service unpbeat.Service, appQuit chan bool) {
+	brokerUrl := []string{"localhost:9092"}
 
 	fmt.Printf("starting consumer with brokerurl %s on topic: %s \n", brokerUrl[0], topic)
 
@@ -41,6 +41,7 @@ func StartConsumerLicense(topic string, service unpbeat.Service) {
 			select {
 			case err := <-consumer.Errors():
 				fmt.Println(err)
+				appQuit <- true
 			case msg := <-consumer.Messages():
 				msgCount++
 				fmt.Printf("Received message Count %d: | Topic(%s) | Message(%s) \n", msgCount, string(msg.Topic), string(msg.Value))
@@ -51,34 +52,48 @@ func StartConsumerLicense(topic string, service unpbeat.Service) {
 					messageValue.Error = "couldn't unmarshal"
 					log.Println("cannot parse the message")
 				}
+
 				if messageValue.Error != "" {
 					toUpdateErr := entities.UnpublishedBeat{
+						ID:     messageValue.BeatId,
 						Status: entities.StatusDraft,
-						Err: messageValue.Error,
+						Err:    messageValue.Error,
 					}
 					beatInitial, _ := service.GetUnpublishedBeatByID(messageValue.BeatId)
 					_, err = service.UpdateUnpublishedBeat(&toUpdateErr, beatInitial.BeatmakerID)
 					if err != nil {
 						log.Println("couldn't update the beat error after receving license error message")
+						log.Println(err)
 					}
 				} else {
 					beat, err := service.GetUnpublishedBeatByID(messageValue.BeatId)
 					if err != nil {
-						log.Println("couldn't update the beat error after receving license error message")
+						log.Println("couldn't get the beat error after receving license error message")
+					} else {
+						toUpdateError := entities.UnpublishedBeat{
+							ID: messageValue.BeatId,
+							Err: "none",
+						}
+						_, err = service.UpdateUnpublishedBeat(&toUpdateError, beat.BeatmakerID)
+						if err != nil {
+							log.Println("\ncouldn't update beat error to none after receving license success message")
+						} else {
+							toMfccMsg := producer.KafkaMessageToMFCC{
+								ID:       messageValue.BeatId.String(),
+								Filename: beat.AvailableFiles.MP3Url,
+							}
+							toMfccMsgBytes, _ := json.Marshal(toMfccMsg)
+							producer.CreateMessage(toMfccMsgBytes, "track_for_mfcc")
+						}
 					}
-					toMfccMsg := producer.KafkaMessageToMFCC{
-						ID : messageValue.BeatId.String(),
-						Filename: beat.AvailableFiles.MP3Url,
-					}
-					toMfccMsgBytes, _ := json.Marshal(toMfccMsg)
-					producer.CreateMessage(toMfccMsgBytes, "track_for_mfcc")
 				}
-				
+
 			case <-sigchan:
 				fmt.Println("Interrupt is detected")
 
 				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
 				doneCh <- struct{}{}
+				appQuit <- true
 			}
 		}
 	}()
@@ -93,13 +108,13 @@ func StartConsumerLicense(topic string, service unpbeat.Service) {
 }
 
 func connectConsumer(brokersUrl []string) (sarama.Consumer, error) {
-    config := sarama.NewConfig()
-    config.Consumer.Return.Errors = true
+	config := sarama.NewConfig()
+	config.Consumer.Return.Errors = true
 
-    conn, err := sarama.NewConsumer(brokersUrl, config)
-    if err != nil {
-        return nil, err
-    }
+	conn, err := sarama.NewConsumer(brokersUrl, config)
+	if err != nil {
+		return nil, err
+	}
 
-    return conn, nil
+	return conn, nil
 }

@@ -1,7 +1,7 @@
 package producer
 
 import (
-	"github.com/JulieWasNotAvailable/microservices/unpublished/api/presenters"
+	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 )
 
 type KafkaMessageToMFCC struct {
@@ -10,6 +10,6 @@ type KafkaMessageToMFCC struct {
 }
 
 type KafkaMessageBeatForPublishing struct {
-	Beat presenters.UnpublishedBeat
+	Beat entities.UnpublishedBeat
 	MFCC []float64
 }

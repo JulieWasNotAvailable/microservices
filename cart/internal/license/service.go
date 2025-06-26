@@ -17,7 +17,7 @@ type Service interface {
 	GetLicenseByBeatId(beatId uuid.UUID) (*[]presenters.License, error)
 	ReadLicenseById(id uint) (*presenters.License, error)
 	InsertNewLicense(license entities.License) (entities.License, error)
-	InsertNewLicenseList(beatId uuid.UUID, userId uuid.UUID, data []entities.License) ([]entities.License, error)
+	InsertNewLicenseList(beatId uuid.UUID, userId uuid.UUID, templatesAndPrices []entities.TemplateAndPrice) ([]entities.License, error) 
 
 	//admin
 	ReadAllLicenseTemplate() (*[]presenters.LicenseTemplate, error)
@@ -60,28 +60,35 @@ func (s *service) InsertNewLicense(license entities.License) (entities.License, 
 	return s.repository.CreateNewLicense(license)
 }
 
-func (s *service) InsertNewLicenseList(beatId uuid.UUID, userId uuid.UUID, licenses []entities.License) ([]entities.License, error) {
+func (s *service) InsertNewLicenseList(beatId uuid.UUID, userId uuid.UUID, templatesAndPrices []entities.TemplateAndPrice) ([]entities.License, error) {
+	licenses := []entities.License{}
 	templateIds := []uint{}
-	for _, license := range licenses {
-		if contains(templateIds, license.LicenseTemplateID) {
-			return []entities.License{}, errors.New("license template was already used in this beat")
-		}
-		templateIds = append(templateIds, license.LicenseTemplateID)
-
-		template, err := s.repository.ReadLicenseTemplateById(license.LicenseTemplateID)
-		if template.UserID != userId {
-			return []entities.License{}, errors.New("user does not own the template")
-		}
+	for _, tandp := range templatesAndPrices {
+		template, err := s.repository.ReadLicenseTemplateById(tandp.TemplateId)
 		if err != nil {
 			return []entities.License{}, err
 		}
+		if template.UserID != userId {
+			return []entities.License{}, errors.New("темплейт, который вы попытались использовать, не принадлежит вам")
+		}
+		if contains(templateIds, template.ID) {
+			return []entities.License{}, errors.New("данный шаблон лицензии уже используется в бите")
+		}
+		templateIds = append(templateIds, tandp.TemplateId)
+		license := entities.License{
+			UserID: userId,
+			BeatID: beatId,
+			Price: tandp.Price,
+			LicenseTemplateID: tandp.TemplateId,
+		}
+		licenses = append(licenses, license)
 	}
 
-	licenses, err := s.repository.CreateNewLicenseList(beatId, userId, licenses)
+	createdLicenses, err := s.repository.CreateNewLicenseList(beatId, userId, licenses)
 	if err != nil {
 		return []entities.License{}, err
 	}
-	return licenses, nil
+	return createdLicenses, nil
 }
 
 func (s *service) InsertNewLicenseTemplate(userId uuid.UUID, data entities.LicenseTemplate) (entities.LicenseTemplate, error) {

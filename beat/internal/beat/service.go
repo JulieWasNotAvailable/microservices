@@ -67,7 +67,7 @@ func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat
 	if err != nil {
 		message := producer.KafkaMessageValue{
 			ID:  unpublishedBeat.ID.String(),
-			Err: "",
+			Err: "couldn't delete the beat",
 		}
 		messageInBytes, err := json.Marshal(message)
 		if err != nil {
@@ -81,12 +81,10 @@ func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat
 		ID:  beat.ID.String(),
 		Err: "",
 	}
-
 	messageInBytes, err := json.Marshal(message)
 	if err != nil {
 		return entities.Beat{}, err
 	}
-
 	producer.CreateMessage(messageInBytes, "delete_approve")
 
 	return beat, nil

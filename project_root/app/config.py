@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 class Config:
-    KAFKA_BOOTSTRAP_SERVERS = "broker:29092"
+    KAFKA_BOOTSTRAP_SERVERS = "localhost:9092"
     REC_BEATS_TOPIC = "rec_beats_topic2"
     REFILL_TOPIC = "rec_refill_requests"
     REFILL_COOLDOWN = 300

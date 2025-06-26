@@ -64,6 +64,10 @@ func (s *service) InsertListened(userId uuid.UUID, beatId uuid.UUID) (entities.L
 	if !exists {
 		return entities.Listen{}, errors.New("beat does not exist")
 	}
+	_, err = s.repository.ReadListenedByUserAndBeatId(userId, beatId)
+	if err != nil {
+		return entities.Listen{}, err
+	}
 	return s.repository.CreateListened(userId, beatId)
 }
 

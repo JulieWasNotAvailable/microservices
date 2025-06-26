@@ -3,27 +3,29 @@ package unpbeat
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"fmt"
+
+	// "fmt"
 	"regexp"
 	"strings"
 
-	"github.com/JulieWasNotAvailable/microservices/unpublished/api/presenters"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/internal/entities"
 	"github.com/JulieWasNotAvailable/microservices/unpublished/pkg/producer"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
 
 type Service interface {
-	CreateUnpublishedBeat(beat entities.UnpublishedBeat) (entities.UnpublishedBeat, error)
-	GetAllUnpublishedBeats() ([]presenters.UnpublishedBeat, error)
-	GetUnpublishedBeatByID(id uuid.UUID) (*presenters.UnpublishedBeat, error)
-	GetUnpublishedBeatsByUser(userID uuid.UUID) ([]presenters.UnpublishedBeat, error)
-	GetUnpublishedInModeration(from int64, to int64) (*[]presenters.UnpublishedBeat, error)
-	GetUnpublishedByBeatmakerandStatus(userId uuid.UUID, status string) (*[]presenters.UnpublishedBeat, error)
-	UpdateUnpublishedBeat(unpublished *entities.UnpublishedBeat, beatmakerId uuid.UUID) (*presenters.UnpublishedBeat, error)
+	CreateUnpublishedBeat(beatmakeruuid uuid.UUID) (entities.UnpublishedBeat, error)
+	GetAllUnpublishedBeats() ([]entities.UnpublishedBeat, error)
+	GetUnpublishedBeatByID(id uuid.UUID) (*entities.UnpublishedBeat, error)
+	GetUnpublishedBeatsByUser(userID uuid.UUID) ([]entities.UnpublishedBeat, error)
+	GetUnpublishedInModeration(from int64, to int64) (*[]entities.UnpublishedBeat, error)
+	GetUnpublishedByBeatmakerandStatus(userId uuid.UUID, status string) (*[]entities.UnpublishedBeat, error)
+	UpdateUnpublishedBeat(beat *entities.UnpublishedBeat, beatmakerId uuid.UUID) (*entities.UnpublishedBeat, error)
 	DeleteUnpublishedBeat(id uuid.UUID) error
 
-	PublishBeat(userId uuid.UUID, beatOptions BeatPublishOptions, beatmakerName string) (*presenters.UnpublishedBeat, error)
+	PublishBeat(beatmakerId uuid.UUID, beatOptions BeatPublishOptions, beatmakerName string) (*entities.UnpublishedBeat, []error)
 }
 
 type service struct {
@@ -35,8 +37,8 @@ func NewService(r Repository) Service {
 }
 
 type License struct {
-	LicenseTemplateID uint
-	Price             int
+	LicenseTemplateID uint `json:"id"`
+	Price             int  `json:"price"`
 }
 
 type BeatPublishOptions struct {
@@ -46,58 +48,55 @@ type BeatPublishOptions struct {
 }
 
 type CreateLicense struct {
-	BeatId      uuid.UUID
-	UserId      uuid.UUID
-	LicenseList []License
+	BeatId      uuid.UUID `json:"beatId"`
+	UserId      uuid.UUID `json:"userId"`
+	LicenseList []License `json:"licenseList"`
 }
 
-func (s *service) CreateUnpublishedBeat(beat entities.UnpublishedBeat) (entities.UnpublishedBeat, error) {
-	createdBeat, err := s.repository.CreateUnpublished(beat)
+func (s *service) CreateUnpublishedBeat(beatmakeruuid uuid.UUID) (entities.UnpublishedBeat, error) {
+	var emptyBeat entities.UnpublishedBeat
+	emptyBeat.Status = entities.StatusDraft
+	emptyBeat.BeatmakerID = beatmakeruuid
+
+	createdBeat, err := s.repository.CreateUnpublished(emptyBeat)
 	return createdBeat, err
 }
 
-func (s *service) GetAllUnpublishedBeats() ([]presenters.UnpublishedBeat, error) {
+func (s *service) GetAllUnpublishedBeats() ([]entities.UnpublishedBeat, error) {
 	beats, err := s.repository.ReadUnpublished()
 	return *beats, err
 }
 
-func (s *service) GetUnpublishedBeatByID(id uuid.UUID) (*presenters.UnpublishedBeat, error) {
+func (s *service) GetUnpublishedBeatByID(id uuid.UUID) (*entities.UnpublishedBeat, error) {
 	return s.repository.ReadUnpublishedById(id)
 }
 
-func (s *service) GetUnpublishedBeatsByUser(userID uuid.UUID) ([]presenters.UnpublishedBeat, error) {
-	beats, err := s.repository.ReadUnpublishedByUser(userID)
-	return *beats, err
+func (s *service) GetUnpublishedBeatsByUser(userID uuid.UUID) ([]entities.UnpublishedBeat, error) {
+	return s.repository.ReadUnpublishedByUser(userID)
 }
 
-func (s service) GetUnpublishedInModeration(from int64, to int64) (*[]presenters.UnpublishedBeat, error) {
+func (s service) GetUnpublishedInModeration(from int64, to int64) (*[]entities.UnpublishedBeat, error) {
 	beats, err := s.repository.ReadUnpublishedInModeration(from, to)
 	return beats, err
 }
 
-func (s *service) GetUnpublishedByBeatmakerandStatus(userId uuid.UUID, status string) (*[]presenters.UnpublishedBeat, error) {
+func (s *service) GetUnpublishedByBeatmakerandStatus(userId uuid.UUID, status string) (*[]entities.UnpublishedBeat, error) {
 	beats, err := s.repository.ReadUnpublishedByBeatmakerandStatus(userId, status)
 	return beats, err
 }
 
-func (s *service) UpdateUnpublishedBeat (beat *entities.UnpublishedBeat, beatmakerId uuid.UUID) (*presenters.UnpublishedBeat, error) {
+func (s *service) UpdateUnpublishedBeat(beat *entities.UnpublishedBeat, beatmakerId uuid.UUID) (*entities.UnpublishedBeat, error) {
 	beatInitial, err := s.repository.ReadUnpublishedById(beat.ID)
 	if err != nil {
-		return &presenters.UnpublishedBeat{}, err
-	}
-	if beat.Status == entities.StatusInModeration {
-		return &presenters.UnpublishedBeat{}, errors.New("tried to manually update beat status, prohibited")
-	}
-	if beatInitial.Status == string(entities.StatusInModeration) {
-		return &presenters.UnpublishedBeat{}, errors.New("cannot update beat with status in process")
+		return &entities.UnpublishedBeat{}, err
 	}
 	if beatInitial.BeatmakerID != beatmakerId {
-		
+		return &entities.UnpublishedBeat{}, errors.New("tried to edit beat that does not belong to you")
 	}
 	return s.repository.UpdateUnpublishedById(beat)
 }
 
-func (s *service) UpdateUnpublishedBeatMass (beat *entities.UnpublishedBeat) (*presenters.UnpublishedBeat, error) {
+func (s *service) UpdateUnpublishedBeatMass(beat *entities.UnpublishedBeat) (*entities.UnpublishedBeat, error) {
 	toSave := entities.UnpublishedBeat{
 		ID:          beat.ID,
 		Name:        beat.Name,
@@ -165,9 +164,9 @@ func (s *service) UpdateUnpublishedBeatMass (beat *entities.UnpublishedBeat) (*p
 				moodRegex := regexp.MustCompile(`(?i)\b` + regexp.QuoteMeta(mood) + `\b`)
 				if moodRegex.MatchString(cleanedName) {
 					moodEntity, _ := s.repository.ReadMoodByName(mood)
-					log.Println("matched mood: ", moodEntity)
-					log.Println("from the tag: ", cleanedName)
-					log.Println(" ")
+					// log.Println("matched mood: ", moodEntity)
+					// log.Println("from the tag: ", cleanedName)
+					// log.Println(" ")
 					toSave.Moods = append(toSave.Moods, *moodEntity)
 					cleanedName = moodRegex.ReplaceAllString(cleanedName, "")
 				}
@@ -202,27 +201,32 @@ func (s *service) DeleteUnpublishedBeat(id uuid.UUID) error {
 	return s.repository.DeleteUnpublishedById(id)
 }
 
-func (s *service) PublishBeat(beatmakerId uuid.UUID, beatOptions BeatPublishOptions, beatmakerName string) (*presenters.UnpublishedBeat, error) {
+func (s *service) PublishBeat(beatmakerId uuid.UUID, beatOptions BeatPublishOptions, beatmakerName string) (*entities.UnpublishedBeat, []error) {
+	errArr := []error{}
 	beatuuid, err := uuid.Parse(beatOptions.BeatId)
 	if err != nil {
-		return nil, err
+		return nil, append(errArr, err)
 	}
 	beat, err := s.GetUnpublishedBeatByID(beatuuid)
 	if err != nil {
-		return nil, err
+		return nil, append(errArr, err)
 	}
-	filename := beat.AvailableFiles.MP3Url
-	if filename == "" {
-		return nil, errors.New("mp3 file path is required to publish the beat")
+	if string(beat.Status) == string(entities.StatusInModeration) {
+		return nil, append(errArr, errors.New("cannot publish beat with status in_process"))
 	}
-	_ = s.CheckFieldsBeforePublishing()
+
 	toUpdateName := entities.UnpublishedBeat{
 		ID:            beatuuid,
 		BeatmakerName: beatmakerName,
 	}
 	_, err = s.repository.UpdateUnpublishedById(&toUpdateName)
 	if err != nil {
-		return nil, err
+		return nil, append(errArr, err)
+	}
+
+	_, errArr = s.CheckFieldsBeforePublishing(*beat)
+	if errArr != nil {
+		return nil, errArr
 	}
 
 	message := CreateLicense{
@@ -230,29 +234,39 @@ func (s *service) PublishBeat(beatmakerId uuid.UUID, beatOptions BeatPublishOpti
 		UserId:      beatmakerId,
 		LicenseList: beatOptions.LicenseList,
 	}
-
 	messageBytes, err := json.Marshal(message)
 	if err != nil {
-		return nil, err
+		return nil, append(errArr, err)
 	}
 	err = producer.CreateMessage(messageBytes, "create_license")
 	if err != nil {
-		return nil, err
+		return nil, append(errArr, err)
 	}
 
 	beatStatusUpdate := entities.UnpublishedBeat{
 		ID:     beat.ID,
 		Status: entities.StatusInModeration,
 	}
-	
-	_, err = s.UpdateUnpublishedBeat(&beatStatusUpdate, beatmakerId)
+	updated, err := s.UpdateUnpublishedBeat(&beatStatusUpdate, beatmakerId)
 	if err != nil {
-		return nil, err
+		return nil, append(errArr, err)
 	}
 
-	return beat, nil
+	return updated, nil
 }
 
-func (s *service) CheckFieldsBeforePublishing() error {
-	return errors.New("unimplemented")
+func (s *service) CheckFieldsBeforePublishing(beat entities.UnpublishedBeat) (status bool, err []error) {
+	validate := validator.New()
+	valErr := validate.Struct(beat)
+	errArray := []error{}
+	if valErr != nil {
+		for _, err := range valErr.(validator.ValidationErrors) {
+			errMsg := fmt.Errorf("%s: поле необходимо к заполнению, но было предоставлено следующее значение: '%v')",
+				err.Field(),
+				err.Value())
+			errArray = append(errArray, errMsg)
+		}
+		return false, errArray
+	}
+	return true, nil
 }

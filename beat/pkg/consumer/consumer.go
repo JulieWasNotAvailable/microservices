@@ -18,8 +18,8 @@ type KafkaMessageBeatForPublishing struct {
 	MFCC []float64
 }
 
-func StartConsumerPublisher(topic string, service beat.Service) {
-	brokerUrl := []string{"broker:29092"}
+func StartConsumerPublisher(topic string, service beat.Service, appQuit chan bool) {
+	brokerUrl := []string{"localhost:9092"}
 
 	fmt.Printf("starting consumer with brokerurl %s on topic: %s \n", brokerUrl[0], topic)
 	worker, err := connectConsumer(brokerUrl)
@@ -63,8 +63,8 @@ func StartConsumerPublisher(topic string, service beat.Service) {
 
 			case <-sigchan:
 				fmt.Println("Interrupt is detected")
-				//It sends an empty struct to doneCh, signaling that the goroutine should terminate.
 				doneCh <- struct{}{}
+				appQuit <- true
 			}
 		}
 	}()
