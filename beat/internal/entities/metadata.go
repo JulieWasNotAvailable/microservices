@@ -55,6 +55,13 @@ type Keynote struct {
 	Name  string `json:"name"`
 }
 
+type GenresWithCount []struct {
+	ID          uint   `json:"id" gorm:"primaryKey"`
+	Name        string `json:"name"`
+	Count       int    `json:"count"`
+	Picture_url string `json:"picture_url"`
+}
+
 // type Instrument struct {
 // 	ID   uint    `json:"id" gorm:"unique"`
 // 	Beat []*Beat `json:"beat" gorm:"many2many:beat_instruments;" swaggerignore:"true"`

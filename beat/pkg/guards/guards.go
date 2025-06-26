@@ -65,10 +65,10 @@ func Protected() func(*fiber.Ctx) error {
 func jwtError(c *fiber.Ctx, err error) error {
 	if err.Error() == "Missing or malformed JWT" {
 		c.Status(fiber.StatusBadRequest)
-		return c.JSON(fiber.Map{"status": "error", "message": "Missing or malformed JWT", "data": nil})
+		return c.JSON(fiber.Map{"status": "false", "message": "Missing or malformed JWT", "data": nil})
 	} else {
 		c.Status(fiber.StatusUnauthorized)
-		return c.JSON(fiber.Map{"status": "error", "message": "Invalid or expired JWT", "data": nil})
+		return c.JSON(fiber.Map{"status": "false", "message": "Invalid or expired JWT", "data": nil})
 	}
 }
 

@@ -921,6 +921,24 @@ paths:
       summary: Get trending genres
       tags:
       - Metadata
+  /metadata/genresWithCount:
+    get:
+      description: Returns a list of all available genre categories with the number
+        of beats in them
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.MetadataListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenters.MetadataErrorResponse'
+      summary: Get all gernes
+      tags:
+      - Metadata
   /metadata/keys:
     get:
       description: Returns a list of all available musical keys

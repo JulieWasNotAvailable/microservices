@@ -39,11 +39,11 @@ func PostLike(service activity.Service) fiber.Handler {
 		requestBody := requestBody{}
 		err = c.BodyParser(&requestBody)
 		if err != nil {
-			return c.Status(http.StatusBadRequest).JSON(presenters.CreateErrorResponse(err))
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateErrorResponse(err))
 		}
 		beatuuid, err := uuid.Parse(requestBody.BeatId)
 		if err != nil {
-			return c.Status(http.StatusBadRequest).JSON(presenters.CreateErrorResponse(err))
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateErrorResponse(err))
 		}
 
 		like, err := service.InsertLike(userId, beatuuid)
@@ -77,7 +77,7 @@ func DeleteLike(service activity.Service) fiber.Handler {
 		beatIdStr := c.Params("beatId")
 		beatId, err := uuid.Parse(beatIdStr)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateMetadataErrorResponse(err))
 		}
 
 		like, err := service.DeleteLike(userId, beatId)
@@ -133,7 +133,7 @@ func GetLikesCountByBeatId(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		beatID, err := uuid.Parse(c.Params("beatId"))
 		if err != nil {
-			return c.Status(http.StatusBadRequest).JSON(presenters.CreateMetadataErrorResponse(err))
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateMetadataErrorResponse(err))
 		}
 
 		count, err := service.GetLikesCountByBeatId(beatID)
@@ -165,7 +165,7 @@ func GetLikesCountByUserId(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userId, err := uuid.Parse(c.Params("userId"))
 		if err != nil {
-			return c.Status(http.StatusBadRequest).JSON(presenters.CreateMetadataErrorResponse(err))
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateMetadataErrorResponse(err))
 		}
 
 		count, err := service.GetUserLikesCount(userId)
@@ -197,14 +197,14 @@ func GetTotalLikesOfBeats(service activity.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var req requestBodyList
 		if err := c.BodyParser(&req); err != nil {
-			return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(err))
 		}
 
 		beatuuids := []uuid.UUID{}
 		for _, v := range req.Beatids {
 			uuid, err := uuid.Parse(v)
 			if err != nil {
-				return c.Status(http.StatusBadRequest).JSON(presenters.CreateBeatErrorResponse(err))
+				return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateBeatErrorResponse(err))
 			}
 			beatuuids = append(beatuuids, uuid)
 		}
@@ -246,16 +246,16 @@ func PostListened(service activity.Service) fiber.Handler {
 		requestBody := requestBody{}
 		err = c.BodyParser(&requestBody)
 		if err != nil {
-			return c.Status(http.StatusBadRequest).JSON(presenters.CreateErrorResponse(err))
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateErrorResponse(err))
 		}
 		beatuuid, err := uuid.Parse(requestBody.BeatId)
 		if err != nil {
-			return c.Status(http.StatusBadRequest).JSON(presenters.CreateErrorResponse(err))
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateErrorResponse(err))
 		}
 
 		listened, err := service.InsertListened(userId, beatuuid)
 		if err != nil {
-			return c.Status(http.StatusBadRequest).JSON(presenters.CreateErrorResponse(err))
+			return c.Status(http.StatusUnprocessableEntity).JSON(presenters.CreateErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateSuccessResponse(listened))

@@ -864,6 +864,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/metadata/genresWithCount": {
+            "get": {
+                "description": "Returns a list of all available genre categories with the number of beats in them",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Metadata"
+                ],
+                "summary": "Get all gernes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.MetadataListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.MetadataErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/metadata/keys": {
             "get": {
                 "description": "Returns a list of all available musical keys",

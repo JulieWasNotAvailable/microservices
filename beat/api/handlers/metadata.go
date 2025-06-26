@@ -28,6 +28,26 @@ func GetAllGenres(service metadata.Service) fiber.Handler {
 	}
 }
 
+// GetGenresWithCount retrieves all genre categories
+//
+//	@Summary		Get all gernes
+//	@Description	Returns a list of all available genre categories with the number of beats in them
+//	@Tags			Metadata
+//	@Produce		json
+//	@Success		200	{object}	presenters.MetadataListResponse
+//	@Failure		500	{object}	presenters.MetadataErrorResponse
+//	@Router			/metadata/genresWithCount [get]
+func GetGenresWithCount(service metadata.Service) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		genres, err := service.ReadGenresWithCounts()
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
+		}
+
+		return c.Status(http.StatusOK).JSON(presenters.CreateMetadataListResponse(genres))
+	}
+}
+
 // GetAllMoods retrieves all mood categories
 //
 //	@Summary		Get all moods
@@ -182,6 +202,9 @@ func GetTagByName(service metadata.Service) fiber.Handler {
 		name := c.Params("name")
 		tag, err := service.ReadTagByName(name)
 		if err != nil {
+			if err == metadata.ErrMetadataNotFound {
+				return c.Status(http.StatusNotFound).JSON(presenters.CreateMetadataErrorResponse(err))	
+			}
 			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateMetadataErrorResponse(err))
 		}
 
@@ -189,14 +212,14 @@ func GetTagByName(service metadata.Service) fiber.Handler {
 	}
 }
 
-//	@Summary		Get MANY tags by name LIKE
-//	@Description	Returns all of the tags for the specified name like%
-//	@Tags			Tags
-//	@Produce		json
-//	@Param			name	path		string	true	"Tag name"
-//	@Success		200		{object}	presenters.MetadataSuccessResponse
-//	@Failure		500		{object}	presenters.MetadataErrorResponse
-//	@Router			/metadata/tags/byNameLike/{name} [get]
+// @Summary		Get MANY tags by name LIKE
+// @Description	Returns all of the tags for the specified name like%
+// @Tags			Tags
+// @Produce		json
+// @Param			name	path		string	true	"Tag name"
+// @Success		200		{object}	presenters.MetadataSuccessResponse
+// @Failure		500		{object}	presenters.MetadataErrorResponse
+// @Router			/metadata/tags/byNameLike/{name} [get]
 func GetTagsByNameLike(service metadata.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		name := c.Params("name")

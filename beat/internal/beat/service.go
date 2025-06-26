@@ -58,7 +58,6 @@ func (s *service) CreateBeat(unpublishedBeat entities.UnpublishedBeat, mfccfloat
 		Tags:           unpublishedBeat.Tags,
 		KeynoteID:      unpublishedBeat.KeynoteID,
 		Timestamps:     unpublishedBeat.Timestamps,
-		// Instruments:    unpublishedBeat.Instruments,
 		MFCC:      mfcc,
 		CreatedAt: time.Now().Unix(), // или unpublishedBeat.CreatedAt, если нужно сохранить оригинальное значение
 	}

@@ -17,6 +17,7 @@ type Service interface {
 	ReadTagByName(name string) (*entities.Tag, error)
 	ReadTagsByNameLike(name string) (*[]entities.Tag, error)
 	ReadPopularTags() (*presenters.TrendingTags, error)
+	ReadGenresWithCounts() (entities.GenresWithCount, error)
 
 	//admin
 	ReadAllTags() (*[]entities.Tag, error)
@@ -81,6 +82,10 @@ func (s *service) ReadPopularGenres() (*presenters.TrendingGenres, error) {
 // ReadPopularTags implements Service.
 func (s *service) ReadPopularTags() (*presenters.TrendingTags, error) {
 	return s.repository.ReadPopularTags()
+}
+
+func (s *service) ReadGenresWithCounts() (entities.GenresWithCount, error) {
+	return s.repository.ReadGenresWithCounts()
 }
 
 // ReadRandomTags implements Service.

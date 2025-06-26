@@ -1,6 +1,7 @@
 package metadata
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -16,6 +17,7 @@ type Repository interface {
 
 	ReadAllMoods() (*[]entities.Mood, error)
 	ReadAllKeys() (*[]entities.Keynote, error)
+	ReadGenresWithCounts() (entities.GenresWithCount, error)
 	// ReadAllInstruments() (*[]entities.Instrument, error)
 
 	ReadRandomTags() (*[]entities.Tag, error)
@@ -67,6 +69,22 @@ func (r *repository) ReadAllKeys() (*[]entities.Keynote, error) {
 	return &keys, nil
 }
 
+func (r *repository) ReadGenresWithCounts() (entities.GenresWithCount, error) {
+	genresWithCount := entities.GenresWithCount{}
+
+	err := r.DB.Table("genres").
+	Select("genres.id, genres.name, count(*) as count, genres.picture_url").
+	Joins("JOIN beat_genres ON genres.id = beat_genres.genre_id").
+	Group("genres.id").
+	Order("count DESC").
+	Find(&genresWithCount).Error
+	if err != nil {
+		return entities.GenresWithCount{}, err
+	}
+
+	return genresWithCount, nil
+}
+
 // func (r *repository) ReadAllInstruments() (*[]entities.Instrument, error) {
 // 	var instruments []entities.Instrument
 // 	err := r.DB.Find(&instruments).Error
@@ -110,7 +128,7 @@ func (r *repository) ReadAllAvailableFiles() (*[]entities.AvailableFiles, error)
 		return nil, err
 	}
 	return &files, nil
-} 
+}
 
 func (r *repository) ReadRandomTags() (*[]entities.Tag, error) {
 	var tags []entities.Tag
@@ -125,6 +143,9 @@ func (r *repository) ReadTagByName(name string) (*entities.Tag, error) {
 	var tag entities.Tag
 	err := r.DB.Where("name = ?", name).First(&tag).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = ErrMetadataNotFound
+		}
 		return nil, err
 	}
 	return &tag, nil
@@ -147,20 +168,12 @@ func (r *repository) ReadPopularTags() (*presenters.TrendingTags, error) {
 	log.Println(startTime)
 	log.Println(endTime)
 
-	// err := r.DB.Table("genres").Select("id, name, count(*) as count").
-    // Joins("JOIN beat_genres ON beat_genres.genre_id = genres.id").
-	// Group("id").Where("created_at BETWEEN ? AND ?", startTime, endTime).
-	// Find(&trendingGenres).Error
-
 	err := r.DB.Table("tags").
-	Select("id, name, count(*) as count").
-    Joins("JOIN beat_tags ON beat_tags.tag_id = tags.id").
-	Group("id").Where("created_at BETWEEN ? AND ?", startTime, endTime).Order("count DESC").
-	Find(&trendingTags).Error
-	
-	// tags := []entities.Tag{}
-	// err := r.DB.Where("created_at BETWEEN ? AND ?", startTime, endTime).Find(&tags).Error
-	// log.Println(tags)
+		Select("id, name, count(*) as count").
+		Joins("JOIN beat_tags ON beat_tags.tag_id = tags.id").
+		Group("id").Where("created_at BETWEEN ? AND ?", startTime, endTime).Order("count DESC").
+		Find(&trendingTags).Error
+
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +181,7 @@ func (r *repository) ReadPopularTags() (*presenters.TrendingTags, error) {
 	return &trendingTags, nil
 }
 
-//how many times was used for the last month
+// how many times was used for the last month
 func (r *repository) ReadPopularGenres() (*presenters.TrendingGenres, error) {
 	trendingGenres := presenters.TrendingGenres{}
 
@@ -176,9 +189,9 @@ func (r *repository) ReadPopularGenres() (*presenters.TrendingGenres, error) {
 	endTime := time.Now().Unix()
 
 	err := r.DB.Table("genres").Select("id, name, count(*) as count").
-    Joins("JOIN beat_genres ON beat_genres.genre_id = genres.id").
-	Group("id").Where("created_at BETWEEN ? AND ?", startTime, endTime).Order("count DESC").
-	Find(&trendingGenres).Error
+		Joins("JOIN beat_genres ON beat_genres.genre_id = genres.id").
+		Group("id").Where("created_at BETWEEN ? AND ?", startTime, endTime).Order("count DESC").
+		Find(&trendingGenres).Error
 
 	if err != nil {
 		return nil, err
