@@ -18,6 +18,7 @@ type requestBodyList struct {
 }
 
 // PostLike godoc
+//
 //	@Summary		Like a beat
 //	@Description	Add a like to a beat by the authenticated user
 //	@Tags			likes
@@ -55,6 +56,7 @@ func PostLike(service activity.Service) fiber.Handler {
 }
 
 // DeleteLike godoc
+//
 //	@Summary		Remove a like
 //	@Description	Remove a like from a beat by the authenticated user
 //	@Tags			likes
@@ -88,6 +90,7 @@ func DeleteLike(service activity.Service) fiber.Handler {
 }
 
 // GetLikesByUserId godoc
+//
 //	@Summary		Get user's likes
 //	@Description	Get all likes by the authenticated user
 //	@Tags			likes
@@ -115,6 +118,7 @@ func GetLikesByUserId(service activity.Service) fiber.Handler {
 }
 
 // GetLikesCountByBeatId godoc
+//
 //	@Summary		Get like count for a beat
 //	@Description	Get the number of likes for a specific beat
 //	@Tags			likes
@@ -146,6 +150,7 @@ func GetLikesCountByBeatId(service activity.Service) fiber.Handler {
 }
 
 // GetLikesCountByUserId godoc
+//
 //	@Summary		Get like count for a user
 //	@Description	Get the number of likes given by a specific user
 //	@Tags			likes
@@ -177,6 +182,7 @@ func GetLikesCountByUserId(service activity.Service) fiber.Handler {
 }
 
 // GetTotalLikesOfBeats godoc
+//
 //	@Summary		Get total likes for multiple beats
 //	@Description	Get the total number of likes for a list of beats
 //	@Tags			likes
@@ -217,6 +223,7 @@ func GetTotalLikesOfBeats(service activity.Service) fiber.Handler {
 }
 
 // PostListened godoc
+//
 //	@Summary		Record a listen
 //	@Description	Record that a user listened to a beat
 //	@Tags			listen
@@ -248,7 +255,7 @@ func PostListened(service activity.Service) fiber.Handler {
 
 		listened, err := service.InsertListened(userId, beatuuid)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(presenters.CreateErrorResponse(err))
+			return c.Status(http.StatusBadRequest).JSON(presenters.CreateErrorResponse(err))
 		}
 
 		return c.Status(http.StatusOK).JSON(presenters.CreateSuccessResponse(listened))
